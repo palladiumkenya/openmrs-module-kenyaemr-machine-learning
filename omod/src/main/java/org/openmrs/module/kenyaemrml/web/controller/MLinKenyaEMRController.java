@@ -28,8 +28,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * This class configured as controller using annotation and mapped with the URL of
  * 'module/${rootArtifactid}/${rootArtifactid}Link.form'.
  */
-@Controller("${rootrootArtifactid}.MLinKenyaEMRController")
-@RequestMapping(value = "module/${rootArtifactid}/${rootArtifactid}.form")
+
 public class MLinKenyaEMRController {
 	
 	/** Logger for this class and subclasses */

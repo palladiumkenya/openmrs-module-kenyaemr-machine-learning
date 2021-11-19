@@ -19,15 +19,80 @@
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
 		<dependency>
-			<groupId>org.openmrs.web</groupId>
-			<artifactId>openmrs-web</artifactId>
-            <scope>provided</scope>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>${project.parent.artifactId}-api</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
+
+
+		<!-- End OpenMRS modules -->
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>uiframework-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>legacyui-omod</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>kenyaui-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>metadatadeploy-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>metadatasharing-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>idgen-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>kenyacore-api</artifactId>
+		</dependency>
+
+		<!-- Begin OpenMRS core -->
+
+		<dependency>
+			<groupId>org.openmrs.api</groupId>
+			<artifactId>openmrs-api</artifactId>
+			<type>jar</type>
+		</dependency>
+
 		<dependency>
 			<groupId>org.openmrs.web</groupId>
 			<artifactId>openmrs-web</artifactId>
-			<scope>provided</scope>
-			<classifier>tests</classifier>
+			<type>jar</type>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openmrs.api</groupId>
+			<artifactId>openmrs-api</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openmrs.web</groupId>
+			<artifactId>openmrs-web</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openmrs.test</groupId>
+			<artifactId>openmrs-test</artifactId>
+			<type>pom</type>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
