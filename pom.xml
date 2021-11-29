@@ -43,7 +43,9 @@
 		<uiframeworkVersion>3.15.0</uiframeworkVersion>
 		<kenyacoreVersion>3.0.0</kenyacoreVersion>
 		<kenyauiVersion>2.0.4</kenyauiVersion>
+		<webservicesRestVersion>2.26.0</webservicesRestVersion>
 		<jodaTimeVersion>2.9.1</jodaTimeVersion>
+		<jpmml.version>1.5.16</jpmml.version>
 		<legacyUiVersion>1.5.0</legacyUiVersion>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -157,6 +159,37 @@
 				<scope>provided</scope>
 			</dependency>
 
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>webservices.rest-omod</artifactId>
+				<version>${webservicesRestVersion}</version>
+				<type>jar</type>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>webservices.rest-omod-common</artifactId>
+				<version>${webservicesRestVersion}</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>webservices.rest-omod-1.8</artifactId>
+				<version>${webservicesRestVersion}</version>
+				<scope>provided</scope>
+			</dependency>
+
+
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>webservices.rest-omod-common</artifactId>
+				<version>${webservicesRestVersion}</version>
+				<classifier>tests</classifier>
+				<scope>test</scope>
+			</dependency>
+
 			<!-- End OpenMRS modules -->
 
 			<!-- Begin OpenMRS core -->
@@ -223,7 +256,17 @@
 				<version>${jodaTimeVersion}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-evaluator</artifactId>
+				<version>${jpmml.version}</version>
+			</dependency>
 
+			<dependency>
+				<groupId>org.jpmml</groupId>
+				<artifactId>pmml-evaluator-extension</artifactId>
+				<version>${jpmml.version}</version>
+			</dependency>
 			<!-- End external libraries -->
 
 		</dependencies>
