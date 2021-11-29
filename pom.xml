@@ -41,6 +41,7 @@
 		<reportingVersion>1.22.0</reportingVersion>
 		<serializationxstreamVersion>0.2.14</serializationxstreamVersion>
 		<uiframeworkVersion>3.15.0</uiframeworkVersion>
+		<kenyaemrVersion>18.0.0</kenyaemrVersion>
 		<kenyacoreVersion>3.0.0</kenyacoreVersion>
 		<kenyauiVersion>2.0.4</kenyauiVersion>
 		<webservicesRestVersion>2.26.0</webservicesRestVersion>
@@ -134,10 +135,18 @@
 
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
+				<artifactId>kenyaemr-api</artifactId>
+				<version>${kenyaemrVersion}</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
 				<artifactId>uiframework-api</artifactId>
 				<version>${uiframeworkVersion}</version>
 				<scope>provided</scope>
 			</dependency>
+
 
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
