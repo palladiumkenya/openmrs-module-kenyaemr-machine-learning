@@ -20,22 +20,23 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Service class used to prepare and score models
+ */
 public class ModelService {
 	
 	private Log log = LogFactory.getLog(this.getClass());
 	
-	public ScoringResult score(String modelId, ModelInputFields inputFields) {
+	public ScoringResult score(String modelId, String facilityName, String encounterDate, ModelInputFields inputFields) {
 		
 		try {
-			InputStream stream = ModelService.class.getClassLoader().getResourceAsStream("hts_xgb_notimeplace.pmml");
+			String fullModelFileName = modelId.concat(".pmml");
+			InputStream stream = ModelService.class.getClassLoader().getResourceAsStream(fullModelFileName);
 			
 			// Building a model evaluator from a PMML file
 			Evaluator evaluator = new LoadingModelEvaluatorBuilder().load(stream).build();
 			evaluator.verify();
 			ScoringResult scoringResult = new ScoringResult(score(evaluator, inputFields));
-			log.info("Model uploaded with model id: [{}]. Result is [{}]" + scoringResult.getResult());
-			System.out.println("Model uploaded with model id: [{}]. Result is [{}]" + scoringResult.getResult());
-			
 			return scoringResult;
 		}
 		catch (Exception e) {
@@ -74,6 +75,13 @@ public class ModelService {
 		return result;
 	}
 	
+	/**
+	 * Performs variable mapping
+	 * 
+	 * @param evaluator
+	 * @param inputFields
+	 * @return variable-value pair
+	 */
 	private Map<FieldName, FieldValue> prepareEvaluationArgs(Evaluator evaluator, ModelInputFields inputFields) {
 		Map<FieldName, FieldValue> arguments = new LinkedHashMap<FieldName, FieldValue>();
 		
