@@ -3,7 +3,6 @@ package org.openmrs.module.kenyaemrml.api;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -32,6 +31,9 @@ public class MLUtils {
 	public static String MODEL_PARAMETER_VALUE_OBJECT_KEY = "variableValues";
 	
 	public static String MODEL_CONFIG_OBJECT_KEY = "modelConfigs";
+	
+	public static String[] FACILITY_PROFILE_VARIABLES = { "PC1", "PC2", "PC3", "PC4", "PC5", "PC6", "PC7", "PC8", "PC9",
+	        "PC10" }; // As defined in the model
 	
 	public static String fetchRequestBody(BufferedReader reader) {
 		String requestBodyJsonStr = "";
@@ -95,9 +97,8 @@ public class MLUtils {
 		// add facility cut off
 		
 		JSONObject profile = getHTSFacilityProfile("Facility.Name", facilityName, getFacilityCutOffs());
-		String[] otherVars = { "PC1", "PC2", "PC3", "PC4", "PC5", "PC6", "PC7", "PC8", "PC9", "PC10" };
-		for (int i = 0; i < otherVars.length; i++) {
-			modelParams.put(otherVars[i], profile.get(otherVars[i]));
+		for (int i = 0; i < FACILITY_PROFILE_VARIABLES.length; i++) {
+			modelParams.put(FACILITY_PROFILE_VARIABLES[i], profile.get(FACILITY_PROFILE_VARIABLES[i]));
 		}
 		
 		ModelInputFields inputFields = new ModelInputFields();
@@ -172,6 +173,10 @@ public class MLUtils {
 		return modelParams;
 	}
 	
+	/**
+	 * @param requestBodyString
+	 * @return
+	 */
 	/**
 	 * Extracts model variables from request body
 	 * 
