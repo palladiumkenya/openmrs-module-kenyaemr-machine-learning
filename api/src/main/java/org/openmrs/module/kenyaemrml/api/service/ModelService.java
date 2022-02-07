@@ -72,7 +72,16 @@ public class ModelService {
 			
 			result.put(targetFieldName.getValue(), targetFieldValue);
 		}
-		return result;
+		//TODO: this is purely for testing
+		Map<String, Object> modelInputs = new HashMap<String, Object>();
+		Map<String, Object> combinedResult = new HashMap<String, Object>();
+		for (Map.Entry<String, Object> entry : inputFields.getFields().entrySet()) {
+			modelInputs.put(entry.getKey(), entry.getValue());
+		}
+		combinedResult.put("predictions", result);
+		combinedResult.put("ModelInputs", modelInputs);
+		
+		return combinedResult;
 	}
 	
 	/**
