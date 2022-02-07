@@ -275,7 +275,7 @@
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-evaluator-extension</artifactId>
 				<version>${jpmml.version}</version>
-			</dependency>
+			</dependency>			
 			<!-- End external libraries -->
 
 		</dependencies>
