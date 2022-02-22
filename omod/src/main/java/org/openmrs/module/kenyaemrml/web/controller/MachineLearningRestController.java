@@ -4,6 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.node.ObjectNode;
+import org.json.simple.JSONObject;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrml.api.MLUtils;
 import org.openmrs.module.kenyaemrml.api.service.ModelService;
 import org.openmrs.module.kenyaemrml.domain.ModelInputFields;
@@ -38,9 +40,15 @@ public class MachineLearningRestController extends BaseRestController {
 		String requestBody = null;
 		try {
 			requestBody = MLUtils.fetchRequestBody(request.getReader());
-			ModelInputFields inputFields = MLUtils.extractHTSCaseFindingVariablesFromRequestBody(requestBody);
 			ObjectNode modelConfigs = MLUtils.getModelConfig(requestBody);
 			String facilityName = modelConfigs.get(MLUtils.FACILITY_ID_REQUEST_VARIABLE).asText();
+			boolean isDebugMode = modelConfigs.has("debug") && modelConfigs.get("debug").asText().equals("true") ? true
+			        : false;
+			
+			if (facilityName.equals("")) { // default to the default facility configured in the EMR
+				facilityName = MLUtils.getDefaultLocation().getName();
+			}
+
 			String modelId = modelConfigs.get(MLUtils.MODEL_ID_REQUEST_VARIABLE).asText();
 			String encounterDate = modelConfigs.get(MLUtils.ENCOUNTER_DATE_REQUEST_VARIABLE).asText();
 			
@@ -48,8 +56,17 @@ public class MachineLearningRestController extends BaseRestController {
 				return new ResponseEntity<Object>("The service requires model, date, and facility information",
 				        new HttpHeaders(), HttpStatus.BAD_REQUEST);
 			}
+			JSONObject profile = MLUtils.getHTSFacilityProfile("Facility.Name", facilityName, MLUtils.getFacilityCutOffs());
+
+			if (profile == null) {
+				return new ResponseEntity<Object>(
+				        "The facility provided currently doesn't have an HTS cut-off profile. Provide an appropriate facility",
+				        new HttpHeaders(), HttpStatus.BAD_REQUEST);
+			}
+			ModelInputFields inputFields = MLUtils.extractHTSCaseFindingVariablesFromRequestBody(requestBody, facilityName,
+			    encounterDate);
 			
-			ScoringResult scoringResult = modelService.score(modelId, facilityName, encounterDate, inputFields);
+			ScoringResult scoringResult = modelService.score(modelId, facilityName, encounterDate, inputFields, isDebugMode);
 			return scoringResult;
 		}
 		catch (IOException e) {

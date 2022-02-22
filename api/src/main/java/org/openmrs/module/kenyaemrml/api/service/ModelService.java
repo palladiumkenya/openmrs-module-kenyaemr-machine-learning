@@ -9,7 +9,6 @@ import org.jpmml.evaluator.FieldValue;
 import org.jpmml.evaluator.InputField;
 import org.jpmml.evaluator.LoadingModelEvaluatorBuilder;
 import org.jpmml.evaluator.OutputField;
-import org.jpmml.evaluator.TargetField;
 import org.openmrs.module.kenyaemrml.domain.ModelInputFields;
 import org.openmrs.module.kenyaemrml.domain.ScoringResult;
 import org.openmrs.module.kenyaemrml.exception.ScoringException;
@@ -27,7 +26,8 @@ public class ModelService {
 	
 	private Log log = LogFactory.getLog(this.getClass());
 	
-	public ScoringResult score(String modelId, String facilityName, String encounterDate, ModelInputFields inputFields) {
+	public ScoringResult score(String modelId, String facilityName, String encounterDate, ModelInputFields inputFields,
+	        boolean debug) {
 		
 		try {
 			String fullModelFileName = modelId.concat(".pmml");
@@ -36,7 +36,7 @@ public class ModelService {
 			// Building a model evaluator from a PMML file
 			Evaluator evaluator = new LoadingModelEvaluatorBuilder().load(stream).build();
 			evaluator.verify();
-			ScoringResult scoringResult = new ScoringResult(score(evaluator, inputFields));
+			ScoringResult scoringResult = new ScoringResult(score(evaluator, inputFields, debug));
 			return scoringResult;
 		}
 		catch (Exception e) {
@@ -54,13 +54,13 @@ public class ModelService {
 	 * @param inputFields
 	 * @return
 	 */
-	private Map<String, Object> score(Evaluator evaluator, ModelInputFields inputFields) {
+	private Map<String, Object> score(Evaluator evaluator, ModelInputFields inputFields, boolean debug) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		
 		Map<FieldName, ?> evaluationResultFromEvaluator = evaluator.evaluate(prepareEvaluationArgs(evaluator, inputFields));
 		
 		List<OutputField> outputFields = evaluator.getOutputFields();
-		List<TargetField> targetFields = evaluator.getTargetFields();
+		//List<TargetField> targetFields = evaluator.getTargetFields();
 		
 		for (OutputField targetField : outputFields) {
 			FieldName targetFieldName = targetField.getName();
@@ -72,16 +72,20 @@ public class ModelService {
 			
 			result.put(targetFieldName.getValue(), targetFieldValue);
 		}
-		//TODO: this is purely for testing
-		Map<String, Object> modelInputs = new HashMap<String, Object>();
-		Map<String, Object> combinedResult = new HashMap<String, Object>();
-		for (Map.Entry<String, Object> entry : inputFields.getFields().entrySet()) {
-			modelInputs.put(entry.getKey(), entry.getValue());
+		//TODO: this is purely for debugging
+		if (debug) {
+			Map<String, Object> modelInputs = new HashMap<String, Object>();
+			Map<String, Object> combinedResult = new HashMap<String, Object>();
+			for (Map.Entry<String, Object> entry : inputFields.getFields().entrySet()) {
+				modelInputs.put(entry.getKey(), entry.getValue());
+			}
+			combinedResult.put("predictions", result);
+			combinedResult.put("ModelInputs", modelInputs);
+			
+			return combinedResult;
+		} else {
+			return result;
 		}
-		combinedResult.put("predictions", result);
-		combinedResult.put("ModelInputs", modelInputs);
-		
-		return combinedResult;
 	}
 	
 	/**

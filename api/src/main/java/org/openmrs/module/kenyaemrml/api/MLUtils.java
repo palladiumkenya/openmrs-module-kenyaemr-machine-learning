@@ -1,14 +1,5 @@
 package org.openmrs.module.kenyaemrml.api;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -18,9 +9,24 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.openmrs.Location;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemr.api.KenyaEmrService;
 import org.openmrs.module.kenyaemrml.domain.ModelInputFields;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 public class MLUtils {
+	
+	public static final String YYYY_MM_DD = "yyyy-MM-dd";
 	
 	public static String MODEL_ID_REQUEST_VARIABLE = "modelId";
 	
@@ -58,10 +64,56 @@ public class MLUtils {
 	 * 
 	 * @param requestBodyString
 	 * @return
+	 * Request body expects sample structure as below
+	 *
+	 * {
+	 *     "modelConfigs": {
+	 *         "modelId":"hts_xgb",
+	 *         "encounterDate":"2021-06-05",
+	 * 		"facilityId":"Good Shepherd Ang'iya",
+	 *         "debug":"false"
+	 *         },
+	 *     "variableValues": {
+	 *         "AgeAtTest": 20,
+	 *         "MonthsSinceLastTest": 45,
+	 *         "GenderMale": 1,
+	 *         "GenderFemale": 0,
+	 *         "KeyPopulationTypeGP": 1,
+	 *         "KeyPopulationTypeSW": 0,
+	 *         "MaritalStatusMarried": 0,
+	 *         "MaritalStatusDivorced": 0,
+	 *         "MaritalStatusPolygamous": 1,
+	 *         "MaritalStatusWidowed": 0,
+	 *         "MaritalStatusMinor": 0,
+	 *         "PatientDisabledNotDisabled": 1,
+	 *         "PatientDisabledDisabled": 0,
+	 *         "EverTestedForHIVYes": 1,
+	 *         "EverTestedForHIVNo": 0,
+	 *         "ClientTestedAsIndividual": 1,
+	 *         "ClientTestedAsCouple": 0,
+	 *         "EntryPointVCT": 0,
+	 *         "EntryPointOPD": 0,
+	 *         "EntryPointMTC": 0,
+	 *         "EntryPointIPD": 0,
+	 *         "EntryPointMOBILE": 1,
+	 *         "EntryPointOther": 0,
+	 *         "EntryPointHB": 0,
+	 *         "EntryPointPEDS": 0,
+	 *         "TestingStrategyVCT": 1,
+	 *         "TestingStrategyHB": 0,
+	 *         "TestingStrategyMOBILE": 0,
+	 *         "TestingStrategyHP": 0,
+	 *         "TestingStrategyNP": 0,
+	 *         "TBScreeningNoPresumedTB": 0,
+	 *         "TBScreeningPresumed TB": 1,
+	 *         "ClientSelfTestedNo": 1,
+	 *         "ClientSelfTestedYes": 0
+	 *     }
+	 * }
 	 */
-	public static ModelInputFields extractHTSCaseFindingVariablesFromRequestBody(String requestBodyString) {
+	public static ModelInputFields extractHTSCaseFindingVariablesFromRequestBody(String requestBodyString,
+	        String facilityName, String encounterDateString) {
 		
-		//System.out.println("Request body: " + requestBodyString);
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode tree = null;
 		Map<String, Object> modelParams = new HashMap<String, Object>();
@@ -77,13 +129,7 @@ public class MLUtils {
 		 */
 		
 		// get content
-		
 		ObjectNode variableValues = (ObjectNode) tree.get(MODEL_PARAMETER_VALUE_OBJECT_KEY);
-		ObjectNode modelConfigs = (ObjectNode) tree.get(MODEL_CONFIG_OBJECT_KEY);
-		String facilityName = modelConfigs.has(MLUtils.FACILITY_ID_REQUEST_VARIABLE) ? modelConfigs.get(
-		    MLUtils.FACILITY_ID_REQUEST_VARIABLE).asText() : "";
-		String encounterDateString = modelConfigs.has(MLUtils.ENCOUNTER_DATE_REQUEST_VARIABLE) ? modelConfigs.get(
-		    MLUtils.ENCOUNTER_DATE_REQUEST_VARIABLE).asText() : "";
 		
 		Iterator<Map.Entry<String, JsonNode>> it = variableValues.getFields();
 		while (it.hasNext()) {
@@ -108,7 +154,7 @@ public class MLUtils {
 	
 	private static Map<String, Object> prepareEncounterModelParams(String encounterDateString,
 	        Map<String, Object> modelParams) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat sdf = new SimpleDateFormat(YYYY_MM_DD);
 		if (StringUtils.isNotBlank(encounterDateString)) {
 			Date encDate = null;
 			try {
@@ -154,7 +200,7 @@ public class MLUtils {
 	/**
 	 * Set month variables
 	 * 
-	 * @param dayOfWeek
+	 * @param month
 	 * @param modelParams
 	 */
 	private static Map<String, Object> setMonthVariables(int month, Map<String, Object> modelParams) {
@@ -259,6 +305,11 @@ public class MLUtils {
 		}
 		
 		return null;
+	}
+	
+	public static Location getDefaultLocation() {
+		KenyaEmrService emrService = Context.getService(KenyaEmrService.class);
+		return emrService.getDefaultLocation();
 	}
 	
 }
