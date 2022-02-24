@@ -2,7 +2,7 @@
 <PMML xmlns="http://www.dmg.org/PMML-4_4" xmlns:data="http://jpmml.org/jpmml-model/InlineTable" version="4.4">
 	<Header>
 		<Application name="JPMML-R" version="1.4.4"/>
-		<Timestamp>2022-01-12T14:04:52Z</Timestamp>
+		<Timestamp>2022-02-07T22:21:07Z</Timestamp>
 	</Header>
 	<DataDictionary>
 		<DataField name="_target" optype="categorical" dataType="integer">
@@ -41,7 +41,7 @@
 		<DataField name="TestingStrategyHB" optype="continuous" dataType="float"/>
 		<DataField name="TestingStrategyMOBILE" optype="continuous" dataType="float"/>
 		<DataField name="TestingStrategyHP" optype="continuous" dataType="float"/>
-		<DataField name="TBScreeningPresumed TB" optype="continuous" dataType="float"/>
+		<DataField name="TBScreeningPresumedTB" optype="continuous" dataType="float"/>
 		<DataField name="ClientSelfTestedYes" optype="continuous" dataType="float"/>
 		<DataField name="month_of_test12" optype="continuous" dataType="float"/>
 		<DataField name="month_of_test3" optype="continuous" dataType="float"/>
@@ -96,7 +96,7 @@
 			<MiningField name="TestingStrategyHB"/>
 			<MiningField name="TestingStrategyMOBILE"/>
 			<MiningField name="TestingStrategyHP"/>
-			<MiningField name="TBScreeningPresumed TB"/>
+			<MiningField name="TBScreeningPresumedTB"/>
 			<MiningField name="ClientSelfTestedYes"/>
 			<MiningField name="month_of_test12"/>
 			<MiningField name="month_of_test3"/>
@@ -153,7 +153,7 @@
 						<MiningField name="TestingStrategyHB"/>
 						<MiningField name="TestingStrategyMOBILE"/>
 						<MiningField name="TestingStrategyHP"/>
-						<MiningField name="TBScreeningPresumed TB"/>
+						<MiningField name="TBScreeningPresumedTB"/>
 						<MiningField name="ClientSelfTestedYes"/>
 						<MiningField name="month_of_test12"/>
 						<MiningField name="month_of_test3"/>
@@ -197,7 +197,7 @@
 									<MiningField name="TestingStrategyHB"/>
 									<MiningField name="TestingStrategyMOBILE"/>
 									<MiningField name="TestingStrategyHP"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="month_of_test3"/>
 									<MiningField name="month_of_test5"/>
 									<MiningField name="dayofweek2"/>
@@ -220,7 +220,7 @@
 													</Node>
 												</Node>
 												<Node score="0.17142859">
-													<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="0.5"/>
+													<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="0.5"/>
 													<Node score="-0.3">
 														<SimplePredicate field="TestingStrategyHP" operator="lessThan" value="0.5"/>
 													</Node>
@@ -234,7 +234,7 @@
 											</Node>
 										</Node>
 										<Node score="-0.54519236">
-											<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+											<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 											<Node score="-0.41538465">
 												<SimplePredicate field="TestingStrategyMOBILE" operator="lessThan" value="0.5"/>
 												<Node score="-0.46415097">
@@ -282,7 +282,7 @@
 									<Node score="-0.5419355">
 										<SimplePredicate field="PC6" operator="greaterOrEqual" value="1.1282129"/>
 										<Node score="0.5368421">
-											<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+											<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 											<Node score="-0.0">
 												<SimplePredicate field="month_of_test5" operator="greaterOrEqual" value="0.5"/>
 											</Node>
@@ -331,7 +331,7 @@
 										</Node>
 									</Node>
 									<Node score="0.40000004">
-										<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+										<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 									</Node>
 									<Node score="0.26666668">
 										<SimplePredicate field="dayofweek2" operator="greaterOrEqual" value="0.5"/>
@@ -366,7 +366,7 @@
 									<MiningField name="EntryPointMTC"/>
 									<MiningField name="EntryPointMOBILE"/>
 									<MiningField name="TestingStrategyHB"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="month_of_test3"/>
 									<MiningField name="month_of_test5"/>
 									<MiningField name="month_of_test7"/>
@@ -400,7 +400,7 @@
 											</Node>
 										</Node>
 										<Node score="-0.23733887">
-											<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+											<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 											<Node score="-0.20874111">
 												<SimplePredicate field="MonthsSinceLastTest" operator="greaterOrEqual" value="13.5"/>
 												<Node score="-0.2771423">
@@ -448,7 +448,7 @@
 									<Node score="-0.4210197">
 										<SimplePredicate field="PC6" operator="greaterOrEqual" value="1.1282129"/>
 										<Node score="0.43633303">
-											<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+											<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 											<Node score="-0.0">
 												<SimplePredicate field="month_of_test5" operator="greaterOrEqual" value="0.5"/>
 											</Node>
@@ -473,7 +473,7 @@
 										</Node>
 									</Node>
 									<Node score="0.015287171">
-										<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+										<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 										<Node score="0.4235519">
 											<SimplePredicate field="PC8" operator="greaterOrEqual" value="-0.56333923"/>
 										</Node>
@@ -523,7 +523,7 @@
 									<MiningField name="TestingStrategyHB"/>
 									<MiningField name="TestingStrategyMOBILE"/>
 									<MiningField name="TestingStrategyHP"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="month_of_test5"/>
 									<MiningField name="month_of_test8"/>
 								</MiningSchema>
@@ -559,7 +559,7 @@
 											</Node>
 										</Node>
 										<Node score="-0.3488244">
-											<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+											<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 											<Node score="0.10415282">
 												<SimplePredicate field="TestingStrategyMOBILE" operator="lessThan" value="0.5"/>
 												<Node score="-0.389078">
@@ -609,7 +609,7 @@
 										<Node score="0.3747465">
 											<SimplePredicate field="AgeAtTest" operator="greaterOrEqual" value="18.5"/>
 											<Node score="-0.1639206">
-												<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="0.5"/>
+												<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="0.5"/>
 												<Node score="0.101137936">
 													<SimplePredicate field="GenderFemale" operator="greaterOrEqual" value="0.5"/>
 													<Node score="-0.14870639">
@@ -629,7 +629,7 @@
 										</Node>
 									</Node>
 									<Node score="-0.38764748">
-										<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="0.5"/>
+										<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="0.5"/>
 										<Node score="0.4071675">
 											<SimplePredicate field="MaritalStatusMinor" operator="lessThan" value="0.5"/>
 											<Node score="-0.30208996">
@@ -698,7 +698,7 @@
 									<MiningField name="MonthsSinceLastTest"/>
 									<MiningField name="EntryPointHB"/>
 									<MiningField name="TestingStrategyHB"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="ClientSelfTestedYes"/>
 									<MiningField name="month_of_test4"/>
 									<MiningField name="month_of_test5"/>
@@ -726,7 +726,7 @@
 												<Node score="-0.27122027">
 													<SimplePredicate field="MaritalStatusDivorced" operator="lessThan" value="0.5"/>
 													<Node score="-0.02499491">
-														<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+														<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 													</Node>
 												</Node>
 												<Node score="0.13621883">
@@ -748,7 +748,7 @@
 											<Node score="-0.35464326">
 												<SimplePredicate field="PC8" operator="greaterOrEqual" value="-1.1363277"/>
 												<Node score="-0.29608843">
-													<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="2.000001"/>
+													<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="2.000001"/>
 												</Node>
 											</Node>
 											<Node score="0.6208877">
@@ -756,7 +756,7 @@
 											</Node>
 										</Node>
 										<Node score="-0.29947507">
-											<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="0.5"/>
+											<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="0.5"/>
 											<Node score="-0.15505533">
 												<SimplePredicate field="MonthsSinceLastTest" operator="greaterOrEqual" value="12.5"/>
 												<Node score="0.0420866">
@@ -803,7 +803,7 @@
 										<Node score="-0.16692159">
 											<SimplePredicate field="AgeAtTest" operator="greaterOrEqual" value="16.5"/>
 											<Node score="0.34957168">
-												<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+												<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 												<Node score="-0.0">
 													<SimplePredicate field="month_of_test5" operator="greaterOrEqual" value="0.5"/>
 												</Node>
@@ -852,7 +852,7 @@
 											</Node>
 										</Node>
 										<Node score="0.26225448">
-											<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+											<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 										</Node>
 									</Node>
 									<Node score="-0.35319576">
@@ -895,7 +895,7 @@
 									<MiningField name="MonthsSinceLastTest"/>
 									<MiningField name="EntryPointMOBILE"/>
 									<MiningField name="TestingStrategyHB"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="ClientSelfTestedYes"/>
 									<MiningField name="month_of_test4"/>
 									<MiningField name="month_of_test8"/>
@@ -949,11 +949,11 @@
 												</Node>
 											</Node>
 											<Node score="0.4276694">
-												<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="2.000001"/>
+												<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="2.000001"/>
 											</Node>
 										</Node>
 										<Node score="-0.2636158">
-											<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="0.5"/>
+											<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="0.5"/>
 											<Node score="0.01627058">
 												<SimplePredicate field="MonthsSinceLastTest" operator="greaterOrEqual" value="12.5"/>
 												<Node score="-0.18697637">
@@ -1089,7 +1089,7 @@
 									<MiningField name="EntryPointPEDS"/>
 									<MiningField name="TestingStrategyHB"/>
 									<MiningField name="TestingStrategyMOBILE"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="month_of_test12"/>
 									<MiningField name="month_of_test5"/>
 									<MiningField name="month_of_test9"/>
@@ -1101,7 +1101,7 @@
 									<Node score="0.05044135">
 										<SimplePredicate field="TestingStrategyHB" operator="lessThan" value="0.5"/>
 										<Node score="-0.2909544">
-											<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+											<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 											<Node score="0.0049555805">
 												<SimplePredicate field="TestingStrategyMOBILE" operator="lessThan" value="0.5"/>
 												<Node score="-0.31900316">
@@ -1169,7 +1169,7 @@
 												</Node>
 											</Node>
 											<Node score="-0.305614">
-												<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="1.0E-6"/>
+												<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="1.0E-6"/>
 											</Node>
 										</Node>
 										<Node score="0.07046787">
@@ -1179,13 +1179,13 @@
 											</Node>
 										</Node>
 										<Node score="-0.32339436">
-											<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="1.0E-6"/>
+											<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="1.0E-6"/>
 										</Node>
 									</Node>
 									<Node score="0.0075114826">
 										<SimplePredicate field="AgeAtTest" operator="greaterOrEqual" value="15.5"/>
 										<Node score="0.017304813">
-											<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+											<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 											<Node score="0.38753715">
 												<SimplePredicate field="EntryPointPEDS" operator="lessThan" value="0.5"/>
 												<Node score="0.119348176">
@@ -1275,7 +1275,7 @@
 									<MiningField name="EntryPointMTC"/>
 									<MiningField name="EntryPointMOBILE"/>
 									<MiningField name="TestingStrategyHB"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="ClientSelfTestedYes"/>
 									<MiningField name="month_of_test6"/>
 									<MiningField name="dayofweek2"/>
@@ -1331,7 +1331,7 @@
 											</Node>
 										</Node>
 										<Node score="-0.20699717">
-											<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="0.5"/>
+											<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="0.5"/>
 											<Node score="-0.28221712">
 												<SimplePredicate field="MonthsSinceLastTest" operator="greaterOrEqual" value="12.5"/>
 												<Node score="-0.1050834">
@@ -1465,7 +1465,7 @@
 									<MiningField name="EntryPointIPD"/>
 									<MiningField name="TestingStrategyHB"/>
 									<MiningField name="TestingStrategyMOBILE"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="month_of_test6"/>
 									<MiningField name="month_of_test5"/>
 									<MiningField name="month_of_test7"/>
@@ -1480,7 +1480,7 @@
 										<Node score="0.06774471">
 											<SimplePredicate field="TestingStrategyMOBILE" operator="lessThan" value="0.5"/>
 											<Node score="0.0072198156">
-												<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+												<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 												<Node score="-0.14504528">
 													<SimplePredicate field="AgeAtTest" operator="greaterOrEqual" value="53.5"/>
 													<Node score="-0.038710278">
@@ -1559,13 +1559,13 @@
 											</Node>
 										</Node>
 										<Node score="-0.29543152">
-											<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="0.5"/>
+											<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="0.5"/>
 										</Node>
 									</Node>
 									<Node score="-0.19016758">
 										<SimplePredicate field="AgeAtTest" operator="greaterOrEqual" value="15.5"/>
 										<Node score="-0.0088045625">
-											<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+											<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 											<Node score="0.072285876">
 												<SimplePredicate field="MonthsSinceLastTest" operator="lessThan" value="31.5"/>
 												<Node score="0.0394799">
@@ -1647,7 +1647,7 @@
 									<MiningField name="ClientTestedAsCouple"/>
 									<MiningField name="TestingStrategyHB"/>
 									<MiningField name="TestingStrategyMOBILE"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="month_of_test4"/>
 									<MiningField name="month_of_test2"/>
 									<MiningField name="month_of_test5"/>
@@ -1693,7 +1693,7 @@
 												</Node>
 											</Node>
 											<Node score="-0.15485033">
-												<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+												<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 												<Node score="0.060564175">
 													<SimplePredicate field="AgeAtTest" operator="greaterOrEqual" value="18.5"/>
 												</Node>
@@ -1721,7 +1721,7 @@
 											</Node>
 										</Node>
 										<Node score="-0.287668">
-											<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="0.5"/>
+											<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="0.5"/>
 											<Node score="-0.16677424">
 												<SimplePredicate field="MaritalStatusMinor" operator="lessThan" value="0.5"/>
 												<Node score="0.20479189">
@@ -1771,7 +1771,7 @@
 										<Node score="0.24501048">
 											<SimplePredicate field="MaritalStatusPolygamous" operator="greaterOrEqual" value="0.5"/>
 											<Node score="-0.097997665">
-												<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="2.000001"/>
+												<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="2.000001"/>
 												<Node score="0.3518534">
 													<SimplePredicate field="PC6" operator="greaterOrEqual" value="-1.1317527"/>
 												</Node>
@@ -1783,7 +1783,7 @@
 										<Node score="0.030066753">
 											<SimplePredicate field="GenderFemale" operator="greaterOrEqual" value="0.5"/>
 											<Node score="-0.06186345">
-												<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="0.5"/>
+												<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="0.5"/>
 											</Node>
 										</Node>
 										<Node score="-0.08909506">
@@ -1837,7 +1837,7 @@
 									<MiningField name="EntryPointPEDS"/>
 									<MiningField name="TestingStrategyHB"/>
 									<MiningField name="TestingStrategyMOBILE"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="month_of_test3"/>
 									<MiningField name="month_of_test4"/>
 									<MiningField name="month_of_test5"/>
@@ -1856,7 +1856,7 @@
 											<Node score="0.055200025">
 												<SimplePredicate field="AgeAtTest" operator="greaterOrEqual" value="20.5"/>
 												<Node score="0.19079126">
-													<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+													<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 													<Node score="0.20615046">
 														<SimplePredicate field="PC3" operator="greaterOrEqual" value="0.8203607"/>
 														<Node score="-0.1455485">
@@ -1880,7 +1880,7 @@
 											<Node score="-0.1699883">
 												<SimplePredicate field="PC5" operator="greaterOrEqual" value="-2.9616392"/>
 												<Node score="0.2874588">
-													<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+													<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 													<Node score="-0.22251512">
 														<SimplePredicate field="PC3" operator="greaterOrEqual" value="1.4357936"/>
 													</Node>
@@ -1914,7 +1914,7 @@
 												</Node>
 											</Node>
 											<Node score="-0.18189043">
-												<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+												<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 												<Node score="0.10403491">
 													<SimplePredicate field="dayofweek2" operator="greaterOrEqual" value="0.5"/>
 												</Node>
@@ -1946,7 +1946,7 @@
 										</Node>
 									</Node>
 									<Node score="0.32031447">
-										<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+										<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 										<Node score="-0.1336534">
 											<SimplePredicate field="month_of_test5" operator="greaterOrEqual" value="0.5"/>
 											<Node score="0.17674878">
@@ -2031,7 +2031,7 @@
 									<MiningField name="EntryPointOPD"/>
 									<MiningField name="EntryPointPEDS"/>
 									<MiningField name="TestingStrategyMOBILE"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="ClientSelfTestedYes"/>
 									<MiningField name="month_of_test12"/>
 									<MiningField name="month_of_test4"/>
@@ -2071,7 +2071,7 @@
 												</Node>
 											</Node>
 											<Node score="-0.17469652">
-												<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+												<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 												<Node score="0.20633744">
 													<SimplePredicate field="dayofweek2" operator="greaterOrEqual" value="0.5"/>
 													<Node score="-0.19683477">
@@ -2116,7 +2116,7 @@
 										<Node score="0.07048376">
 											<SimplePredicate field="MaritalStatusMinor" operator="lessThan" value="0.5"/>
 											<Node score="0.6588873">
-												<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="2.000001"/>
+												<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="2.000001"/>
 												<Node score="0.03791382">
 													<SimplePredicate field="PC8" operator="greaterOrEqual" value="-0.85695916"/>
 													<Node score="-0.12585528">
@@ -2219,7 +2219,7 @@
 									<MiningField name="EntryPointOPD"/>
 									<MiningField name="EntryPointMTC"/>
 									<MiningField name="TestingStrategyMOBILE"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="ClientSelfTestedYes"/>
 									<MiningField name="month_of_test3"/>
 									<MiningField name="month_of_test4"/>
@@ -2249,7 +2249,7 @@
 												</Node>
 											</Node>
 											<Node score="0.034267385">
-												<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+												<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 												<Node score="-0.24297146">
 													<SimplePredicate field="dayofweek3" operator="greaterOrEqual" value="0.5"/>
 												</Node>
@@ -2345,7 +2345,7 @@
 										<Node score="-0.23787265">
 											<SimplePredicate field="PC5" operator="greaterOrEqual" value="-3.271443"/>
 											<Node score="0.26495618">
-												<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+												<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 												<Node score="-0.16645142">
 													<SimplePredicate field="PC3" operator="greaterOrEqual" value="1.4357936"/>
 												</Node>
@@ -2377,7 +2377,7 @@
 										<SimplePredicate field="ClientTestedAsCouple" operator="greaterOrEqual" value="0.5"/>
 									</Node>
 									<Node score="-0.25434554">
-										<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="2.000001"/>
+										<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="2.000001"/>
 									</Node>
 								</Node>
 							</TreeModel>
@@ -2405,7 +2405,7 @@
 									<MiningField name="EntryPointOther"/>
 									<MiningField name="TestingStrategyHB"/>
 									<MiningField name="TestingStrategyMOBILE"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="ClientSelfTestedYes"/>
 									<MiningField name="month_of_test12"/>
 									<MiningField name="month_of_test4"/>
@@ -2479,7 +2479,7 @@
 									<Node score="0.038454995">
 										<SimplePredicate field="AgeAtTest" operator="greaterOrEqual" value="20.5"/>
 										<Node score="-0.27950045">
-											<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+											<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 											<Node score="0.19111967">
 												<SimplePredicate field="ClientSelfTestedYes" operator="lessThan" value="0.5"/>
 												<Node score="0.22964372">
@@ -2746,7 +2746,7 @@
 									<MiningField name="ClientTestedAsCouple"/>
 									<MiningField name="TestingStrategyHB"/>
 									<MiningField name="TestingStrategyMOBILE"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="month_of_test6"/>
 									<MiningField name="month_of_test5"/>
 									<MiningField name="month_of_test9"/>
@@ -2808,7 +2808,7 @@
 											</Node>
 										</Node>
 										<Node score="-0.29092234">
-											<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="0.5"/>
+											<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="0.5"/>
 										</Node>
 									</Node>
 									<Node score="0.052788746">
@@ -2899,7 +2899,7 @@
 										</Node>
 									</Node>
 									<Node score="-0.016129551">
-										<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="0.5"/>
+										<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="0.5"/>
 									</Node>
 								</Node>
 							</TreeModel>
@@ -2924,7 +2924,7 @@
 									<MiningField name="EntryPointPEDS"/>
 									<MiningField name="TestingStrategyMOBILE"/>
 									<MiningField name="TestingStrategyHP"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="ClientSelfTestedYes"/>
 									<MiningField name="month_of_test12"/>
 									<MiningField name="month_of_test3"/>
@@ -2998,7 +2998,7 @@
 										</Node>
 									</Node>
 									<Node score="-0.15739684">
-										<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+										<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 										<Node score="-0.03565398">
 											<SimplePredicate field="month_of_test12" operator="greaterOrEqual" value="0.5"/>
 											<Node score="-0.23080592">
@@ -3090,7 +3090,7 @@
 									<MiningField name="EntryPointMTC"/>
 									<MiningField name="EntryPointMOBILE"/>
 									<MiningField name="EntryPointHB"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="ClientSelfTestedYes"/>
 									<MiningField name="month_of_test4"/>
 									<MiningField name="month_of_test2"/>
@@ -3149,7 +3149,7 @@
 												</Node>
 											</Node>
 											<Node score="-0.29372495">
-												<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="0.5"/>
+												<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="0.5"/>
 											</Node>
 										</Node>
 										<Node score="0.03808535">
@@ -3191,7 +3191,7 @@
 										<Node score="0.34472084">
 											<SimplePredicate field="PC10" operator="greaterOrEqual" value="1.284145"/>
 											<Node score="-0.029334377">
-												<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="2.000001"/>
+												<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="2.000001"/>
 												<Node score="0.1509015">
 													<SimplePredicate field="MonthsSinceLastTest" operator="lessThan" value="12.5"/>
 												</Node>
@@ -3270,7 +3270,7 @@
 									<MiningField name="EntryPointMOBILE"/>
 									<MiningField name="TestingStrategyHB"/>
 									<MiningField name="TestingStrategyMOBILE"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="ClientSelfTestedYes"/>
 									<MiningField name="month_of_test12"/>
 									<MiningField name="month_of_test3"/>
@@ -3279,7 +3279,7 @@
 								<Node score="-0.022415567">
 									<True/>
 									<Node score="0.13361387">
-										<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+										<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 										<Node score="-0.046357576">
 											<SimplePredicate field="PC10" operator="greaterOrEqual" value="-0.09550056"/>
 											<Node score="-0.2396709">
@@ -3408,7 +3408,7 @@
 									<MiningField name="EntryPointMOBILE"/>
 									<MiningField name="EntryPointHB"/>
 									<MiningField name="TestingStrategyHP"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="ClientSelfTestedYes"/>
 									<MiningField name="month_of_test2"/>
 									<MiningField name="month_of_test9"/>
@@ -3505,7 +3505,7 @@
 											<Node score="-0.21869667">
 												<SimplePredicate field="MaritalStatusMinor" operator="lessThan" value="0.5"/>
 												<Node score="0.33326262">
-													<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="1.0E-6"/>
+													<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="1.0E-6"/>
 												</Node>
 											</Node>
 											<Node score="0.46112266">
@@ -3522,7 +3522,7 @@
 									<Node score="-0.14995109">
 										<SimplePredicate field="MaritalStatusMinor" operator="lessThan" value="0.5"/>
 										<Node score="0.06395343">
-											<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="2.000001"/>
+											<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="2.000001"/>
 											<Node score="0.021495227">
 												<SimplePredicate field="PatientDisabledDisabled" operator="greaterOrEqual" value="0.5"/>
 												<Node score="-0.17035225">
@@ -3592,7 +3592,7 @@
 									<MiningField name="EntryPointHB"/>
 									<MiningField name="EntryPointPEDS"/>
 									<MiningField name="TestingStrategyHB"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="dayofweek2"/>
 									<MiningField name="dayofweek3"/>
 								</MiningSchema>
@@ -3618,7 +3618,7 @@
 												</Node>
 											</Node>
 											<Node score="0.07488436">
-												<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="0.5"/>
+												<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="0.5"/>
 												<Node score="0.100501455">
 													<SimplePredicate field="MonthsSinceLastTest" operator="greaterOrEqual" value="4.5"/>
 													<Node score="-0.17348164">
@@ -3699,7 +3699,7 @@
 										<Node score="0.25910547">
 											<SimplePredicate field="EverTestedForHIVNo" operator="greaterOrEqual" value="0.5"/>
 											<Node score="-0.007426597">
-												<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="0.5"/>
+												<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="0.5"/>
 											</Node>
 										</Node>
 										<Node score="-0.25090396">
@@ -3758,7 +3758,7 @@
 									<MiningField name="MonthsSinceLastTest"/>
 									<MiningField name="EntryPointOther"/>
 									<MiningField name="TestingStrategyMOBILE"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="dayofweek1"/>
 								</MiningSchema>
 								<Node score="-0.08622993">
@@ -3770,7 +3770,7 @@
 										</Node>
 									</Node>
 									<Node score="-0.18903942">
-										<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+										<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 										<Node score="0.11392157">
 											<SimplePredicate field="PC3" operator="greaterOrEqual" value="-1.4150034"/>
 											<Node score="-0.1581593">
@@ -3851,7 +3851,7 @@
 									<MiningField name="EntryPointOPD"/>
 									<MiningField name="EntryPointHB"/>
 									<MiningField name="TestingStrategyHP"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="month_of_test1"/>
 									<MiningField name="month_of_test8"/>
 									<MiningField name="dayofweek2"/>
@@ -3899,7 +3899,7 @@
 										<Node score="0.16052476">
 											<SimplePredicate field="TestingStrategyHP" operator="lessThan" value="0.5"/>
 											<Node score="-0.15629944">
-												<SimplePredicate field="TBScreeningPresumed TB" operator="lessThan" value="1.0E-6"/>
+												<SimplePredicate field="TBScreeningPresumedTB" operator="lessThan" value="1.0E-6"/>
 											</Node>
 										</Node>
 									</Node>
@@ -4162,7 +4162,7 @@
 									<MiningField name="EntryPointOther"/>
 									<MiningField name="EntryPointPEDS"/>
 									<MiningField name="TestingStrategyHP"/>
-									<MiningField name="TBScreeningPresumed TB"/>
+									<MiningField name="TBScreeningPresumedTB"/>
 									<MiningField name="month_of_test11"/>
 									<MiningField name="month_of_test2"/>
 									<MiningField name="month_of_test8"/>
@@ -4240,7 +4240,7 @@
 											</Node>
 										</Node>
 										<Node score="0.07943789">
-											<SimplePredicate field="TBScreeningPresumed TB" operator="greaterOrEqual" value="0.5"/>
+											<SimplePredicate field="TBScreeningPresumedTB" operator="greaterOrEqual" value="0.5"/>
 										</Node>
 										<Node score="-0.08865191">
 											<SimplePredicate field="dayofweek2" operator="greaterOrEqual" value="0.5"/>
