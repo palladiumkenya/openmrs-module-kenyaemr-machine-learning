@@ -48,7 +48,7 @@ public class MachineLearningRestController extends BaseRestController {
 			if (facilityName.equals("")) { // default to the default facility configured in the EMR
 				facilityName = MLUtils.getDefaultLocation().getName();
 			}
-
+			
 			String modelId = modelConfigs.get(MLUtils.MODEL_ID_REQUEST_VARIABLE).asText();
 			String encounterDate = modelConfigs.get(MLUtils.ENCOUNTER_DATE_REQUEST_VARIABLE).asText();
 			
@@ -57,7 +57,7 @@ public class MachineLearningRestController extends BaseRestController {
 				        new HttpHeaders(), HttpStatus.BAD_REQUEST);
 			}
 			JSONObject profile = MLUtils.getHTSFacilityProfile("Facility.Name", facilityName, MLUtils.getFacilityCutOffs());
-
+			
 			if (profile == null) {
 				return new ResponseEntity<Object>(
 				        "The facility provided currently doesn't have an HTS cut-off profile. Provide an appropriate facility",

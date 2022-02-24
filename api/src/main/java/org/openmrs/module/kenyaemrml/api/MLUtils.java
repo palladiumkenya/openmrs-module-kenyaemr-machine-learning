@@ -63,53 +63,20 @@ public class MLUtils {
 	 * Extracts model variables from request body Variable values are of float type
 	 * 
 	 * @param requestBodyString
-	 * @return
-	 * Request body expects sample structure as below
-	 *
-	 * {
-	 *     "modelConfigs": {
-	 *         "modelId":"hts_xgb",
-	 *         "encounterDate":"2021-06-05",
-	 * 		"facilityId":"Good Shepherd Ang'iya",
-	 *         "debug":"false"
-	 *         },
-	 *     "variableValues": {
-	 *         "AgeAtTest": 20,
-	 *         "MonthsSinceLastTest": 45,
-	 *         "GenderMale": 1,
-	 *         "GenderFemale": 0,
-	 *         "KeyPopulationTypeGP": 1,
-	 *         "KeyPopulationTypeSW": 0,
-	 *         "MaritalStatusMarried": 0,
-	 *         "MaritalStatusDivorced": 0,
-	 *         "MaritalStatusPolygamous": 1,
-	 *         "MaritalStatusWidowed": 0,
-	 *         "MaritalStatusMinor": 0,
-	 *         "PatientDisabledNotDisabled": 1,
-	 *         "PatientDisabledDisabled": 0,
-	 *         "EverTestedForHIVYes": 1,
-	 *         "EverTestedForHIVNo": 0,
-	 *         "ClientTestedAsIndividual": 1,
-	 *         "ClientTestedAsCouple": 0,
-	 *         "EntryPointVCT": 0,
-	 *         "EntryPointOPD": 0,
-	 *         "EntryPointMTC": 0,
-	 *         "EntryPointIPD": 0,
-	 *         "EntryPointMOBILE": 1,
-	 *         "EntryPointOther": 0,
-	 *         "EntryPointHB": 0,
-	 *         "EntryPointPEDS": 0,
-	 *         "TestingStrategyVCT": 1,
-	 *         "TestingStrategyHB": 0,
-	 *         "TestingStrategyMOBILE": 0,
-	 *         "TestingStrategyHP": 0,
-	 *         "TestingStrategyNP": 0,
-	 *         "TBScreeningNoPresumedTB": 0,
-	 *         "TBScreeningPresumed TB": 1,
-	 *         "ClientSelfTestedNo": 1,
-	 *         "ClientSelfTestedYes": 0
-	 *     }
-	 * }
+	 * @return Request body expects sample structure as below { "modelConfigs": {
+	 *         "modelId":"hts_xgb", "encounterDate":"2021-06-05",
+	 *         "facilityId":"Good Shepherd Ang'iya", "debug":"false" }, "variableValues": {
+	 *         "AgeAtTest": 20, "MonthsSinceLastTest": 45, "GenderMale": 1, "GenderFemale": 0,
+	 *         "KeyPopulationTypeGP": 1, "KeyPopulationTypeSW": 0, "MaritalStatusMarried": 0,
+	 *         "MaritalStatusDivorced": 0, "MaritalStatusPolygamous": 1, "MaritalStatusWidowed": 0,
+	 *         "MaritalStatusMinor": 0, "PatientDisabledNotDisabled": 1, "PatientDisabledDisabled":
+	 *         0, "EverTestedForHIVYes": 1, "EverTestedForHIVNo": 0, "ClientTestedAsIndividual": 1,
+	 *         "ClientTestedAsCouple": 0, "EntryPointVCT": 0, "EntryPointOPD": 0, "EntryPointMTC":
+	 *         0, "EntryPointIPD": 0, "EntryPointMOBILE": 1, "EntryPointOther": 0, "EntryPointHB":
+	 *         0, "EntryPointPEDS": 0, "TestingStrategyVCT": 1, "TestingStrategyHB": 0,
+	 *         "TestingStrategyMOBILE": 0, "TestingStrategyHP": 0, "TestingStrategyNP": 0,
+	 *         "TBScreeningNoPresumedTB": 0, "TBScreeningPresumed TB": 1, "ClientSelfTestedNo": 1,
+	 *         "ClientSelfTestedYes": 0 } }
 	 */
 	public static ModelInputFields extractHTSCaseFindingVariablesFromRequestBody(String requestBodyString,
 	        String facilityName, String encounterDateString) {
