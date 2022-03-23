@@ -18,11 +18,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 public class MLUtils {
 	
@@ -38,8 +41,15 @@ public class MLUtils {
 	
 	public static String MODEL_CONFIG_OBJECT_KEY = "modelConfigs";
 	
-	public static String[] FACILITY_PROFILE_VARIABLES = { "PC1", "PC2", "PC3", "PC4", "PC5", "PC6", "PC7", "PC8", "PC9",
-	        "PC10" }; // As defined in the model
+	/*"FacilityName": "Adiedo Dispensary",
+	"births","pregnancies","literacy","poverty","anc","pnc","sba","hiv_prev","hiv_count","condom","intercourse","in_union","circumcision","partner_away","partner_men","partner_women","sti","pop_density","women_reproductive_age","young_adults"*/
+	public static String[] FACILITY_PROFILE_VARIABLES = { "births", "pregnancies", "literacy", "poverty", "anc", "pnc",
+	        "sba", "hiv_prev", "hiv_count", "condom", "intercourse", "in_union", "circumcision", "partner_away",
+	        "partner_men", "partner_women", "sti", "pop_density", "women_reproductive_age", "young_adults" };
+	
+	public static Set<String> FACILITY_PROFILE_VARS_TO_EXCLUDE = new HashSet<String>(Arrays.asList("FacilityName"));
+	
+	//{ "PC1", "PC2", "PC3", "PC4", "PC5", "PC6", "PC7", "PC8", "PC9", "PC10" }; // As defined in the model
 	
 	public static String fetchRequestBody(BufferedReader reader) {
 		String requestBodyJsonStr = "";
@@ -109,7 +119,26 @@ public class MLUtils {
 		prepareEncounterModelParams(encounterDateString, modelParams);
 		// add facility cut off
 		
-		JSONObject profile = getHTSFacilityProfile("Facility.Name", facilityName, getFacilityCutOffs());
+		JSONObject profile = getHTSFacilityProfile("FacilityName", facilityName, getFacilityCutOffs());
+		/*profile.keySet().forEach(keyObj ->
+				{
+					String param = (String) keyObj;
+					System.out.print("Param: " + param );
+
+					if (!FACILITY_PROFILE_VARS_TO_EXCLUDE.contains(param)) {
+						modelParams.put(param, profile.get(param));
+						System.out.println(", value: " + profile.get(param));
+					}
+				}
+		);*/
+		/*for (Object key : profile.keySet()) {
+			String param = (String) key;
+			if (!FACILITY_PROFILE_VARS_TO_EXCLUDE.contains(param)) {
+				modelParams.put(param, profile.get(param));
+				System.out.println("Param: " + param + ", value: " + profile.get(param));
+			}
+		}*/
+		
 		for (int i = 0; i < FACILITY_PROFILE_VARIABLES.length; i++) {
 			modelParams.put(FACILITY_PROFILE_VARIABLES[i], profile.get(FACILITY_PROFILE_VARIABLES[i]));
 		}
@@ -219,7 +248,7 @@ public class MLUtils {
 	 * @return
 	 */
 	public static String readBundledHtsCasefindingFacilityProfileFile() {
-		InputStream stream = MLUtils.class.getClassLoader().getResourceAsStream("hts_ml_facility_cut_off.json");
+		InputStream stream = MLUtils.class.getClassLoader().getResourceAsStream("hts_ml_facility_cut_off_updated.json");
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			ArrayNode result = mapper.readValue(stream, ArrayNode.class);

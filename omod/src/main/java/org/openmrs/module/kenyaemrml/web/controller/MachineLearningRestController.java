@@ -56,7 +56,7 @@ public class MachineLearningRestController extends BaseRestController {
 				return new ResponseEntity<Object>("The service requires model, date, and facility information",
 				        new HttpHeaders(), HttpStatus.BAD_REQUEST);
 			}
-			JSONObject profile = MLUtils.getHTSFacilityProfile("Facility.Name", facilityName, MLUtils.getFacilityCutOffs());
+			JSONObject profile = MLUtils.getHTSFacilityProfile("FacilityName", facilityName, MLUtils.getFacilityCutOffs());
 			
 			if (profile == null) {
 				return new ResponseEntity<Object>(
