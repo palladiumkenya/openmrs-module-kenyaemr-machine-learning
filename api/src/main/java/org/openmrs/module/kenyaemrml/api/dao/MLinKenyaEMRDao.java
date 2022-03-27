@@ -9,12 +9,19 @@
  */
 package org.openmrs.module.kenyaemrml.api.dao;
 
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.openmrs.Patient;
 import org.openmrs.api.db.hibernate.DbSession;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
 import org.openmrs.module.kenyaemrml.Item;
+import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+import java.util.Date;
+import java.util.List;
 
 @Repository("kenyaemrml.MLinKenyaEMRDao")
 public class MLinKenyaEMRDao {
@@ -33,5 +40,78 @@ public class MLinKenyaEMRDao {
 	public Item saveItem(Item item) {
 		getSession().saveOrUpdate(item);
 		return item;
+	}
+	
+	/**
+	 * Saves or updates risk score
+	 * 
+	 * @param riskScore
+	 * @return
+	 */
+	public PatientRiskScore saveOrUpdateRiskScore(PatientRiskScore riskScore) {
+		getSession().saveOrUpdate(riskScore);
+		return riskScore;
+	}
+	
+	/**
+	 * Returns a PatientRiskScore for a given id
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public PatientRiskScore getPatientRiskScoreById(Integer id) {
+		return (PatientRiskScore) getSession().createCriteria(PatientRiskScore.class).add(Restrictions.eq("id", id))
+		        .uniqueResult();
+		
+	}
+	
+	/**
+	 * Gets the latest PatientRiskScore for a patient
+	 * 
+	 * @param patient
+	 * @return
+	 */
+	public PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient) {
+		Criteria criteria = getSession().createCriteria(PatientRiskScore.class);
+		criteria.add(Restrictions.eq("patient", patient));
+		criteria.addOrder(Order.desc("evaluationDate"));
+		criteria.setMaxResults(1);
+		
+		PatientRiskScore patientRiskScore = (PatientRiskScore) criteria.uniqueResult();
+		
+		return patientRiskScore;
+	}
+	
+	/**
+	 * Gets a list of risk score for a patient
+	 * 
+	 * @param patient
+	 * @return
+	 */
+	public List<PatientRiskScore> getPatientRiskScoreByPatient(Patient patient) {
+		return (List<PatientRiskScore>) getSession().createCriteria(PatientRiskScore.class)
+		        .add(Restrictions.eq("patient", patient)).list();
+		
+	}
+	
+	/**
+	 * Gets a list of risk score for a patient
+	 * 
+	 * @param patient
+	 * @return
+	 */
+	public List<PatientRiskScore> getPatientRiskScoreByPatient(Patient patient, Date onOrBefore, Date onOrAfter) {
+		return (List<PatientRiskScore>) getSession().createCriteria(PatientRiskScore.class)
+		        .add(Restrictions.eq("patient", patient)).list();
+	}
+	
+	/**
+	 * Gets a list of risk score for a patient
+	 * 
+	 * @return
+	 */
+	public List<PatientRiskScore> getAllPatientRiskScore() {
+		return (List<PatientRiskScore>) getSession().createCriteria(PatientRiskScore.class).list();
+		
 	}
 }

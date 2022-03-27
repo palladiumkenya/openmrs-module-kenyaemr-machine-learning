@@ -13,27 +13,66 @@
         for a list of supported elements and attributes
     -->
  
- 	<!-- Uncomment the changeset below if you want to make the Item class persistable, see also Item and MLinKenyaEMRDaoTest -->
- 	<!--
-	<changeSet id="kenyaemrml-2016-08-02-12-21" author="raff">
+	<changeSet id="kenyaemrml-20220324-2310" author="aojwang">
 		<preConditions onFail="MARK_RAN">
-			<not><tableExists tableName="kenyaemrml_item"/></not>
+			<not><tableExists tableName="kenyaemr_ml_patient_risk_score"/></not>
 		</preConditions>
 		<comment>
-			Creating the kenyaemrml_item table
+			Creating the kenyaemr_ml_patient_risk_score table
 		</comment>
-		<createTable tableName="kenyaemrml_item">
-			<column name="kenyaemrml_item_id" type="int" autoIncrement="true">
+		<createTable tableName="kenyaemr_ml_patient_risk_score">
+			<column name="id" type="int" autoIncrement="true">
 				<constraints primaryKey="true" nullable="false"/>
 			</column>
-			<column name="uuid" type="char(38)">
-				<constraints nullable="false" unique="true"></constraints>
+			<column name="source_system_uuid" type="char(38)">
+				<constraints nullable="false" unique="false"></constraints>
 			</column>
-			<column name="owner" type="int" />
-			<column name="description" type="varchar(255)" />
+            <column name="patient_id" type="int">
+                <constraints nullable="true"/>
+            </column>
+            <column name="risk_score" type="double">
+                <constraints nullable="false"/>
+            </column>
+            <column name="evaluation_date" type="datetime">
+                <constraints nullable="true"/>
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column defaultValueBoolean="false" name="voided" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="voided_reason" type="varchar(255)"/>
 		</createTable>
-        <addForeignKeyConstraint constraintName="kenyaemrml_item_owner_fk" baseTableName="kenyaemrml_item" baseColumnNames="owner"  referencedTableName="users"
-                                 referencedColumnNames="user_id" />
-    </changeSet> -->
+        <addForeignKeyConstraint constraintName="patient_risk_score_creator"
+                                 baseTableName="kenyaemr_ml_patient_risk_score" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="patient_risk_score_changed_by"
+                                 baseTableName="kenyaemr_ml_patient_risk_score" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="patient_risk_score_patient_pk"
+                                 baseTableName="kenyaemr_ml_patient_risk_score" baseColumnNames="patient_id"
+                                 referencedTableName="patient" referencedColumnNames="patient_id"/>
+    </changeSet>
+
+    <changeSet author="aojwang" id="kenyaemrml-20220324-2330">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_ml_patient_risk_score"/>
+            <not>
+                <indexExists indexName="index_risk_score_evaluation_date"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="index_risk_score_evaluation_date" tableName="kenyaemr_ml_patient_risk_score" unique="true">
+            <column name="evaluation_date"/>
+            <column name="patient_id"/>
+        </createIndex>
+    </changeSet>
  
 </databaseChangeLog>
