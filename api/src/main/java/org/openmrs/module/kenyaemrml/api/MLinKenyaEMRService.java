@@ -9,12 +9,17 @@
  */
 package org.openmrs.module.kenyaemrml.api;
 
+import org.openmrs.Patient;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.kenyaemrml.MLinKenyaEMRConfig;
 import org.openmrs.module.kenyaemrml.Item;
+import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * The main service of this module, which is exposed for other modules. See
@@ -45,4 +50,52 @@ public interface MLinKenyaEMRService extends OpenmrsService {
 	@Authorized(MLinKenyaEMRConfig.MODULE_PRIVILEGE)
 	@Transactional
 	Item saveItem(Item item) throws APIException;
+	
+	/**
+	 * Saves or updates risk score
+	 * 
+	 * @param riskScore
+	 * @return
+	 */
+	PatientRiskScore saveOrUpdateRiskScore(PatientRiskScore riskScore);
+	
+	/**
+	 * Returns a PatientRiskScore for a given id
+	 * 
+	 * @param id
+	 * @return
+	 */
+	PatientRiskScore getPatientRiskScoreById(Integer id);
+	
+	/**
+	 * Gets the latest PatientRiskScore for a patient
+	 * 
+	 * @param patient
+	 * @return
+	 */
+	PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient);
+	
+	/**
+	 * Gets a list of risk score for a patient
+	 * 
+	 * @param patient
+	 * @return
+	 */
+	List<PatientRiskScore> getPatientRiskScoreByPatient(Patient patient);
+	
+	/**
+	 * Gets a list of risk score for a patient
+	 * 
+	 * @param patient
+	 * @return
+	 */
+	List<PatientRiskScore> getPatientRiskScoreByPatient(Patient patient, Date onOrBefore, Date onOrAfter);
+	
+	/**
+	 * Gets a list of risk score for a patient
+	 * 
+	 * @return
+	 */
+	List<PatientRiskScore> getAllPatientRiskScore();
+	
 }
