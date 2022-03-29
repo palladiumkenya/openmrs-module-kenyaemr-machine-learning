@@ -19,6 +19,10 @@ import org.openmrs.module.kenyaemr.metadata.HivMetadata;
 import org.openmrs.module.kenyaemr.reporting.calculation.converter.DateArtStartDateConverter;
 import org.openmrs.module.kenyaemr.reporting.data.converter.CalculationResultConverter;
 import org.openmrs.module.kenyaemr.reporting.data.converter.IdentifierConverter;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLArtStartDateDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLCurrentRegLineDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLCurrentRegimenDataDefinition;
+import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLFirstRegimenDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLLastVisitDateDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLNextAppointmentDateDataDefinition;
 import org.openmrs.module.kenyaemr.reporting.data.converter.definition.art.ETLStabilityDataDefinition;
@@ -56,6 +60,10 @@ public class HighIITRiskPatientsReportBuilder extends CalculationReportBuilder {
 		        new LastRiskScoreEvaluationDateCalculation()), "", new CalculationResultConverter());
 		dsd.addColumn("Enrollment Date", new CalculationDataDefinition("Enrollment Date",
 		        new DateOfEnrollmentArtCalculation()), "", new DateArtStartDateConverter());
+		dsd.addColumn("Art Start Date", new ETLArtStartDateDataDefinition(), "", new DateConverter(DATE_FORMAT));
+		dsd.addColumn("First Regimen", new ETLFirstRegimenDataDefinition(), "");
+		dsd.addColumn("Current Regimen", new ETLCurrentRegimenDataDefinition(), "");
+		dsd.addColumn("Current Regimen Line", new ETLCurrentRegLineDataDefinition(), "");
 		dsd.addColumn("Stability", new ETLStabilityDataDefinition(), "");
 		dsd.addColumn("Last Visit Date", new ETLLastVisitDateDataDefinition(), "", new DateConverter(DATE_FORMAT));
 		dsd.addColumn("Next Appointment Date", new ETLNextAppointmentDateDataDefinition(), "",
