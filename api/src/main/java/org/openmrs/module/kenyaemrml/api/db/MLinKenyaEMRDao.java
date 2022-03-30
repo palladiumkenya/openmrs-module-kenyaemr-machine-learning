@@ -7,33 +7,24 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.kenyaemrml.api;
+package org.openmrs.module.kenyaemrml.api.db;
 
 import java.util.Date;
 import java.util.List;
 
 import org.openmrs.Patient;
-import org.openmrs.annotation.Authorized;
-import org.openmrs.api.OpenmrsService;
-import org.openmrs.module.kenyaemrml.MLinKenyaEMRConfig;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
-import org.springframework.transaction.annotation.Transactional;
 
-/**
- * The main service of this module, which is exposed for other modules. See
- * moduleApplicationContext.xml on how it is wired up.
- */
-public interface MLinKenyaEMRService extends OpenmrsService {
-		
+//@Repository("kenyaemrml.MLinKenyaEMRDao")
+public interface MLinKenyaEMRDao {
+	
 	/**
 	 * Saves or updates risk score
 	 * 
 	 * @param riskScore
 	 * @return
 	 */
-	@Authorized(MLinKenyaEMRConfig.MODULE_PRIVILEGE)
-	@Transactional
-	PatientRiskScore saveOrUpdateRiskScore(PatientRiskScore riskScore);
+	public PatientRiskScore saveOrUpdateRiskScore(PatientRiskScore riskScore);
 	
 	/**
 	 * Returns a PatientRiskScore for a given id
@@ -41,7 +32,7 @@ public interface MLinKenyaEMRService extends OpenmrsService {
 	 * @param id
 	 * @return
 	 */
-	PatientRiskScore getPatientRiskScoreById(Integer id);
+	public PatientRiskScore getPatientRiskScoreById(Integer id);
 	
 	/**
 	 * Gets the latest PatientRiskScore for a patient
@@ -49,7 +40,7 @@ public interface MLinKenyaEMRService extends OpenmrsService {
 	 * @param patient
 	 * @return
 	 */
-	PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient);
+	public PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient);
 	
 	/**
 	 * Gets a list of risk score for a patient
@@ -57,7 +48,7 @@ public interface MLinKenyaEMRService extends OpenmrsService {
 	 * @param patient
 	 * @return
 	 */
-	List<PatientRiskScore> getPatientRiskScoreByPatient(Patient patient);
+	public List<PatientRiskScore> getPatientRiskScoreByPatient(Patient patient);
 	
 	/**
 	 * Gets a list of risk score for a patient
@@ -65,13 +56,12 @@ public interface MLinKenyaEMRService extends OpenmrsService {
 	 * @param patient
 	 * @return
 	 */
-	List<PatientRiskScore> getPatientRiskScoreByPatient(Patient patient, Date onOrBefore, Date onOrAfter);
+	public List<PatientRiskScore> getPatientRiskScoreByPatient(Patient patient, Date onOrBefore, Date onOrAfter);
 	
 	/**
 	 * Gets a list of risk score for a patient
 	 * 
 	 * @return
 	 */
-	List<PatientRiskScore> getAllPatientRiskScore();
-	
+	public List<PatientRiskScore> getAllPatientRiskScore();
 }

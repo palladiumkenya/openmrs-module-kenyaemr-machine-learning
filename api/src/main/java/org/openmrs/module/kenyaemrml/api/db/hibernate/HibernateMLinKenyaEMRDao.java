@@ -7,39 +7,38 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.kenyaemrml.api.dao;
-
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.openmrs.Patient;
-import org.openmrs.api.db.hibernate.DbSession;
-import org.openmrs.api.db.hibernate.DbSessionFactory;
-import org.openmrs.module.kenyaemrml.Item;
-import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+package org.openmrs.module.kenyaemrml.api.db.hibernate;
 
 import java.util.Date;
 import java.util.List;
 
-@Repository("kenyaemrml.MLinKenyaEMRDao")
-public class MLinKenyaEMRDao {
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
+import org.openmrs.Patient;
+import org.openmrs.module.kenyaemrml.api.db.MLinKenyaEMRDao;
+import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
+
+public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 	
-	@Autowired
-	DbSessionFactory sessionFactory;
+	protected final Log log = LogFactory.getLog(this.getClass());
 	
-	private DbSession getSession() {
+	private SessionFactory sessionFactory;
+	
+	public void setSessionFactory(SessionFactory sessionFactory) {
+		this.sessionFactory = sessionFactory;
+	}
+	
+	public SessionFactory getSessionFactory() {
+		return sessionFactory;
+	}
+	
+	private Session getSession() {
 		return sessionFactory.getCurrentSession();
-	}
-	
-	public Item getItemByUuid(String uuid) {
-		return (Item) getSession().createCriteria(Item.class).add(Restrictions.eq("uuid", uuid)).uniqueResult();
-	}
-	
-	public Item saveItem(Item item) {
-		getSession().saveOrUpdate(item);
-		return item;
 	}
 	
 	/**
