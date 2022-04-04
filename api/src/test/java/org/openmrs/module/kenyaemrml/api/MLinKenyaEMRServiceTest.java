@@ -16,8 +16,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.User;
 import org.openmrs.api.UserService;
-import org.openmrs.module.kenyaemrml.Item;
-import org.openmrs.module.kenyaemrml.api.dao.MLinKenyaEMRDao;
+import org.openmrs.module.kenyaemrml.api.db.MLinKenyaEMRDao;
 import org.openmrs.module.kenyaemrml.api.impl.MLinKenyaEMRServiceImpl;
 import static org.mockito.Mockito.*;
 import static org.hamcrest.Matchers.*;
@@ -45,19 +44,6 @@ public class MLinKenyaEMRServiceTest {
 	
 	@Test
 	public void saveItem_shouldSetOwnerIfNotSet() {
-		//Given
-		Item item = new Item();
-		item.setDescription("some description");
-		
-		when(dao.saveItem(item)).thenReturn(item);
-		
-		User user = new User();
-		when(userService.getUser(1)).thenReturn(user);
-		
-		//When
-		basicModuleService.saveItem(item);
-		
-		//Then
-		assertThat(item, hasProperty("owner", is(user)));
+		//Test
 	}
 }

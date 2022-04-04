@@ -9,29 +9,27 @@
  */
 package org.openmrs.module.kenyaemrml.api.impl;
 
-import org.openmrs.Patient;
-import org.openmrs.api.APIException;
-import org.openmrs.api.UserService;
-import org.openmrs.api.impl.BaseOpenmrsService;
-import org.openmrs.module.kenyaemrml.Item;
-import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
-import org.openmrs.module.kenyaemrml.api.dao.MLinKenyaEMRDao;
-import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
-
 import java.util.Date;
 import java.util.List;
 
+import org.openmrs.Patient;
+import org.openmrs.api.UserService;
+import org.openmrs.api.impl.BaseOpenmrsService;
+import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
+import org.openmrs.module.kenyaemrml.api.db.hibernate.HibernateMLinKenyaEMRDao;
+import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
+
 public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinKenyaEMRService {
 	
-	MLinKenyaEMRDao dao;
+	HibernateMLinKenyaEMRDao mLinKenyaEMRDao;
 	
 	UserService userService;
 	
 	/**
 	 * Injected in moduleApplicationContext.xml
 	 */
-	public void setDao(MLinKenyaEMRDao dao) {
-		this.dao = dao;
+	public void setMLinKenyaEMRDao(HibernateMLinKenyaEMRDao mLinKenyaEMRDao) {
+		this.mLinKenyaEMRDao = mLinKenyaEMRDao;
 	}
 	
 	/**
@@ -42,46 +40,32 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 	}
 	
 	@Override
-	public Item getItemByUuid(String uuid) throws APIException {
-		return dao.getItemByUuid(uuid);
-	}
-	
-	@Override
-	public Item saveItem(Item item) throws APIException {
-		if (item.getOwner() == null) {
-			item.setOwner(userService.getUser(1));
-		}
-		
-		return dao.saveItem(item);
-	}
-	
-	@Override
 	public PatientRiskScore saveOrUpdateRiskScore(PatientRiskScore riskScore) {
-		return dao.saveOrUpdateRiskScore(riskScore);
+		return mLinKenyaEMRDao.saveOrUpdateRiskScore(riskScore);
 	}
 	
 	@Override
 	public PatientRiskScore getPatientRiskScoreById(Integer id) {
-		return dao.getPatientRiskScoreById(id);
+		return mLinKenyaEMRDao.getPatientRiskScoreById(id);
 	}
 	
 	@Override
 	public PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient) {
-		return dao.getLatestPatientRiskScoreByPatient(patient);
+		return mLinKenyaEMRDao.getLatestPatientRiskScoreByPatient(patient);
 	}
 	
 	@Override
 	public List<PatientRiskScore> getPatientRiskScoreByPatient(Patient patient) {
-		return dao.getPatientRiskScoreByPatient(patient);
+		return mLinKenyaEMRDao.getPatientRiskScoreByPatient(patient);
 	}
 	
 	@Override
 	public List<PatientRiskScore> getPatientRiskScoreByPatient(Patient patient, Date onOrBefore, Date onOrAfter) {
-		return dao.getPatientRiskScoreByPatient(patient, onOrBefore, onOrAfter);
+		return mLinKenyaEMRDao.getPatientRiskScoreByPatient(patient, onOrBefore, onOrAfter);
 	}
 	
 	@Override
 	public List<PatientRiskScore> getAllPatientRiskScore() {
-		return dao.getAllPatientRiskScore();
+		return mLinKenyaEMRDao.getAllPatientRiskScore();
 	}
 }

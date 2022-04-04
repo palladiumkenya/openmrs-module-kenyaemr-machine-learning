@@ -17,6 +17,7 @@
 		<many-to-one name="creator" class="org.openmrs.User" not-null="true">
 			<column name="creator"/>
 		</many-to-one>
+		<property name="dateCreated" type="java.util.Date" column="date_created" not-null="true" length="19"/>
 		<many-to-one name="changedBy" class="org.openmrs.User" column="changed_by"/>
 		<property name="dateChanged" type="java.util.Date" column="date_changed" length="19"/>
 		<property name="voided" type="java.lang.Boolean" column="voided" length="1"/>

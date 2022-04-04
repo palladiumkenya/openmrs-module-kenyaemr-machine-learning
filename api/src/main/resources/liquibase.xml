@@ -13,7 +13,7 @@
         for a list of supported elements and attributes
     -->
  
-	<changeSet id="kenyaemrml-20220324-2310" author="aojwang">
+	<changeSet id="kenyaemr-ML-table-risk-score-20220324-231000" author="aojwang">
 		<preConditions onFail="MARK_RAN">
 			<not><tableExists tableName="kenyaemr_ml_patient_risk_score"/></not>
 		</preConditions>
@@ -62,7 +62,7 @@
                                  referencedTableName="patient" referencedColumnNames="patient_id"/>
     </changeSet>
 
-    <changeSet author="aojwang" id="kenyaemrml-20220324-2330">
+    <changeSet id="kenyaemr-ML-index-risk-score-20220324-233000" author="aojwang">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="kenyaemr_ml_patient_risk_score"/>
             <not>
@@ -73,6 +73,108 @@
             <column name="evaluation_date"/>
             <column name="patient_id"/>
         </createIndex>
+    </changeSet>
+
+    <!--Adding global variables for IIT ML -->
+    <changeSet id="kenyaemr-ML-backend-url-20220329-212630" author="pwaweru">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM global_property
+                WHERE property = 'kenyaemr.iit.machine.learning.backend.url'
+            </sqlCheck>
+        </preConditions>
+        <comment>Inserting The URL of the data warehouse backend</comment>
+        <insert tableName="global_property">
+            <column name="property" value="kenyaemr.iit.machine.learning.backend.url" />
+            <column name="property_value" value="https://data.kenyahmis.org:9783/api/Dataset" />
+            <column name="description" value="IIT ML - The URL of the data warehouse backend" />
+            <column name="uuid" value="e8f35121-c569-489b-c1d7-6c713fd72198" />
+        </insert>
+    </changeSet>
+
+    <!--Adding global variables for IIT ML -->
+    <changeSet id="kenyaemr-ML-client-id-20220329-213640" author="pwaweru">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM global_property
+                WHERE property = 'kenyaemr.iit.machine.learning.client.id'
+            </sqlCheck>
+        </preConditions>
+        <comment>Inserting The oauth2 client-id of the data warehouse backend</comment>
+        <insert tableName="global_property">
+            <column name="property" value="kenyaemr.iit.machine.learning.client.id" />
+            <column name="property_value" value="test" />
+            <column name="description" value="IIT ML - The oauth2 client-id of the data warehouse backend" />
+            <column name="uuid" value="e8f35121-c569-489b-c1d7-7c713fd72199" />
+        </insert>
+    </changeSet>
+
+    <!--Adding global variables for IIT ML -->
+    <changeSet id="kenyaemr-ML-client-secret-20220329-214650" author="pwaweru">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM global_property
+                WHERE property = 'kenyaemr.iit.machine.learning.client.secret'
+            </sqlCheck>
+        </preConditions>
+        <comment>Inserting The oauth2 client-secret of the data warehouse backend</comment>
+        <insert tableName="global_property">
+            <column name="property" value="kenyaemr.iit.machine.learning.client.secret" />
+            <column name="property_value" value="7f11e148-5741-11ec-bf63-0242ac130002" />
+            <column name="description" value="IIT ML - The oauth2 client-secret of the data warehouse backend" />
+            <column name="uuid" value="e8f35121-c569-489b-c1d7-8c713fd72188" />
+        </insert>
+    </changeSet>
+
+    <!--Adding global variables for IIT ML -->
+    <changeSet id="kenyaemr-ML-auth-scope-20220329-215620" author="pwaweru">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM global_property
+                WHERE property = 'kenyaemr.iit.machine.learning.scope'
+            </sqlCheck>
+        </preConditions>
+        <comment>Inserting The oauth2 scope of the data warehouse backend</comment>
+        <insert tableName="global_property">
+            <column name="property" value="kenyaemr.iit.machine.learning.scope" />
+            <column name="property_value" value="pdapiv1" />
+            <column name="description" value="IIT ML - The oauth2 scope of the data warehouse backend" />
+            <column name="uuid" value="e8f35121-c569-489b-c1d7-9c713fd72155" />
+        </insert>
+    </changeSet>
+
+    <!--Adding global variables for IIT ML -->
+    <changeSet id="kenyaemr-ML-auth-url-20220329-222610" author="pwaweru">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM global_property
+                WHERE property = 'kenyaemr.iit.machine.learning.authorization.url'
+            </sqlCheck>
+        </preConditions>
+        <comment>Inserting The oauth2 authorization_endpoint of the data warehouse backend</comment>
+        <insert tableName="global_property">
+            <column name="property" value="kenyaemr.iit.machine.learning.authorization.url" />
+            <column name="property_value" value="https://auth2.kenyahmis.org:8443/connect/authorize" />
+            <column name="description" value="IIT ML - The oauth2 authorization URL of the data warehouse backend" />
+            <column name="uuid" value="e8f35121-c569-489b-c1d7-dc713fd72144" />
+        </insert>
+    </changeSet>
+
+    <!--Adding global variables for IIT ML -->
+    <changeSet id="kenyaemr-ML-token-url-20220329-223630" author="pwaweru">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM global_property
+                WHERE property = 'kenyaemr.iit.machine.learning.token.url'
+            </sqlCheck>
+        </preConditions>
+        <comment>Inserting The oauth2 token URL of the data warehouse backend</comment>
+        <insert tableName="global_property">
+            <column name="property" value="kenyaemr.iit.machine.learning.token.url" />
+            <column name="property_value" value="https://auth2.kenyahmis.org:8443/connect/token" />
+            <column name="description" value="IIT ML - The oauth2 token URL of the data warehouse backend" />
+            <column name="uuid" value="e8f35121-c669-489b-c1d7-dd713fd72133" />
+        </insert>
     </changeSet>
  
 </databaseChangeLog>

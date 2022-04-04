@@ -1,4 +1,4 @@
-${moduleName}
+KenyaEMR IIT Machine Learning
 ==========================
 
 Description
