@@ -176,20 +176,11 @@ public class MLDataExchange {
 				out.append(line);
 			}
 			String response = out.toString();
-			System.err.println("ITT ML - Total Remote Records JSON: " + response);
 			
 			ObjectMapper mapper = new ObjectMapper();
 			ObjectNode jsonNode = (ObjectNode) mapper.readTree(response);
 			if (jsonNode != null) {
-				long pageNumber = jsonNode.get("pageNumber").getLongValue();
-				long pageSize = jsonNode.get("pageSize").getLongValue();
 				long pageCount = jsonNode.get("pageCount").getLongValue();
-				long totalItemCount = jsonNode.get("totalItemCount").getLongValue();
-				
-				System.err.println("ITT ML - Total Remote Records pageNumber: " + pageNumber);
-				System.err.println("ITT ML - Total Remote Records pageSize: " + pageSize);
-				System.err.println("ITT ML - Total Remote Records pageCount: " + pageCount);
-				System.err.println("ITT ML - Total Remote Records totalItemCount: " + totalItemCount);
 				
 				return (pageCount);
 			} else {
@@ -238,7 +229,6 @@ public class MLDataExchange {
 	private boolean pullAndSave(String bearerToken, long totalRemote) {
 		
 		long totalPages = (long) (Math.ceil((totalRemote * 1.0) / (recordsPerPull * 1.0)));
-		System.err.println("ITT ML - Calculated Total Pages: " + totalPages);
 		
 		long currentPage = 1;
 		for (int i = 0; i < totalPages; i++) {
@@ -250,7 +240,6 @@ public class MLDataExchange {
 			try {
 				String fullURL = strDWHbackEndURL + "?code=FND&name=predictions&pageNumber=" + currentPage + "&pageSize="
 				        + recordsPerPull + "&siteCode=" + strFacilityCode;
-				System.err.println("ITT ML - Full URL: " + fullURL + " and page: " + currentPage);
 				URL url = new URL(fullURL);
 				connection = (HttpsURLConnection) url.openConnection();
 				connection.setRequestProperty("Authorization", "Bearer " + bearerToken);
@@ -263,20 +252,10 @@ public class MLDataExchange {
 					out.append(line);
 				}
 				String response = out.toString();
-				System.err.println("ITT ML - Total Remote Records JSON: " + response);
 				
 				ObjectMapper mapper = new ObjectMapper();
 				ObjectNode jsonNode = (ObjectNode) mapper.readTree(response);
 				if (jsonNode != null) {
-					long pageNumber = jsonNode.get("pageNumber").getLongValue();
-					long pageSize = jsonNode.get("pageSize").getLongValue();
-					long pageCount = jsonNode.get("pageCount").getLongValue();
-					long totalItemCount = jsonNode.get("totalItemCount").getLongValue();
-					
-					System.err.println("ITT ML - Total Remote Records pageNumber: " + pageNumber);
-					System.err.println("ITT ML - Total Remote Records pageSize: " + pageSize);
-					System.err.println("ITT ML - Total Remote Records pageCount: " + pageCount);
-					System.err.println("ITT ML - Total Remote Records totalItemCount: " + totalItemCount);
 					
 					JsonNode extract = jsonNode.get("extract");
 					if (extract.isArray() && extract.size() > 0) {
@@ -288,10 +267,6 @@ public class MLDataExchange {
 								String riskScore = person.get("risk_score").asText();
 								String uuid = person.get("id").asText();
 								String patientId = person.get("PatientPID").asText();
-								
-								System.err.println("ITT ML - Risk Score: " + riskScore);
-								System.err.println("ITT ML - UUID: " + uuid);
-								System.err.println("ITT ML - PatientID: " + patientId);
 								
 								Patient patient = patientService.getPatient(Integer.valueOf(patientId));
 								PatientRiskScore patientRiskScore = new PatientRiskScore();
@@ -343,7 +318,6 @@ public class MLDataExchange {
 				}
 			}
 			try {
-				System.err.println("ITT ML - Going to sleep for 1 seconds");
 				Thread.sleep(1000);
 			}
 			catch (Exception ie) {
@@ -367,20 +341,17 @@ public class MLDataExchange {
 			String credentials = getClientCredentials();
 			//Get the data
 			if (credentials != null) {
-				System.err.println("ITT ML - Received a Token: " + credentials);
 				//get total count by fetching only one record from remote
 				long totalRemote = getTotalRecordsOnRemote(credentials);
-				System.err.println("ITT ML - Total Remote Records: " + totalRemote);
+				System.out.println("ITT ML - Total Remote Records: " + totalRemote);
 				if (totalRemote > 0) {
 					//We have remote records - get local total records
 					long totalLocal = getTotalRecordsOnLocal();
-					System.err.println("ITT ML - Total Local Records: " + totalLocal);
+					System.out.println("ITT ML - Total Local Records: " + totalLocal);
 					//if remote records are greater than local, we pull
 					if (totalRemote > totalLocal) {
 						//We now pull and save
 						pullAndSave(credentials, totalRemote);
-						// pullThread pt = new pullThread(credentials, totalRemote);
-						// pt.start();
 					} else {
 						System.err.println("ITT ML - Records are already in sync");
 						return (false);
@@ -406,12 +377,10 @@ public class MLDataExchange {
 	 * @return false if pulling should be stopped and true if pull should continue
 	 */
 	public boolean getContinuePullingData() {
-		//User user = Context.getUserService().getUser(Context.getUserContext().getAuthenticatedUser().getId());
 		User user = Context.getUserContext().getAuthenticatedUser();
 		if (user != null) {
 			String stopIITMLPull = user.getUserProperty("stopIITMLPull");
 			if (stopIITMLPull != null) {
-				System.err.println("ITT ML - got the stop pull var as: " + stopIITMLPull);
 				stopIITMLPull = stopIITMLPull.trim();
 				if (stopIITMLPull.equalsIgnoreCase("0")) {
 					return (true);
@@ -429,19 +398,4 @@ public class MLDataExchange {
 		return (true);
 	}
 	
-	class pullThread extends Thread {
-		
-		String token = "";
-		
-		long total = 0;
-		
-		public pullThread(String token, long total) {
-			this.token = token;
-			this.total = total;
-		}
-		
-		public void run() {
-			pullAndSave(token, total);
-		}
-	}
 }

@@ -65,14 +65,7 @@ public class IitRiskScoreHistoryFragmentController {
 
 		MLDataExchange mlDataExchange = new MLDataExchange();
 		boolean gotData = mlDataExchange.fetchDataFromDWH();
-		try {
-			System.err.println("kenyaemr ML - Going to sleep for 10 seconds");
-			Thread.sleep(10000);
-		}
-		catch (Exception ie) {
-			Thread.currentThread().interrupt();
-		}
-		System.err.println("kenyaemr ML - Finished the wait");
+
 		return (gotData);
 	}
 
@@ -82,8 +75,6 @@ public class IitRiskScoreHistoryFragmentController {
 	 */
 	@AppAction("kenyaemrml.predictions")
 	public void stopDataPull(@SpringBean KenyaUiUtils kenyaUi, UiUtils ui) {
-		//Stop pulling data
-		System.err.println("IIT ML - Stop Fetching Data");
 		User user = Context.getUserContext().getAuthenticatedUser();
 		if(user != null) {
 			user.setUserProperty("stopIITMLPull", "1");
@@ -97,7 +88,6 @@ public class IitRiskScoreHistoryFragmentController {
 	 */
 	@AppAction("kenyaemrml.predictions")
 	public SimpleObject fetchLocalSummary(@SpringBean KenyaUiUtils kenyaUi, UiUtils ui) {
-		System.err.println("IIT ML - Fetching local summary");
 		String strRiskThreshold = "kenyaemrml.palantir.high.iit.risk.threshold";
 		GlobalProperty globalRiskThreshold = Context.getAdministrationService().getGlobalPropertyObject(strRiskThreshold);
 		String riskThreshold = globalRiskThreshold.getPropertyValue();

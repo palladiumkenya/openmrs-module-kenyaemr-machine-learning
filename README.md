@@ -1,4 +1,4 @@
-KenyaEMR IIT Machine Learning
+KenyaEMR Machine Learning
 ==========================
 
 Description
