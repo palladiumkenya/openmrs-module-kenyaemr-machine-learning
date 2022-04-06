@@ -27,7 +27,6 @@ import java.util.Comparator;
 public class DataManagementPageController {
 	
 	public void get(@SpringBean KenyaUiUtils kenyaUi, UiUtils ui, PageModel model) {
-		System.err.println("IIT ML - Getting Risk Scores");
 		String strRiskThreshold = "kenyaemrml.palantir.high.iit.risk.threshold";
 		GlobalProperty globalRiskThreshold = Context.getAdministrationService().getGlobalPropertyObject(strRiskThreshold);
 		String riskThreshold = globalRiskThreshold.getPropertyValue();
