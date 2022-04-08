@@ -8,6 +8,7 @@ import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Base64;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -274,6 +275,7 @@ public class MLDataExchange {
 								patientRiskScore.setRiskScore(Double.valueOf(riskScore));
 								patientRiskScore.setSourceSystemUuid(uuid);
 								patientRiskScore.setPatient(patient);
+								patientRiskScore.setEvaluationDate(new Date()); //TODO: This should be pulled from the NDWH
 								
 								mLinKenyaEMRService.saveOrUpdateRiskScore(patientRiskScore);
 							}
