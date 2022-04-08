@@ -77,7 +77,7 @@
             },
             yAxis: {
                 title: {
-                    text: 'IIT Risk score'
+                    text: 'Risk score (%)'
                 }
             },
             legend: {
