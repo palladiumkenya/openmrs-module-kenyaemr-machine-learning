@@ -1,5 +1,21 @@
 package org.openmrs.module.kenyaemrml.util;
 
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.ObjectNode;
+import org.openmrs.GlobalProperty;
+import org.openmrs.Patient;
+import org.openmrs.User;
+import org.openmrs.api.PatientService;
+import org.openmrs.api.PersonService;
+import org.openmrs.api.context.Context;
+import org.openmrs.api.db.hibernate.DbSessionFactory;
+import org.openmrs.module.kenyaemr.api.KenyaEmrService;
+import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
+import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
+import org.openmrs.util.PrivilegeConstants;
+
+import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,22 +27,6 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.net.ssl.HttpsURLConnection;
-
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ObjectNode;
-import org.openmrs.GlobalProperty;
-import org.openmrs.Patient;
-import org.openmrs.User;
-import org.openmrs.api.PatientService;
-import org.openmrs.api.PersonService;
-import org.openmrs.api.context.Context;
-import org.openmrs.api.db.hibernate.DbSessionFactory;
-import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
-import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
-import org.openmrs.util.PrivilegeConstants;
 
 public class MLDataExchange {
 	
@@ -85,9 +85,10 @@ public class MLDataExchange {
 		GlobalProperty globalAuthURL = Context.getAdministrationService().getGlobalPropertyObject(authURL);
 		strAuthURL = globalAuthURL.getPropertyValue();
 		
-		String facilityCode = "facility.mflcode";
-		GlobalProperty globalFacilityCode = Context.getAdministrationService().getGlobalPropertyObject(facilityCode);
-		strFacilityCode = globalFacilityCode.getPropertyValue();
+		KenyaEmrService emrService = Context.getService(KenyaEmrService.class);
+		emrService.getDefaultLocationMflCode();
+		strFacilityCode = emrService.getDefaultLocationMflCode();
+		;
 		
 		if (strDWHbackEndURL == null || strTokenUrl == null || strScope == null || strClientSecret == null
 		        || strClientId == null || strAuthURL == null) {
