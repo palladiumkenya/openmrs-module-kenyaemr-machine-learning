@@ -3,6 +3,9 @@
     def menuItems = [
             [label: "Back", iconProvider: "kenyaui", icon: "buttons/back.png", label: "Back to IIT home", href: ui.pageLink("kenyaemrml", "mlRiskScoreHome")]
     ]
+
+    ui.includeJavascript("kenyaemrml", "bootstrap/bootstrap.bundle.min.js")
+    ui.includeCss("kenyaemrml", "bootstrap/bootstrap-iso.css")
 %>
 <style>
 .simple-table {
@@ -60,9 +63,13 @@ tr:nth-child(even) {background-color: #f2f2f2;}
     justify-content: flex-start; 
     align-items: flex-start;
 }
+.prog-bar {
+    width: 500px;
+}
 .wait-loading {
     margin-right: 5px;
     margin-left: 5px;
+    display: none;
 }
 #fetchRiskScores {
     margin-right: 5px;
@@ -118,16 +125,22 @@ tr:nth-child(even) {background-color: #f2f2f2;}
     <div>
         <fieldset>
             <legend>Fetch IIT risk scores from Data Warehouse (NDWH)</legend>
-
             <br/>
             <div id="message"><span id="lblText" style="color: Red; top: 50px;"></span></div>
-            <br/>
-            <br/>
             <br/>
             <div class="alignHorizontal">
                 <button id="updateSummary">Update Summary</button>
                 <button id="fetchRiskScores">Pull Patient scores</button>
-                <div class="wait-loading"></div>
+                <div class="bootstrap-iso">
+                    <div class="wait-loading prog-bar">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                                <span class="prog-percentage"></span>
+                            </div>
+                        </div>
+                        <div class="prog-status"></div>
+                    </div>
+                </div>
                 <button id="stopPull">Stop the pull</button>
             </div>
         </fieldset>
@@ -140,7 +153,8 @@ tr:nth-child(even) {background-color: #f2f2f2;}
     jq(function() {
 
         var loadingImageURL = ui.resourceLink("kenyaemrml", "images/loading.gif");
-        var showLoadingImage = '<span style="padding:2px; display:inline-block;"> <img src="' + loadingImageURL + '" /> </span>';
+        var isPullingData = false;
+        //var showLoadingImage = '<span style="padding:2px; display:inline-block;"> <img src="' + loadingImageURL + '" /> </span>';
 
         //show message
         function display_message(msg) {
@@ -148,11 +162,14 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             jq('#message').fadeIn('slow').delay(3000).fadeOut('slow');
         }
 
+        // display or hide the data pull progress indicator
         function display_loading(status) {
             if(status) {
-                jq('.wait-loading').append(showLoadingImage);
+                //jq('.wait-loading').append(showLoadingImage);
+                jq('.wait-loading').show();
             } else {
-                jq('.wait-loading').empty();
+                //jq('.wait-loading').empty();
+                jq('.wait-loading').hide();
             }
         }
 
@@ -189,11 +206,16 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 jq('#fetchRiskScores').attr('disabled', false);
                 jq('#stopPull').hide();
                 updateSummaryTable();
+                isPullingData = false;
             });
+
+            fetchStatus();
         });
 
-        function fetchDataAsync(){
+        // fetch the data from DWH asynchronously
+        function fetchDataAsync() {
             let dfrd = jq.Deferred();
+            isPullingData = true;
             //The Task
             ui.getFragmentActionAsJson('kenyaemrml', 'iitRiskScoreHistory', 'fetchDataFromDWH', {}, function (result) {
                 if(result) {
@@ -209,6 +231,47 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             }).promise();
         }
 
+        // Check the status of the data pull
+        function fetchStatus() {
+            console.log('Checking fetch status!');
+            getFetchStatusAsync().done(function(){
+                if(isPullingData) {
+                    setTimeout(function() {
+                        fetchStatus();
+                    },3000);
+                }
+            });
+        }
+
+        // fetch the status of data pull asynchronously
+        function getFetchStatusAsync() {
+            let dfrd = jq.Deferred();
+            //The Task
+            ui.getFragmentActionAsJson('kenyaemrml', 'iitRiskScoreHistory', 'getStatusOfDataPull', {}, function (result) {
+                if(result) {
+                    //console.log('Success fetching pull status!');
+                    let statusDone = result.done;
+                    let statusTotal = result.total;
+                    let statusPercent = result.percent;
+                    //console.log('Got done as: ' + statusDone);
+                    //console.log('Got total as: ' + statusTotal);
+                    //console.log('Got percent as: ' + statusPercent);
+                    //jq(".progress-value").html(statusPercent + "%");
+                    jq(".progress-bar").attr('aria-valuenow', statusPercent).css('width', statusPercent+'%');
+                    jq(".prog-status").html(statusDone + "/" + statusTotal);
+                    jq(".prog-percentage").html(statusPercent+'%');
+                } else {
+                    console.log('Failed to fetch pull status!');
+                }
+                dfrd.resolve();
+            });
+
+            return jq.when(dfrd).done(function(){
+                console.log('Finished the fetch status check!');
+            }).promise();
+        }
+
+        // update the summary table
         function updateSummaryTable() {
             ui.getFragmentActionAsJson('kenyaemrml', 'iitRiskScoreHistory', 'fetchLocalSummary', {}, function (result) {
                 if(result) {

@@ -88,7 +88,6 @@ public class MLDataExchange {
 		KenyaEmrService emrService = Context.getService(KenyaEmrService.class);
 		emrService.getDefaultLocationMflCode();
 		strFacilityCode = emrService.getDefaultLocationMflCode();
-		;
 		
 		if (strDWHbackEndURL == null || strTokenUrl == null || strScope == null || strClientSecret == null
 		        || strClientId == null || strAuthURL == null) {
@@ -327,6 +326,8 @@ public class MLDataExchange {
 				Thread.currentThread().interrupt();
 			}
 			currentPage++;
+			// setDataPullStatus(currentPage, totalPages);
+			setDataPullStatus((long)Math.floor(((currentPage * 1.00 / totalPages * 1.00) * totalRemote)), totalRemote);
 		}
 		return (true);
 	}
@@ -399,6 +400,24 @@ public class MLDataExchange {
 			return (false);
 		}
 		return (true);
+	}
+	
+	/**
+	 * sets the status of data pull so that it is accessible to the user
+	 * 
+	 * @param done number of records done
+	 * @param total the total number of records
+	 */
+	public void setDataPullStatus(long done, long total) {
+		User user = Context.getUserContext().getAuthenticatedUser();
+		if (user != null) {
+			user.setUserProperty("IITMLPullDone", String.valueOf(done));
+			user.setUserProperty("IITMLPullTotal", String.valueOf(total));
+			System.err.println("ITT ML - setting user properties: Done" + done + " and Total: " + total);
+		} else {
+			//User has logged out, stop pulling
+			System.err.println("ITT ML - User has logged out, unable to set pull status");
+		}
 	}
 	
 }
