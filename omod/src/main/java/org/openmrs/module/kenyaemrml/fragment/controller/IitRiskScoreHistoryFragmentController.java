@@ -81,6 +81,34 @@ public class IitRiskScoreHistoryFragmentController {
 			user.setUserProperty("stopIITMLPull", "1");
 		}
 	}
+
+	/**
+	 * Get current status of Fetching data from Data Warehouse
+	 * 
+	 */
+	@AppAction("kenyaemrml.predictions")
+	public SimpleObject getStatusOfDataPull(@SpringBean KenyaUiUtils kenyaUi, UiUtils ui) {
+		User user = Context.getUserContext().getAuthenticatedUser();
+		SimpleObject summary = new SimpleObject();
+		if(user != null) {
+			long done = 0;
+			long total = 0;
+			String strDone = user.getUserProperty("IITMLPullDone");
+			String strTotal = user.getUserProperty("IITMLPullTotal");
+			try {
+				done = Long.parseLong(strDone);
+				total = Long.parseLong(strTotal);
+			} catch(Exception ex) {}
+			double percent = 0.00;
+			if(total > 0.00 && done > 0.00) {
+				percent = ((done * 1.00/total * 1.00) * 100.0);
+			}
+			summary.put("done", done);
+			summary.put("total", total);
+			summary.put("percent", (int)Math.floor(percent));
+		}
+		return(summary);
+	}
 	
 	/**
 	 * Fetch local summary
