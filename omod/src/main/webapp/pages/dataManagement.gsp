@@ -154,7 +154,6 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 
         var loadingImageURL = ui.resourceLink("kenyaemrml", "images/loading.gif");
         var isPullingData = false;
-        //var showLoadingImage = '<span style="padding:2px; display:inline-block;"> <img src="' + loadingImageURL + '" /> </span>';
 
         //show message
         function display_message(msg) {
@@ -165,10 +164,8 @@ tr:nth-child(even) {background-color: #f2f2f2;}
         // display or hide the data pull progress indicator
         function display_loading(status) {
             if(status) {
-                //jq('.wait-loading').append(showLoadingImage);
                 jq('.wait-loading').show();
             } else {
-                //jq('.wait-loading').empty();
                 jq('.wait-loading').hide();
             }
         }
@@ -233,7 +230,6 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 
         // Check the status of the data pull
         function fetchStatus() {
-            console.log('Checking fetch status!');
             getFetchStatusAsync().done(function(){
                 if(isPullingData) {
                     setTimeout(function() {
@@ -249,14 +245,9 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             //The Task
             ui.getFragmentActionAsJson('kenyaemrml', 'iitRiskScoreHistory', 'getStatusOfDataPull', {}, function (result) {
                 if(result) {
-                    //console.log('Success fetching pull status!');
                     let statusDone = result.done;
                     let statusTotal = result.total;
                     let statusPercent = result.percent;
-                    //console.log('Got done as: ' + statusDone);
-                    //console.log('Got total as: ' + statusTotal);
-                    //console.log('Got percent as: ' + statusPercent);
-                    //jq(".progress-value").html(statusPercent + "%");
                     jq(".progress-bar").attr('aria-valuenow', statusPercent).css('width', statusPercent+'%');
                     jq(".prog-status").html(statusDone + "/" + statusTotal);
                     jq(".prog-percentage").html(statusPercent+'%');

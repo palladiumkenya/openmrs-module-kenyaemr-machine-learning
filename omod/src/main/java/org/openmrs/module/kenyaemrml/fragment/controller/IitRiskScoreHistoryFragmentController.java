@@ -106,7 +106,6 @@ public class IitRiskScoreHistoryFragmentController {
 			summary.put("done", done);
 			summary.put("total", total);
 			summary.put("percent", (int)Math.floor(percent));
-			//System.out.println("ITT ML - Got the pull status as: " + summary);
 		}
 		return(summary);
 	}

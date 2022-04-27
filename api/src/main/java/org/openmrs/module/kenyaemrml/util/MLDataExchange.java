@@ -413,7 +413,6 @@ public class MLDataExchange {
 		if (user != null) {
 			user.setUserProperty("IITMLPullDone", String.valueOf(done));
 			user.setUserProperty("IITMLPullTotal", String.valueOf(total));
-			System.err.println("ITT ML - setting user properties: Done" + done + " and Total: " + total);
 		} else {
 			//User has logged out, stop pulling
 			System.err.println("ITT ML - User has logged out, unable to set pull status");
