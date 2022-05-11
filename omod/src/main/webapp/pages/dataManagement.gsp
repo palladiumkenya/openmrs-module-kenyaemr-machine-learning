@@ -202,7 +202,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 display_loading(false);
                 jq('#fetchRiskScores').attr('disabled', false);
                 jq('#stopPull').hide();
-                updateSummaryTable();
+                updateSummaryTable(false);
                 isPullingData = false;
             });
 
@@ -251,6 +251,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     jq(".progress-bar").attr('aria-valuenow', statusPercent).css('width', statusPercent+'%');
                     jq(".prog-status").html(statusDone + "/" + statusTotal);
                     jq(".prog-percentage").html(statusPercent+'%');
+                    updateSummaryTable(false);
                 } else {
                     console.log('Failed to fetch pull status!');
                 }
@@ -263,17 +264,18 @@ tr:nth-child(even) {background-color: #f2f2f2;}
         }
 
         // update the summary table
-        function updateSummaryTable() {
+        function updateSummaryTable(notify) {
+            notify = typeof notify !== "undefined" ? notify : true;
             ui.getFragmentActionAsJson('kenyaemrml', 'iitRiskScoreHistory', 'fetchLocalSummary', {}, function (result) {
                 if(result) {
-                    display_message('Success fetching summary!');
+                    if(notify) display_message('Success fetching summary!');
                     console.log('Success fetching summary!');
                     jq("#strTotalCount").html(result.totalCount);
                     jq("#strHighRiskCount").html(result.highRiskCount);
                     jq("#strLowRiskCount").html(result.lowRiskCount);
                     jq("#strRiskThreshhold").html(result.riskThreshhold);
                 } else {
-                    display_message('Failed to fetch summary!');
+                    if(notify) display_message('Failed to fetch summary!');
                     console.log('Failed to fetch summary!');
                 }
             });
