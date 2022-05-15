@@ -27,32 +27,65 @@
 
     <!-- Wraps MLinKenyaEMRService methods in DB transactions and OpenMRS interceptors,
     which set audit info like dateCreated, changedBy, etc.-->
-    <bean id="kenyaemrml.MLinKenyaEMRService"
-            class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-        <property name="transactionManager">
-            <ref bean="transactionManager" />
-        </property>
-        <property name="target">
-            <bean class="org.openmrs.module.kenyaemrml.api.impl.MLinKenyaEMRServiceImpl">
-                <property name="dao" ref="kenyaemrml.MLinKenyaEMRDao" />
-            </bean>
-        </property>
-        <property name="preInterceptors">
-            <ref bean="serviceInterceptors" />
-        </property>
-        <property name="transactionAttributeSource">
-            <ref bean="transactionAttributeSource" />
-        </property>
-    </bean>
 
     <!-- Adds MLinKenyaEMRService to OpenMRS context so it can be accessed
     calling Context.getService(MLinKenyaEMRService.class) -->
+
     <bean parent="serviceContext">
         <property name="moduleService">
             <list>
                 <value>org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService</value>
-                <ref bean="kenyaemrml.MLinKenyaEMRService" />
+                <bean
+                        class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+                    <property name="transactionManager">
+                        <ref bean="transactionManager" />
+                    </property>
+                    <property name="target">
+                        <bean class="org.openmrs.module.kenyaemrml.api.impl.MLinKenyaEMRServiceImpl">
+                            <property name="mLinKenyaEMRDao">
+                                <bean class="org.openmrs.module.kenyaemrml.api.db.hibernate.HibernateMLinKenyaEMRDao">
+                                    <property name="sessionFactory">
+                                        <ref bean="sessionFactory" />
+                                    </property>
+                                </bean>
+                            </property>
+                        </bean>
+                    </property>
+                    <property name="preInterceptors">
+                        <ref bean="serviceInterceptors" />
+                    </property>
+                    <property name="transactionAttributeSource">
+                        <ref bean="transactionAttributeSource" />
+                    </property>
+                </bean>
             </list>
         </property>
+    </bean>
+    
+
+    <!--App descriptor-->
+    <bean id="kenyaemrml.app.predictions" factory-bean="kenyacore.appFactoryBean" factory-method="createInstance">
+        <constructor-arg value="kenyaemrml.predictions" />
+        <constructor-arg value="Machine Learning" />
+        <constructor-arg value="kenyaemrml/mlRiskScoreHome.page" />
+        <constructor-arg value="kenyaemrml:machine_learning_app_icon.png" />
+        <constructor-arg value="999999" />
+    </bean>
+
+    <!--Reports-->
+    <bean id="kenyaemrml.config.report" class="org.openmrs.module.kenyacore.report.ReportConfiguration">
+        <property name="commonReports">
+            <set>
+                <ref bean="kenyaemrml.hiv.report.highIIT" />
+            </set>
+        </property>
+    </bean>
+
+    <bean id="kenyaemrml.hiv.report.highIIT" class="org.openmrs.module.kenyacore.report.CalculationReportDescriptor">
+        <property name="targetUuid" value="01be2a6e-3938-46bf-875d-bba11b420eb6" />
+        <property name="name" value="IIT high risk" />
+        <property name="description" value="Patients with IIT high risk" />
+        <property name="calculation" value="org.openmrs.module.kenyaemrml.calculation.HighIITRiskScoreCalculation" />
+        <property name="apps"><set><ref bean="kenyaemr.app.reports" /></set></property>
     </bean>
 </beans>

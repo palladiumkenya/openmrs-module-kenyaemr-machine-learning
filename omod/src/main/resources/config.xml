@@ -64,6 +64,14 @@
 			Defines whether the ML based case finding feature is enabled in the HTS forms
 		</description>
 	</globalProperty>
+
+	<globalProperty>
+		<property>kenyaemrml.palantir.high.iit.risk.threshold</property>
+		<defaultValue>0.40</defaultValue>
+		<description>
+			Palantir's threshold for high IIT score. Any patient with values equal or greater will be flagged as high risk
+		</description>
+	</globalProperty>
 	<!--
 	<dwr>
 		<allow>
@@ -107,6 +115,10 @@
 		<file>messages_es.properties</file>
 	</messages>
 	<!-- /Internationalization -->
-	
+
+	<!--Mapping files-->
+	<mappingFiles>
+		PatientRiskScore.hbm.xml
+	</mappingFiles>
 </module>
 

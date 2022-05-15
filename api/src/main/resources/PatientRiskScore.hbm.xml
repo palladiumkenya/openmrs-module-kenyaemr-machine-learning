@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd" >
+
+<hibernate-mapping package="org.openmrs.module.kenyaemrml">
+	<class name="org.openmrs.module.kenyaemrml.iit.PatientRiskScore"
+		table="kenyaemr_ml_patient_risk_score">
+		<id name="id" type="int" column="id" unsaved-value="0">
+			<generator class="native" />
+		</id>
+		<discriminator column="id" insert="false" />
+		<property name="sourceSystemUuid" type="java.lang.String" column="source_system_uuid" length="38" unique="true" />
+		<property name="riskScore" type="java.lang.Double" column ="risk_score" length="19"/>
+		<many-to-one name="patient" class="org.openmrs.Patient" column ="patient_id"/>
+		<property name="evaluationDate" type = "java.util.Date" column ="evaluation_date"/>
+		<many-to-one name="creator" class="org.openmrs.User" not-null="true">
+			<column name="creator"/>
+		</many-to-one>
+		<property name="dateCreated" type="java.util.Date" column="date_created" not-null="true" length="19"/>
+		<many-to-one name="changedBy" class="org.openmrs.User" column="changed_by"/>
+		<property name="dateChanged" type="java.util.Date" column="date_changed" length="19"/>
+		<property name="voided" type="java.lang.Boolean" column="voided" length="1"/>
+		<many-to-one name="voidedBy" class ="org.openmrs.User" column="voided_by"/>
+		<property name="dateVoided" type ="java.util.Date" column ="date_voided" length="19"/>
+		<property name="voidReason" type="java.lang.String" column="voided_reason" length="255"/>
+	</class>
+</hibernate-mapping>

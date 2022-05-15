@@ -1,4 +1,4 @@
-${moduleName}
+KenyaEMR Machine Learning
 ==========================
 
 Description
