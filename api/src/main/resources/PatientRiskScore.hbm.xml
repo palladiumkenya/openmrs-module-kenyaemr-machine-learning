@@ -14,6 +14,8 @@
 		<property name="riskScore" type="java.lang.Double" column ="risk_score" length="19"/>
 		<many-to-one name="patient" class="org.openmrs.Patient" column ="patient_id"/>
 		<property name="evaluationDate" type = "java.util.Date" column ="evaluation_date"/>
+		<property name="description" type = "java.lang.String" column ="description"/>
+		<property name="riskFactors" type = "java.lang.String" column ="risk_factors"/>
 		<many-to-one name="creator" class="org.openmrs.User" not-null="true">
 			<column name="creator"/>
 		</many-to-one>

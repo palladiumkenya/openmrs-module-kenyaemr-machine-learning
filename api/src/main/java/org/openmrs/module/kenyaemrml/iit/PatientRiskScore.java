@@ -40,6 +40,10 @@ public class PatientRiskScore extends BaseOpenmrsData implements Serializable {
 	private Double riskScore;
 	
 	private Date evaluationDate;
+
+	private String description;
+
+	private String riskFactors;
 	
 	@Override
 	public Integer getId() {
@@ -83,6 +87,22 @@ public class PatientRiskScore extends BaseOpenmrsData implements Serializable {
 		this.evaluationDate = evaluationDate;
 	}
 	
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getRiskFactors() {
+		return riskFactors;
+	}
+
+	public void setRiskFactors(String riskFactors) {
+		this.riskFactors = riskFactors;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
