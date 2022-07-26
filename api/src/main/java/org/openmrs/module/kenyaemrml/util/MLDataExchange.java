@@ -284,7 +284,7 @@ public class MLDataExchange {
 								} catch(Exception ex) {}
 								try {
 									String evalDate = person.get("evaluationDate").asText();
-									SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
+									SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
 									evaluationDate = formatter.parse(evalDate);
 								} catch(Exception ex) {}
 								
