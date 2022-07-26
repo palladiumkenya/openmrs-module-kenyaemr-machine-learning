@@ -176,5 +176,41 @@
             <column name="uuid" value="e8f35121-c669-489b-c1d7-dd713fd72133" />
         </insert>
     </changeSet>
+
+    <!-- Add description field to the ML table -->
+    <changeSet author="pwaweru" id="kenyaemr-ML-description-field-20220726-123630"> 
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_ml_patient_risk_score"/>
+            <not>
+                <columnExists columnName="description" tableName="kenyaemr_ml_patient_risk_score"/>
+            </not>
+        </preConditions>
+        <comment>Adding description column</comment>
+        <addColumn tableName="kenyaemr_ml_patient_risk_score" >
+            <column name="description"  
+                type="varchar(2048)" >  
+                <constraints nullable="true" />  
+            </column>  
+        </addColumn>  
+    </changeSet>
+
+    <!-- Add risk_factors field to the ML table -->
+    <changeSet author="pwaweru" id="kenyaemr-ML-riskfactors-field-20220726-123630"> 
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_ml_patient_risk_score"/>
+            <not>
+                <columnExists columnName="risk_factors" tableName="kenyaemr_ml_patient_risk_score"/>
+            </not>
+        </preConditions>
+        <comment>Adding risk factors column</comment>
+        <addColumn tableName="kenyaemr_ml_patient_risk_score" >
+            <column name="risk_factors"  
+                type="varchar(4096)" >  
+                <constraints nullable="true" />  
+            </column>  
+        </addColumn>  
+    </changeSet>
+
+
  
 </databaseChangeLog>
