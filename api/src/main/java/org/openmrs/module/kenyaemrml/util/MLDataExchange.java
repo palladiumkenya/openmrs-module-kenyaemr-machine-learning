@@ -23,8 +23,10 @@ import java.io.PrintStream;
 import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -268,6 +270,23 @@ public class MLDataExchange {
 								String riskScore = person.get("risk_score").asText();
 								String uuid = person.get("id").asText();
 								String patientId = person.get("PatientPID").asText();
+
+								//Get the description and riskFactors from payload -- optional
+								String description = "";
+								String riskFactors = "";
+								Date evaluationDate = new Date();
+
+								try {
+									description = person.get("description").asText();
+								} catch(Exception ex) {}
+								try {
+									riskFactors = person.get("riskFactors").asText();
+								} catch(Exception ex) {}
+								try {
+									String evalDate = person.get("evaluationDate").asText();
+									SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
+									evaluationDate = formatter.parse(evalDate);
+								} catch(Exception ex) {}
 								
 								Patient patient = patientService.getPatient(Integer.valueOf(patientId));
 								PatientRiskScore patientRiskScore = new PatientRiskScore();
@@ -275,7 +294,10 @@ public class MLDataExchange {
 								patientRiskScore.setRiskScore(Double.valueOf(riskScore));
 								patientRiskScore.setSourceSystemUuid(uuid);
 								patientRiskScore.setPatient(patient);
-								patientRiskScore.setEvaluationDate(new Date()); //TODO: This should be pulled from the NDWH
+
+								patientRiskScore.setDescription(description);
+								patientRiskScore.setRiskFactors(riskFactors);
+								patientRiskScore.setEvaluationDate(evaluationDate);
 								
 								mLinKenyaEMRService.saveOrUpdateRiskScore(patientRiskScore);
 							}
