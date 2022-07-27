@@ -262,14 +262,14 @@ public class MLDataExchange {
 					
 					JsonNode extract = jsonNode.get("extract");
 					if (extract.isArray() && extract.size() > 0) {
-						for (JsonNode person : extract) {
+						for (JsonNode personObject : extract) {
 							if (!getContinuePullingData()) {
 								return (false);
 							}
 							try {
-								String riskScore = person.get("risk_score").asText();
-								String uuid = person.get("id").asText();
-								String patientId = person.get("PatientPID").asText();
+								String riskScore = personObject.get("risk_score").asText();
+								String uuid = personObject.get("id").asText();
+								String patientId = personObject.get("PatientPID").asText();
 
 								//Get the description and riskFactors from payload -- optional
 								String description = "";
@@ -277,13 +277,13 @@ public class MLDataExchange {
 								Date evaluationDate = new Date();
 
 								try {
-									description = person.get("description").asText();
+									description = personObject.get("description").asText();
 								} catch(Exception ex) {}
 								try {
-									riskFactors = person.get("riskFactors").asText();
+									riskFactors = personObject.get("riskFactors").asText();
 								} catch(Exception ex) {}
 								try {
-									String evalDate = person.get("evaluationDate").asText();
+									String evalDate = personObject.get("evaluationDate").asText();
 									SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
 									evaluationDate = formatter.parse(evalDate);
 								} catch(Exception ex) {}
