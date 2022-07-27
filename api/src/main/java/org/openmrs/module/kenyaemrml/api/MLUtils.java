@@ -221,7 +221,7 @@ public class MLUtils {
 	 * @return
 	 */
 	public static String readBundledHtsCasefindingFacilityProfileFile() {
-		InputStream stream = MLUtils.class.getClassLoader().getResourceAsStream("hts_ml_facility_cut_off_updated.json");
+		InputStream stream = MLUtils.class.getClassLoader().getResourceAsStream("hts_ml_facility_cut_off_national.json");
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			ArrayNode result = mapper.readValue(stream, ArrayNode.class);
@@ -279,6 +279,11 @@ public class MLUtils {
 	public static Location getDefaultLocation() {
 		KenyaEmrService emrService = Context.getService(KenyaEmrService.class);
 		return emrService.getDefaultLocation();
+	}
+
+	public static String getDefaultMflCode() {
+		KenyaEmrService emrService = Context.getService(KenyaEmrService.class);
+		return emrService.getDefaultLocationMflCode();
 	}
 	
 }
