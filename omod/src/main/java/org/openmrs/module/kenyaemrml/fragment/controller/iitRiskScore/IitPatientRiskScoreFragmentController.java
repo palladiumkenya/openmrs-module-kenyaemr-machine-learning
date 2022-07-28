@@ -31,8 +31,8 @@ public class IitPatientRiskScoreFragmentController {
     public void controller(@RequestParam("patientId") Patient patient, PageModel model, UiUtils ui) {
         //Pick latest Patient risk score,evaluationDate and Description
         Date evaluationDate = null;
-        String description = "";
-        String riskFactor = "";
+        String description = null;
+        String riskFactor = null;
 
         PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
                 .getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(patient.getPatientId()));
@@ -41,9 +41,9 @@ public class IitPatientRiskScoreFragmentController {
                     description = latestRiskScore.getDescription();
                     riskFactor = latestRiskScore.getRiskFactors();
         }
-        model.put("riskScore", latestRiskScore != null ? latestRiskScore.getRiskScore() : "");
-        model.put("evaluationDate", evaluationDate != null ? evaluationDate : "");
-        model.put("description", description != null ? description : "");
-        model.put("riskFactor", riskFactor != null ? riskFactor : "");
+        model.put("riskScore", latestRiskScore != null ? latestRiskScore.getRiskScore() : "-");
+        model.put("evaluationDate", evaluationDate != null ? evaluationDate : "-");
+        model.put("description", description != null ? description : "-");
+        model.put("riskFactor", riskFactor != null ? riskFactor : "-");
     }
 }
