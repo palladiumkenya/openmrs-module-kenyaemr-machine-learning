@@ -113,4 +113,14 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 		return (List<PatientRiskScore>) getSession().createCriteria(PatientRiskScore.class).list();
 		
 	}
+
+	@Override
+	public Date getLatestRiskEvaluationDate() {
+		Criteria criteria = getSession().createCriteria(PatientRiskScore.class);
+		criteria.addOrder(Order.desc("evaluationDate"));
+		criteria.setMaxResults(1);
+		PatientRiskScore patientRiskScore = (PatientRiskScore) criteria.uniqueResult();
+		return patientRiskScore.getEvaluationDate();
+
+	}
 }

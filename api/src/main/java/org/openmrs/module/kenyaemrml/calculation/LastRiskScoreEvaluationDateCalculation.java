@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Calculate whether a patient has high IIT risk score based on data pulled from Palantir
+ * Calculate whether a patient has high IIT risk score based on data pulled from NDWH
  */
 public class LastRiskScoreEvaluationDateCalculation extends AbstractPatientCalculation {
 	

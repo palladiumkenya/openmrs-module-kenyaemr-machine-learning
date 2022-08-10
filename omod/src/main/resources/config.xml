@@ -72,6 +72,70 @@
 			Palantir's threshold for high IIT score. Any patient with values equal or greater will be flagged as high risk
 		</description>
 	</globalProperty>
+
+	<globalProperty>
+		<property>kenyaemr.iit.machine.learning.lastEvaluationDate</property>
+		<defaultValue>2022JUN01</defaultValue>
+		<description>
+			Evaluation date of the last IIT risk score pull
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kenyaemr.iit.machine.learning.backend.url</property>
+		<defaultValue>https://data.kenyahmis.org:9783/api/Dataset/v2</defaultValue>
+		<description>
+			The URL of the data warehouse backend
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kenyaemr.iit.machine.learning.client.id</property>
+		<defaultValue>test</defaultValue>
+		<description>
+			IIT ML - The oauth2 client-id of the data warehouse backend
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kenyaemr.iit.machine.learning.client.secret</property>
+		<defaultValue>7f11e148-5741-11ec-bf63-0242ac130002</defaultValue>
+		<description>
+			The oauth2 client-secret of the data warehouse backend
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kenyaemr.iit.machine.learning.scope</property>
+		<defaultValue>pdapiv1</defaultValue>
+		<description>
+			IIT ML - The oauth2 scope of the data warehouse backend
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kenyaemr.iit.machine.learning.authorization.url</property>
+		<defaultValue>https://auth2.kenyahmis.org:8443/connect/authorize</defaultValue>
+		<description>
+			IIT ML - The oauth2 authorization URL of the data warehouse backend
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kenyaemr.iit.machine.learning.token.url</property>
+		<defaultValue>https://auth2.kenyahmis.org:8443/connect/token</defaultValue>
+		<description>
+			The oauth2 token URL of the data warehouse backend
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kenyaemr.iit.machine.learning.paging</property>
+		<defaultValue>400</defaultValue>
+		<description>
+			The paging threshold for NDWH response. Default is 400
+		</description>
+	</globalProperty>
 	<!--
 	<dwr>
 		<allow>
