@@ -42,6 +42,8 @@ public class MLDataExchange {
 	
 	public static final String RISK_SCORE = "risk_score";
 	
+	public static final String PATIENT_UUID = "id";
+	
 	public static final String KENYAEMR_IIT_MACHINE_LEARNING_LAST_EVALUATION_DATE = "kenyaemr.iit.machine.learning.lastEvaluationDate";
 	
 	PersonService personService = Context.getPersonService();
@@ -67,7 +69,7 @@ public class MLDataExchange {
 	
 	private String strFacilityCode = ""; // Facility Code
 	
-	private String strPagingThreshold = ""; // Paging of response
+	private String strPagingThreshold = ""; // Paging of response (Number of items per page)
 	
 	private long recordsPerPull = 400; // Total number of records per request
 	
@@ -76,7 +78,7 @@ public class MLDataExchange {
 	 * 
 	 * @return true on success or false on failure
 	 */
-	public boolean initAuthVars() {
+	public boolean initGlobalVars() {
 		String dWHbackEndURL = "kenyaemr.iit.machine.learning.backend.url";
 		GlobalProperty globalDWHbackEndURL = Context.getAdministrationService().getGlobalPropertyObject(dWHbackEndURL);
 		strDWHbackEndURL = globalDWHbackEndURL.getPropertyValue();
@@ -178,14 +180,15 @@ public class MLDataExchange {
 	 * Get the total records on remote side
 	 * 
 	 * @param bearerToken the OAuth2 token
-	 * @return total number of records
+	 * @return long available number of records
 	 */
-	private long getTotalRecordsOnRemote(String bearerToken) {
+	private long getAvailableRecordsOnRemoteSide(String bearerToken, String fromDate) {
 		BufferedReader reader = null;
 		HttpsURLConnection connection = null;
 		try {
 			URL url = new URL(strDWHbackEndURL + "?code=FND&name=predictions&pageNumber=1&pageSize=1&siteCode="
-			        + strFacilityCode);
+			        + strFacilityCode + "&fromDate=" + fromDate);
+			System.out.println("Getting available data count using: " + url);
 			connection = (HttpsURLConnection) url.openConnection();
 			connection.setRequestProperty("Authorization", "Bearer " + bearerToken);
 			connection.setDoOutput(true);
@@ -202,9 +205,10 @@ public class MLDataExchange {
 			ObjectNode jsonNode = (ObjectNode) mapper.readTree(response);
 			if (jsonNode != null) {
 				long pageCount = jsonNode.get("pageCount").getLongValue();
-				
+				System.out.println("Got available data count as: " + pageCount);
 				return (pageCount);
 			} else {
+				System.out.println("No available data");
 				return (0);
 			}
 		}
@@ -224,26 +228,11 @@ public class MLDataExchange {
 	}
 	
 	/**
-	 * Get the total records on local side
-	 * 
-	 * @return total number of records
-	 */
-	private long getTotalRecordsOnLocal() {
-		Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
-		String strTotalCount = "select count(*) from kenyaemr_ml_patient_risk_score;";
-		
-		Long totalCount = (Long) Context.getAdministrationService().executeSQL(strTotalCount, true).get(0).get(0);
-		
-		Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
-		return (totalCount);
-	}
-	
-	/**
 	 * Pulls records and saves locally
 	 * 
 	 * @param bearerToken the OAuth2 token
-	 * @param totalRemote the total number of records in DWH
-	 * @param lastEvaluationDate
+	 * @param totalRemote the available number of records in DWH
+	 * @param lastEvaluationDate the last evaluation date
 	 * @return true when successfull and false on failure
 	 */
 	private boolean pullAndSave(String bearerToken, long totalRemote, String lastEvaluationDate) {
@@ -267,6 +256,7 @@ public class MLDataExchange {
 
 				String fullURL = strDWHbackEndURL + "?code=FND&name=predictions&pageNumber=" + currentPage + "&pageSize="
 				        + recordsPerPull + "&siteCode=" + strFacilityCode + "&fromDate=" + lastEvaluationDate;
+				System.out.println("Pulling data using: " + fullURL);
 				URL url = new URL(fullURL);
 				connection = (HttpsURLConnection) url.openConnection();
 				connection.setRequestProperty("Authorization", "Bearer " + bearerToken);
@@ -293,7 +283,7 @@ public class MLDataExchange {
 
 							try {
 								String riskScore = personObject.get(RISK_SCORE).asText();
-								String uuid = personObject.get("id").asText();
+								String uuid = personObject.get(PATIENT_UUID).asText();
 								String patientId = personObject.get(PATIENT_PID).asText();
 
 								//Get the description and riskFactors from payload -- optional
@@ -367,7 +357,8 @@ public class MLDataExchange {
 				}
 			}
 			try {
-				Thread.sleep(20000);
+				//Delay for 5 seconds
+				Thread.sleep(5000);
 			}
 			catch (Exception ie) {
 				Thread.currentThread().interrupt();
@@ -397,32 +388,24 @@ public class MLDataExchange {
 	 */
 	public boolean fetchDataFromDWH() {
 		// Init the auth vars
-		boolean varsOk = initAuthVars();
+		boolean varsOk = initGlobalVars();
 		if (varsOk) {
 			//Get the OAuth Token
 			String credentials = getClientCredentials();
 			//Get the data
 			if (credentials != null) {
-				//get total count by fetching only one record from remote
-				long totalRemote = getTotalRecordsOnRemote(credentials);
-				System.out.println("ITT ML - Total Remote Records: " + totalRemote);
-				
+				// Get the last evaluation date
 				GlobalProperty globalLastEvaluationDate = Context.getAdministrationService().getGlobalPropertyObject(
 				    KENYAEMR_IIT_MACHINE_LEARNING_LAST_EVALUATION_DATE);
 				String lastEvaluationDate = globalLastEvaluationDate.getPropertyValue();
 				
+				//get total count by fetching only one record from remote (start from last evaluation date)
+				long totalRemote = getAvailableRecordsOnRemoteSide(credentials, lastEvaluationDate);
+				System.out.println("ITT ML - Total Remote Records: " + totalRemote);
+				
 				if (totalRemote > 0) {
-					//We have remote records - get local total records
-					long totalLocal = getTotalRecordsOnLocal();
-					System.out.println("ITT ML - Total Local Records: " + totalLocal);
-					//if remote records are greater than local, we pull
-					if (totalRemote > totalLocal) {
-						//We now pull and save
-						pullAndSave(credentials, totalRemote, lastEvaluationDate);
-					} else {
-						System.err.println("ITT ML - Records are already in sync");
-						return (false);
-					}
+					//We now pull and save
+					pullAndSave(credentials, totalRemote, lastEvaluationDate);
 				} else {
 					System.err.println("ITT ML - No records on remote side");
 					return (false);

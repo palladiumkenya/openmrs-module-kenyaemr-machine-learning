@@ -82,6 +82,9 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 #stopPull {
     display: none;
 }
+#message { 
+    min-height: 20px;
+}
 </style>
 
 <div class="ke-page-sidebar">
@@ -126,7 +129,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
         <fieldset>
             <legend>Fetch IIT risk scores from Data Warehouse (NDWH)</legend>
             <br/>
-            <div id="message"><span id="lblText" style="color: Red; top: 50px;"></span></div>
+            <div id="message"><span id="lblText" style="color: Red; top: 50px;">Ready</span></div>
             <br/>
             <div class="alignHorizontal">
                 <button id="updateSummary">Update Summary</button>
@@ -158,7 +161,11 @@ tr:nth-child(even) {background-color: #f2f2f2;}
         //show message
         function display_message(msg) {
             jq("#lblText").html(msg);
-            jq('#message').fadeIn('slow').delay(3000).fadeOut('slow');
+            //Show message for 3 seconds
+            //jq('#message').fadeIn('slow').delay(3000).fadeOut('slow');
+            setTimeout(function() {
+                jq("#lblText").html(" ");
+            }, 3000);
         }
 
         // display or hide the data pull progress indicator
