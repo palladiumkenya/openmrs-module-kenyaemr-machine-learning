@@ -68,4 +68,9 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 	public List<PatientRiskScore> getAllPatientRiskScore() {
 		return mLinKenyaEMRDao.getAllPatientRiskScore();
 	}
+
+	@Override
+	public Date getLatestRiskEvaluationDate() {
+		return mLinKenyaEMRDao.getLatestRiskEvaluationDate();
+	}
 }

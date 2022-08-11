@@ -1,5 +1,6 @@
 package org.openmrs.module.kenyaemrml.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
@@ -9,7 +10,6 @@ import org.openmrs.User;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.PersonService;
 import org.openmrs.api.context.Context;
-import org.openmrs.api.db.hibernate.DbSessionFactory;
 import org.openmrs.module.kenyaemr.api.KenyaEmrService;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
@@ -31,6 +31,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MLDataExchange {
+	
+	public static final String DESCRIPTION = "Description";
+	
+	public static final String RISK_FACTORS = "RiskFactors";
+	
+	public static final String EVALUATION_DATE = "EvaluationDate";
+	
+	public static final String PATIENT_PID = "PatientPID";
+	
+	public static final String RISK_SCORE = "risk_score";
+	
+	public static final String KENYAEMR_IIT_MACHINE_LEARNING_LAST_EVALUATION_DATE = "kenyaemr.iit.machine.learning.lastEvaluationDate";
 	
 	PersonService personService = Context.getPersonService();
 	
@@ -55,7 +67,9 @@ public class MLDataExchange {
 	
 	private String strFacilityCode = ""; // Facility Code
 	
-	private final long recordsPerPull = 50; // Total number of records per request
+	private String strPagingThreshold = ""; // Paging of response
+	
+	private long recordsPerPull = 400; // Total number of records per request
 	
 	/**
 	 * Initialize the OAuth variables
@@ -86,6 +100,10 @@ public class MLDataExchange {
 		String authURL = "kenyaemr.iit.machine.learning.authorization.url";
 		GlobalProperty globalAuthURL = Context.getAdministrationService().getGlobalPropertyObject(authURL);
 		strAuthURL = globalAuthURL.getPropertyValue();
+		
+		String gpResponsePaging = "kenyaemr.iit.machine.learning.paging";
+		GlobalProperty responsePagingString = Context.getAdministrationService().getGlobalPropertyObject(gpResponsePaging);
+		strPagingThreshold = responsePagingString.getPropertyValue();
 		
 		KenyaEmrService emrService = Context.getService(KenyaEmrService.class);
 		emrService.getDefaultLocationMflCode();
@@ -212,8 +230,6 @@ public class MLDataExchange {
 	 */
 	private long getTotalRecordsOnLocal() {
 		Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
-		DbSessionFactory sf = Context.getRegisteredComponents(DbSessionFactory.class).get(0);
-		
 		String strTotalCount = "select count(*) from kenyaemr_ml_patient_risk_score;";
 		
 		Long totalCount = (Long) Context.getAdministrationService().executeSQL(strTotalCount, true).get(0).get(0);
@@ -227,10 +243,17 @@ public class MLDataExchange {
 	 * 
 	 * @param bearerToken the OAuth2 token
 	 * @param totalRemote the total number of records in DWH
+	 * @param lastEvaluationDate
 	 * @return true when successfull and false on failure
 	 */
-	private boolean pullAndSave(String bearerToken, long totalRemote) {
-		
+	private boolean pullAndSave(String bearerToken, long totalRemote, String lastEvaluationDate) {
+
+		if (StringUtils.isNotBlank(strPagingThreshold)) {
+			long configuredValue = Long.valueOf(strPagingThreshold);
+			if (configuredValue > 0) {
+				recordsPerPull = configuredValue;
+			}
+		}
 		long totalPages = (long) (Math.ceil((totalRemote * 1.0) / (recordsPerPull * 1.0)));
 		
 		long currentPage = 1;
@@ -241,8 +264,9 @@ public class MLDataExchange {
 			BufferedReader reader = null;
 			HttpsURLConnection connection = null;
 			try {
+
 				String fullURL = strDWHbackEndURL + "?code=FND&name=predictions&pageNumber=" + currentPage + "&pageSize="
-				        + recordsPerPull + "&siteCode=" + strFacilityCode;
+				        + recordsPerPull + "&siteCode=" + strFacilityCode + "&fromDate=" + lastEvaluationDate;
 				URL url = new URL(fullURL);
 				connection = (HttpsURLConnection) url.openConnection();
 				connection.setRequestProperty("Authorization", "Bearer " + bearerToken);
@@ -266,10 +290,11 @@ public class MLDataExchange {
 							if (!getContinuePullingData()) {
 								return (false);
 							}
+
 							try {
-								String riskScore = personObject.get("risk_score").asText();
+								String riskScore = personObject.get(RISK_SCORE).asText();
 								String uuid = personObject.get("id").asText();
-								String patientId = personObject.get("PatientPID").asText();
+								String patientId = personObject.get(PATIENT_PID).asText();
 
 								//Get the description and riskFactors from payload -- optional
 								String description = "";
@@ -277,17 +302,17 @@ public class MLDataExchange {
 								Date evaluationDate = new Date();
 
 								try {
-									description = personObject.get("description").asText();
+									description = personObject.get(DESCRIPTION).asText();
 								} catch(Exception ex) {}
 								try {
-									riskFactors = personObject.get("riskFactors").asText();
+									riskFactors = personObject.get(RISK_FACTORS).asText();
 								} catch(Exception ex) {}
 								try {
-									String evalDate = personObject.get("evaluationDate").asText();
+									String evalDate = personObject.get(EVALUATION_DATE).asText();
 									SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
 									evaluationDate = formatter.parse(evalDate);
 								} catch(Exception ex) {}
-								
+
 								Patient patient = patientService.getPatient(Integer.valueOf(patientId));
 								PatientRiskScore patientRiskScore = new PatientRiskScore();
 								
@@ -303,7 +328,7 @@ public class MLDataExchange {
 							}
 							catch (Exception ex) {
 								//Failed to save record
-								System.err.println("ITT ML - Error getting and saving remote records: " + ex.getMessage());
+								System.err.println("IIT ML - Error getting and saving remote records: " + ex.getMessage());
 							}
 						}
 					} else {
@@ -325,7 +350,7 @@ public class MLDataExchange {
 				}
 			}
 			catch (Exception e) {
-				System.err.println("ITT ML - Error getting and saving remote records: " + e.getMessage());
+				System.err.println("IIT ML - Error getting and saving remote records: " + e.getMessage());
 			}
 			finally {
 				if (reader != null) {
@@ -342,7 +367,7 @@ public class MLDataExchange {
 				}
 			}
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(20000);
 			}
 			catch (Exception ie) {
 				Thread.currentThread().interrupt();
@@ -351,6 +376,17 @@ public class MLDataExchange {
 			// setDataPullStatus(currentPage, totalPages);
 			setDataPullStatus((long)Math.floor(((currentPage * 1.00 / totalPages * 1.00) * totalRemote)), totalRemote);
 		}
+
+		// update the last evaluation date
+
+		Date latestRiskEvaluationDate = mLinKenyaEMRService.getLatestRiskEvaluationDate();
+		if (latestRiskEvaluationDate != null) {
+			SimpleDateFormat format = new SimpleDateFormat("yyyyMMMdd");
+			GlobalProperty globalLastEvaluationDate = Context.getAdministrationService().getGlobalPropertyObject(KENYAEMR_IIT_MACHINE_LEARNING_LAST_EVALUATION_DATE);
+			globalLastEvaluationDate.setPropertyValue(format.format(latestRiskEvaluationDate));
+			Context.getAdministrationService().saveGlobalProperty(globalLastEvaluationDate);
+		}
+
 		return (true);
 	}
 	
@@ -370,6 +406,11 @@ public class MLDataExchange {
 				//get total count by fetching only one record from remote
 				long totalRemote = getTotalRecordsOnRemote(credentials);
 				System.out.println("ITT ML - Total Remote Records: " + totalRemote);
+				
+				GlobalProperty globalLastEvaluationDate = Context.getAdministrationService().getGlobalPropertyObject(
+				    KENYAEMR_IIT_MACHINE_LEARNING_LAST_EVALUATION_DATE);
+				String lastEvaluationDate = globalLastEvaluationDate.getPropertyValue();
+				
 				if (totalRemote > 0) {
 					//We have remote records - get local total records
 					long totalLocal = getTotalRecordsOnLocal();
@@ -377,7 +418,7 @@ public class MLDataExchange {
 					//if remote records are greater than local, we pull
 					if (totalRemote > totalLocal) {
 						//We now pull and save
-						pullAndSave(credentials, totalRemote);
+						pullAndSave(credentials, totalRemote, lastEvaluationDate);
 					} else {
 						System.err.println("ITT ML - Records are already in sync");
 						return (false);

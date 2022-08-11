@@ -64,4 +64,6 @@ public interface MLinKenyaEMRDao {
 	 * @return
 	 */
 	public List<PatientRiskScore> getAllPatientRiskScore();
+
+    Date getLatestRiskEvaluationDate();
 }

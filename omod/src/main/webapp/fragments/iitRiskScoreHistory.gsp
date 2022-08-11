@@ -67,7 +67,7 @@
                 text: 'IIT Risk score'
             },
             subtitle: {
-                text: 'Source: Palantir'
+                text: 'Source: KeHMIS ML Model'
             },
             xAxis: {
                 accessibility: {

@@ -73,5 +73,7 @@ public interface MLinKenyaEMRService extends OpenmrsService {
 	 * @return
 	 */
 	List<PatientRiskScore> getAllPatientRiskScore();
-	
+
+	Date getLatestRiskEvaluationDate();
+
 }

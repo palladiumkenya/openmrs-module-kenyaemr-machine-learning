@@ -13,6 +13,7 @@ import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
+import org.openmrs.module.kenyaui.KenyaUiUtils;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.page.PageModel;
 import org.slf4j.Logger;
@@ -41,9 +42,11 @@ public class IitPatientRiskScoreFragmentController {
                     description = latestRiskScore.getDescription();
                     riskFactor = latestRiskScore.getRiskFactors();
         }
+        KenyaUiUtils kenyaui = Context.getRegisteredComponents(KenyaUiUtils.class).get(0);
+
         model.put("riskScore", latestRiskScore != null ? latestRiskScore.getRiskScore() : "-");
-        model.put("evaluationDate", evaluationDate != null ? evaluationDate : "-");
+        model.put("evaluationDate", evaluationDate != null ? kenyaui.formatDate(evaluationDate) : "-");
         model.put("description", description != null ? description : "-");
-        model.put("riskFactor", riskFactor != null ? riskFactor : "-");
+        model.put("riskFactor", riskFactor != null && (description != null && !description.equalsIgnoreCase("Low Risk")) ? riskFactor : "-");
     }
 }
