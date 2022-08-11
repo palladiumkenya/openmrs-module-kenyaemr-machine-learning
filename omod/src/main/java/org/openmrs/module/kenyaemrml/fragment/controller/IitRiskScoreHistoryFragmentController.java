@@ -61,7 +61,9 @@ public class IitRiskScoreHistoryFragmentController {
 		//Save in the local DB
 		User user = Context.getUserContext().getAuthenticatedUser();
 		if(user != null) {
-			user.setUserProperty("stopIITMLPull", "0");
+			user.setUserProperty("stopIITMLPull", "0"); //stop process = 1, continue process = 0
+			user.setUserProperty("IITMLPullDone", "0"); //number of received records
+			user.setUserProperty("IITMLPullTotal", "0"); //number of available records on remote
 		}
 
 		MLDataExchange mlDataExchange = new MLDataExchange();

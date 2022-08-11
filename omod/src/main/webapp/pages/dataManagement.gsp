@@ -85,6 +85,9 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 #message { 
     min-height: 20px;
 }
+.progress-container {
+    min-height: 30px;
+}
 </style>
 
 <div class="ke-page-sidebar">
@@ -131,20 +134,25 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             <br/>
             <div id="message"><span id="lblText" style="color: Red; top: 50px;">Ready</span></div>
             <br/>
+            <div class="progress-container">
+                <div class="alignHorizontal">
+                    <div class="bootstrap-iso">
+                        <div class="wait-loading prog-bar">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                                    <span class="prog-percentage"></span>
+                                </div>
+                            </div>
+                            <div class="prog-status"></div>
+                        </div>
+                    </div>
+                    <button id="stopPull">Stop the pull</button>
+                </div>
+            </div>
+            <br/>
             <div class="alignHorizontal">
                 <button id="updateSummary">Update Summary</button>
                 <button id="fetchRiskScores">Pull Patient scores</button>
-                <div class="bootstrap-iso">
-                    <div class="wait-loading prog-bar">
-                        <div class="progress">
-                            <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
-                                <span class="prog-percentage"></span>
-                            </div>
-                        </div>
-                        <div class="prog-status"></div>
-                    </div>
-                </div>
-                <button id="stopPull">Stop the pull</button>
             </div>
         </fieldset>
     </div>
@@ -177,6 +185,13 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             }
         }
 
+        //resets the progress bar to begin from zero
+        function resetProgressBar() {
+            jq(".progress-bar").attr('aria-valuenow', 0).css('width', 0+'%');
+            jq(".prog-status").html(0 + "/" + 0);
+            jq(".prog-percentage").html(0+'%');
+        }
+
         // handle click event of the stop pull button
         jq(document).on('click','#stopPull',function () {
             console.log('Stoping the fetch task!');
@@ -199,6 +214,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             //Run the fetch task
             console.log('Starting the fetch task!');
             display_message('Starting the fetch task!');
+            resetProgressBar();
             display_loading(true);
             jq('#fetchRiskScores').attr('disabled', true);
             jq('#stopPull').show();
@@ -211,6 +227,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 jq('#stopPull').hide();
                 updateSummaryTable(false);
                 isPullingData = false;
+                resetProgressBar();
             });
 
             fetchStatus();
@@ -235,13 +252,14 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             }).promise();
         }
 
-        // Check the status of the data pull
+        // Check the status of the data pull (one second cyclic async check)
         function fetchStatus() {
             getFetchStatusAsync().done(function(){
                 if(isPullingData) {
                     setTimeout(function() {
+                        updateSummaryTable(false);
                         fetchStatus();
-                    },3000);
+                    },1000);
                 }
             });
         }
@@ -258,7 +276,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     jq(".progress-bar").attr('aria-valuenow', statusPercent).css('width', statusPercent+'%');
                     jq(".prog-status").html(statusDone + "/" + statusTotal);
                     jq(".prog-percentage").html(statusPercent+'%');
-                    updateSummaryTable(false);
+                    //console.log('Got done: ' + statusDone + ' Got total: ' + statusTotal + ' Got percent: ' + statusPercent);
                 } else {
                     console.log('Failed to fetch pull status!');
                 }
