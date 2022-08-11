@@ -356,6 +356,10 @@ public class MLDataExchange {
 					catch (Exception er) {}
 				}
 			}
+			currentPage++;
+			// setDataPullStatus(currentPage, totalPages);
+			setDataPullStatus((long)Math.floor(((currentPage * 1.00 / totalPages * 1.00) * totalRemote)), totalRemote);
+			
 			try {
 				//Delay for 5 seconds
 				Thread.sleep(5000);
@@ -363,9 +367,6 @@ public class MLDataExchange {
 			catch (Exception ie) {
 				Thread.currentThread().interrupt();
 			}
-			currentPage++;
-			// setDataPullStatus(currentPage, totalPages);
-			setDataPullStatus((long)Math.floor(((currentPage * 1.00 / totalPages * 1.00) * totalRemote)), totalRemote);
 		}
 
 		// update the last evaluation date
