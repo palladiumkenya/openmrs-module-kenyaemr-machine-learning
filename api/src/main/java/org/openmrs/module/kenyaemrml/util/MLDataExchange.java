@@ -356,10 +356,10 @@ public class MLDataExchange {
 					catch (Exception er) {}
 				}
 			}
-			currentPage++;
-			// setDataPullStatus(currentPage, totalPages);
-			setDataPullStatus((long)Math.floor(((currentPage * 1.00 / totalPages * 1.00) * totalRemote)), totalRemote);
 			
+			setDataPullStatus((long)Math.floor(((currentPage * 1.00 / totalPages * 1.00) * totalRemote)), totalRemote);
+			currentPage++;
+
 			try {
 				//Delay for 5 seconds
 				Thread.sleep(5000);
