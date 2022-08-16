@@ -17,9 +17,14 @@ jobs:
         port: ${{ secrets.PORT }}
         command_timeout: 200m
         script: |
+          cd /apps/github-workflows/kenyaemr-modules/
+          sudo rm -rf openmrs-module-kenyaemr-machine-learning
+          sudo mkdir openmrs-module-kenyaemr-machine-learning
+          sudo chown -R cicd2:cicd2 openmrs-module-kenyaemr-machine-learning
+          cd openmrs-module-kenyaemr-machine-learning
           git config --global --add safe.directory /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaemr-machine-learning     
-          cd /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaemr-machine-learning
-          git pull origin dev
+          git clone -b dev https://github.com/palladiumkenya/openmrs-module-kenyaemr-machine-learning.git
+          sudo chown -R cicd2:cicd2 /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaemr-machine-learning
           git status
           mvn clean install -DskipTests
           sudo rm -rf /var/lib/OpenMRS/modules/kenyaemrml-*.omod
@@ -27,5 +32,5 @@ jobs:
           sudo chown -R tomcat:tomcat /var/lib/OpenMRS/modules/
           sudo chmod +r /var/lib/OpenMRS/modules/*.omod
           sudo chmod 755 /var/lib/OpenMRS/modules/*.omod
-          sudo service tomcat9 restart
-         
+          sudo systemctl stop tomcat
+          sudo systemctl start tomcat
