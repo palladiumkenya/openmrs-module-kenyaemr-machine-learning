@@ -5,7 +5,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.node.ObjectNode;
 import org.json.simple.JSONObject;
-import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrml.api.MLUtils;
 import org.openmrs.module.kenyaemrml.api.service.ModelService;
 import org.openmrs.module.kenyaemrml.domain.ModelInputFields;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
-
 import java.io.IOException;
 
 /**
@@ -41,32 +39,32 @@ public class MachineLearningRestController extends BaseRestController {
 		try {
 			requestBody = MLUtils.fetchRequestBody(request.getReader());
 			ObjectNode modelConfigs = MLUtils.getModelConfig(requestBody);
-			String facilityName = modelConfigs.get(MLUtils.FACILITY_ID_REQUEST_VARIABLE).asText();
+			String facilityMflCode = modelConfigs.get(MLUtils.FACILITY_ID_REQUEST_VARIABLE).asText();
 			boolean isDebugMode = modelConfigs.has("debug") && modelConfigs.get("debug").asText().equals("true") ? true
 			        : false;
 			
-			if (facilityName.equals("")) { // default to the default facility configured in the EMR
-				facilityName = MLUtils.getDefaultLocation().getName();
+			if (facilityMflCode.equals("")) { // default to the default facility configured in the EMR
+				facilityMflCode = MLUtils.getDefaultMflCode();
 			}
 			
 			String modelId = modelConfigs.get(MLUtils.MODEL_ID_REQUEST_VARIABLE).asText();
 			String encounterDate = modelConfigs.get(MLUtils.ENCOUNTER_DATE_REQUEST_VARIABLE).asText();
 			
-			if (StringUtils.isBlank(facilityName) || StringUtils.isBlank(modelId) || StringUtils.isBlank(encounterDate)) {
+			if (StringUtils.isBlank(facilityMflCode) || StringUtils.isBlank(modelId) || StringUtils.isBlank(encounterDate)) {
 				return new ResponseEntity<Object>("The service requires model, date, and facility information",
 				        new HttpHeaders(), HttpStatus.BAD_REQUEST);
 			}
-			JSONObject profile = MLUtils.getHTSFacilityProfile("FacilityName", facilityName, MLUtils.getFacilityCutOffs());
+			JSONObject profile = MLUtils.getHTSFacilityProfile("SiteCode", facilityMflCode, MLUtils.getFacilityCutOffs());
 			
 			if (profile == null) {
 				return new ResponseEntity<Object>(
 				        "The facility provided currently doesn't have an HTS cut-off profile. Provide an appropriate facility",
 				        new HttpHeaders(), HttpStatus.BAD_REQUEST);
 			}
-			ModelInputFields inputFields = MLUtils.extractHTSCaseFindingVariablesFromRequestBody(requestBody, facilityName,
+			ModelInputFields inputFields = MLUtils.extractHTSCaseFindingVariablesFromRequestBody(requestBody, facilityMflCode,
 			    encounterDate);
 			
-			ScoringResult scoringResult = modelService.score(modelId, facilityName, encounterDate, inputFields, isDebugMode);
+			ScoringResult scoringResult = modelService.score(modelId, facilityMflCode, encounterDate, inputFields, isDebugMode);
 			return scoringResult;
 		}
 		catch (IOException e) {
