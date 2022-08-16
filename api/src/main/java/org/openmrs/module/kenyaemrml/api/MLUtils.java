@@ -80,7 +80,7 @@ public class MLUtils {
 	 *         "ClientSelfTestedYes": 0 } }
 	 */
 	public static ModelInputFields extractHTSCaseFindingVariablesFromRequestBody(String requestBodyString,
-	        String facilityName, String encounterDateString) {
+	        String facilityMflCode, String encounterDateString) {
 		
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode tree = null;
@@ -110,7 +110,7 @@ public class MLUtils {
 		prepareEncounterModelParams(encounterDateString, modelParams);
 		// add facility cut off
 		
-		JSONObject profile = getHTSFacilityProfile("FacilityName", facilityName, getFacilityCutOffs());
+		JSONObject profile = getHTSFacilityProfile("SiteCode", facilityMflCode, getFacilityCutOffs());
 		
 		for (int i = 0; i < FACILITY_PROFILE_VARIABLES.length; i++) {
 			modelParams.put(FACILITY_PROFILE_VARIABLES[i], profile.get(FACILITY_PROFILE_VARIABLES[i]));
