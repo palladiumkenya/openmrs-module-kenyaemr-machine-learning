@@ -35,6 +35,7 @@ import org.openmrs.module.reporting.data.patient.definition.ConvertedPatientData
 import org.openmrs.module.reporting.data.patient.definition.PatientIdentifierDataDefinition;
 import org.openmrs.module.reporting.dataset.definition.PatientDataSetDefinition;
 import org.springframework.stereotype.Component;
+import org.openmrs.module.reporting.common.SortCriteria;
 
 /**
  * Created by codehub on 10/7/15.
@@ -68,6 +69,7 @@ public class HighIITRiskPatientsReportBuilder extends CalculationReportBuilder {
 		dsd.addColumn("Last Visit Date", new ETLLastVisitDateDataDefinition(), "", new DateConverter(DATE_FORMAT));
 		dsd.addColumn("Next Appointment Date", new ETLNextAppointmentDateDataDefinition(), "",
 		    new DateConverter(DATE_FORMAT));
+		dsd.addSortCriteria("Last risk score", SortCriteria.SortDirection.DESC);
 		
 	}
 }
