@@ -47,6 +47,6 @@ public class IitPatientRiskScoreFragmentController {
         model.put("riskScore", latestRiskScore != null ? latestRiskScore.getRiskScore() : "-");
         model.put("evaluationDate", evaluationDate != null ? kenyaui.formatDate(evaluationDate) : "-");
         model.put("description", description != null ? description : "-");
-        model.put("riskFactor", riskFactor != null && (description != null && !description.equalsIgnoreCase("Low Risk")) ? riskFactor : "-");
+        model.put("riskFactor", riskFactor != null ? riskFactor : "-");
     }
 }
