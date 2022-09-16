@@ -1,10 +1,12 @@
 package org.openmrs.module.kenyaemrml.fragment.controller;
 
-import org.openmrs.GlobalProperty;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.openmrs.Patient;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
-import org.openmrs.api.db.hibernate.DbSessionFactory;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
 import org.openmrs.module.kenyaemrml.util.MLDataExchange;
@@ -14,13 +16,9 @@ import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.page.PageModel;
-import org.openmrs.util.PrivilegeConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Controller for getting a history of risk score and grouped by the date of evaluation
@@ -119,32 +117,18 @@ public class IitRiskScoreHistoryFragmentController {
 	 */
 	@AppAction("kenyaemrml.predictions")
 	public SimpleObject fetchLocalSummary(@SpringBean KenyaUiUtils kenyaUi, UiUtils ui) {
-		String strRiskThreshold = "kenyaemrml.palantir.high.iit.risk.threshold";
-		GlobalProperty globalRiskThreshold = Context.getAdministrationService().getGlobalPropertyObject(strRiskThreshold);
-		String riskThreshold = globalRiskThreshold.getPropertyValue();
-		if (riskThreshold == null) {
-			System.err.println("IIT ML - get data: Please set credentials for risk threshold");
-			return (null);
-		}
-		
-		Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
-		DbSessionFactory sf = Context.getRegisteredComponents(DbSessionFactory.class).get(0);
-		
-		String strTotalCount = "select count(*) from kenyaemr_ml_patient_risk_score;";
-		String strHighRiskCount = "select count(*) from kenyaemr_ml_patient_risk_score where risk_score > " + riskThreshold
-		        + ";";
-		Long totalCount = (Long) Context.getAdministrationService().executeSQL(strTotalCount, true).get(0).get(0);
-		Long highRiskCount = (Long) Context.getAdministrationService().executeSQL(strHighRiskCount, true).get(0).get(0);
-		Long lowRiskCount = totalCount - highRiskCount;
+		Collection<Integer> high = Context.getService(MLinKenyaEMRService.class).getAllPatientsWithHighRiskScores();
+		Collection<Integer> medium = Context.getService(MLinKenyaEMRService.class).getAllPatientsWithMediumRiskScores();
+		Collection<Integer> low = Context.getService(MLinKenyaEMRService.class).getAllPatientsWithLowRiskScores();
+		Collection<Integer> all = Context.getService(MLinKenyaEMRService.class).getAllPatients();
 		
 		//prepare result
 		SimpleObject summary = new SimpleObject();
-		summary.put("totalCount", totalCount.intValue());
-		summary.put("highRiskCount", highRiskCount.intValue());
-		summary.put("lowRiskCount", lowRiskCount.intValue());
-		summary.put("riskThreshhold", riskThreshold);
-		
-		Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
+		summary.put("totalCount", all.size());
+		summary.put("highRiskCount", high.size());
+		summary.put("mediumRiskCount", medium.size());
+		summary.put("lowRiskCount", low.size());
+
 		return summary;
 	}
 	

@@ -110,6 +110,30 @@
         </addColumn>  
     </changeSet>
 
+    <!-- Add not null constraint to the patient_id column -->
+    <changeSet author="pwaweru" id="kenyaemr-ML-patientid-field-20220919-215430"> 
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_ml_patient_risk_score"/>
+            <columnExists columnName="patient_id" tableName="kenyaemr_ml_patient_risk_score"/>
+        </preConditions>
+        <comment>Adding not null constraint to patient_id column</comment>
+        <addNotNullConstraint 
+           columnDataType="int"  
+           columnName="patient_id" 
+           tableName="kenyaemr_ml_patient_risk_score"/>
+    </changeSet>
 
+    <!-- Add not null constraint to the description column -->
+    <changeSet author="pwaweru" id="kenyaemr-ML-description-field-20220920-231430"> 
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_ml_patient_risk_score"/>
+            <columnExists columnName="description" tableName="kenyaemr_ml_patient_risk_score"/>
+        </preConditions>
+        <comment>Adding not null constraint to description column</comment>
+        <addNotNullConstraint 
+           columnDataType="varchar(2048)"  
+           columnName="description" 
+           tableName="kenyaemr_ml_patient_risk_score"/>
+    </changeSet>
  
 </databaseChangeLog>

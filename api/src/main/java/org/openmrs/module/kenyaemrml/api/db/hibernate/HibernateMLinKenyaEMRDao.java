@@ -9,7 +9,11 @@
  */
 package org.openmrs.module.kenyaemrml.api.db.hibernate;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -18,10 +22,25 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.transform.Transformers;
 import org.openmrs.Patient;
+import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.api.db.MLinKenyaEMRDao;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
+
+import org.openmrs.Program;
+import org.openmrs.calculation.patient.PatientCalculationContext;
+import org.openmrs.calculation.patient.PatientCalculationService;
+import org.openmrs.module.metadatadeploy.MetadataUtils;
+import org.openmrs.module.kenyaemr.metadata.HivMetadata;
+import java.util.Set;
+import org.openmrs.module.kenyacore.calculation.Filters;
+import org.openmrs.api.context.Context;
+import org.openmrs.ui.framework.SimpleObject;
+import org.springframework.context.annotation.Bean;
+import org.openmrs.api.context.Context;
 
 public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 	
@@ -79,6 +98,168 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 		PatientRiskScore patientRiskScore = (PatientRiskScore) criteria.uniqueResult();
 		
 		return patientRiskScore;
+	}
+
+	/**
+	 * Get all ML patients with HIGH risk scores and who are alive and on HIV program
+	 * @return a list of patients
+	 */
+	@Override
+	public Collection<Integer> getAllPatientsWithHighRiskScores() {
+		PatientCalculationService service = Context.getService(PatientCalculationService.class);
+		PatientCalculationContext patientCalculationContext = service.createCalculationContext();
+		Criteria criteria = getSession().createCriteria(PatientRiskScore.class);
+
+		List<PatientRiskScore> pList = criteria.list();
+		HashSet<Integer> hIds = new HashSet<>();
+
+		for (PatientRiskScore patientRiskScore : pList) {
+			Patient patient = patientRiskScore.getPatient();
+			if(patient != null)	{	
+				Integer pId = patient.getPatientId();
+				if(!hIds.contains(pId)) {
+					hIds.add(pId);
+				}
+			}
+		}
+		// Get HIV program
+		Program hivProgram = MetadataUtils.existing(Program.class, HivMetadata._Program.HIV);
+		// Get all patients who are alive and in HIV program
+		Set<Integer> alive = Filters.alive(hIds, patientCalculationContext);
+		Set<Integer> inHivProgram = Filters.inProgram(hivProgram, alive, patientCalculationContext);
+		
+		HashSet<Integer> ret = new HashSet<>();
+		for (Integer ptId : inHivProgram) {
+			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
+							.getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId));
+			if (latestRiskScore != null) {
+				String riskGroup = latestRiskScore.getDescription();
+				if (riskGroup.trim().equalsIgnoreCase("High Risk")) {
+					ret.add(ptId);
+				}				
+			}
+		}
+		
+		return(ret);
+	}
+
+	/**
+	 * Get all ML patients with MEDIUM risk scores and who are alive and on HIV program
+	 * @return a list of patients
+	 */
+	@Override
+	public Collection<Integer> getAllPatientsWithMediumRiskScores() {
+		PatientCalculationService service = Context.getService(PatientCalculationService.class);
+		PatientCalculationContext patientCalculationContext = service.createCalculationContext();
+		Criteria criteria = getSession().createCriteria(PatientRiskScore.class);
+
+		List<PatientRiskScore> pList = criteria.list();
+		HashSet<Integer> hIds = new HashSet<>();
+
+		for (PatientRiskScore patientRiskScore : pList) {
+			Patient patient = patientRiskScore.getPatient();
+			if(patient != null)	{	
+				Integer pId = patient.getPatientId();
+				if(!hIds.contains(pId)) {
+					hIds.add(pId);
+				}
+			}
+		}
+		// Get HIV program
+		Program hivProgram = MetadataUtils.existing(Program.class, HivMetadata._Program.HIV);
+		// Get all patients who are alive and in HIV program
+		Set<Integer> alive = Filters.alive(hIds, patientCalculationContext);
+		Set<Integer> inHivProgram = Filters.inProgram(hivProgram, alive, patientCalculationContext);
+
+		HashSet<Integer> ret = new HashSet<>();
+		for (Integer ptId : inHivProgram) {
+			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
+							.getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId));
+			if (latestRiskScore != null) {
+				String riskGroup = latestRiskScore.getDescription();
+				if (riskGroup.trim().equalsIgnoreCase("Medium Risk")) {
+					ret.add(ptId);
+				}				
+			}
+		}
+		
+		return(ret);
+	}
+
+	/**
+	 * Get all ML patients with LOW risk scores and who are alive and on HIV program
+	 * @return a list of patients
+	 */
+	@Override
+	public Collection<Integer> getAllPatientsWithLowRiskScores() {
+		PatientCalculationService service = Context.getService(PatientCalculationService.class);
+		PatientCalculationContext patientCalculationContext = service.createCalculationContext();
+		Criteria criteria = getSession().createCriteria(PatientRiskScore.class);
+
+		List<PatientRiskScore> pList = criteria.list();
+		HashSet<Integer> hIds = new HashSet<>();
+
+		for (PatientRiskScore patientRiskScore : pList) {
+			Patient patient = patientRiskScore.getPatient();
+			if(patient != null)	{	
+				Integer pId = patient.getPatientId();
+				if(!hIds.contains(pId)) {
+					hIds.add(pId);
+				}
+			}
+		}
+		// Get HIV program
+		Program hivProgram = MetadataUtils.existing(Program.class, HivMetadata._Program.HIV);
+		// Get all patients who are alive and in HIV program
+		Set<Integer> alive = Filters.alive(hIds, patientCalculationContext);
+		Set<Integer> inHivProgram = Filters.inProgram(hivProgram, alive, patientCalculationContext);
+		
+		HashSet<Integer> ret = new HashSet<>();
+		for (Integer ptId : inHivProgram) {
+			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
+							.getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId));
+			if (latestRiskScore != null) {
+				String riskGroup = latestRiskScore.getDescription();
+				if (riskGroup.trim().equalsIgnoreCase("Low Risk")) {
+					ret.add(ptId);
+				}				
+			}
+		}
+		
+		return(ret);
+	}
+
+	/**
+	 * Get all ML patients who are alive and on HIV program
+	 * @return a list of patients
+	 */
+	@Override
+	public Collection<Integer> getAllPatients() {
+		PatientCalculationService service = Context.getService(PatientCalculationService.class);
+		PatientCalculationContext patientCalculationContext = service.createCalculationContext();
+		Criteria criteria = getSession().createCriteria(PatientRiskScore.class);
+
+		List<PatientRiskScore> pList = criteria.list();
+		System.out.println("Major: " + pList.size());
+		HashSet<Integer> hIds = new HashSet<>();
+
+		for (PatientRiskScore patientRiskScore : pList) {
+			Patient patient = patientRiskScore.getPatient();
+			if(patient != null && patientRiskScore.getDescription() != null && (patientRiskScore.getDescription().trim().equalsIgnoreCase("High Risk") || patientRiskScore.getDescription().trim().equalsIgnoreCase("Medium Risk") || patientRiskScore.getDescription().trim().equalsIgnoreCase("Low Risk"))) {
+				Integer pId = patient.getPatientId();
+				if(!hIds.contains(pId)) {
+					hIds.add(pId);
+				}
+			}
+		}
+		
+		// Get HIV program
+		Program hivProgram = MetadataUtils.existing(Program.class, HivMetadata._Program.HIV);
+		// Get all patients who are alive and in HIV program
+		Set<Integer> alive = Filters.alive(hIds, patientCalculationContext);
+		Set<Integer> inHivProgram = Filters.inProgram(hivProgram, alive, patientCalculationContext);
+		
+		return(inHivProgram);
 	}
 	
 	/**

@@ -9,6 +9,10 @@
  */
 package org.openmrs.module.kenyaemrml.calculation;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+
 import org.openmrs.Program;
 import org.openmrs.api.context.Context;
 import org.openmrs.calculation.patient.PatientCalculationContext;
@@ -20,14 +24,9 @@ import org.openmrs.module.kenyaemr.metadata.HivMetadata;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
-import org.openmrs.ui.framework.SimpleObject;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
 
 /**
- * Calculate whether a patient has high IIT risk score based on data pulled from NDWH
+ * Calculate risk score for patient
  */
 public class LastRiskScoreCalculation extends AbstractPatientCalculation {
 	
@@ -41,7 +40,6 @@ public class LastRiskScoreCalculation extends AbstractPatientCalculation {
 	        PatientCalculationContext context) {
 		// Get HIV program
 		Program hivProgram = MetadataUtils.existing(Program.class, HivMetadata._Program.HIV);
-		double highRiskThreshold = 0.3;
 		
 		// Get all patients who are alive and in HIV program
 		Set<Integer> alive = Filters.alive(cohort, context);
@@ -49,21 +47,17 @@ public class LastRiskScoreCalculation extends AbstractPatientCalculation {
 		
 		CalculationResultMap ret = new CalculationResultMap();
 		for (Integer ptId : cohort) {
-			double object = 0;
-			
 			// check if a patient is alive
 			if (inHivProgram.contains(ptId)) {
+				double score = 0.00;
 				PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
 				        .getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId));
 				if (latestRiskScore != null) {
-					object = latestRiskScore.getRiskScore();
-					
+					score = latestRiskScore.getRiskScore();
 				}
-				
+				ret.put(ptId, new SimpleResult(score, this));
 			}
-			ret.put(ptId, new SimpleResult(object, this));
 		}
 		return ret;
 	}
-	
 }

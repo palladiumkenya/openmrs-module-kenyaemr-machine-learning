@@ -117,6 +117,13 @@ public class PatientRiskScore extends BaseOpenmrsData implements Serializable {
 	}
 	
 	@Override
+	public String toString() {
+		return "PatientRiskScore [description=" + description + ", evaluationDate=" + evaluationDate + ", id=" + id
+				+ ", patient=" + patient + ", riskFactors=" + riskFactors + ", riskScore=" + riskScore
+				+ ", sourceSystemUuid=" + sourceSystemUuid + "]";
+	}
+
+	@Override
 	public int hashCode() {
 		return Objects.hash(super.hashCode(), id, patient, sourceSystemUuid, riskScore, evaluationDate);
 	}
