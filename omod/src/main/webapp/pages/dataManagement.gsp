@@ -116,12 +116,12 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                         <td id="strHighRiskCount">${highRiskCount}</td>
                     </tr>
                     <tr>
-                        <td width="30%">Low Risk</td>
-                        <td id="strLowRiskCount">${lowRiskCount}</td>
+                        <td width="30%">Medium Risk</td>
+                        <td id="strMediumRiskCount">${mediumRiskCount}</td>
                     </tr>
                     <tr>
-                        <td width="30%">Risk Threshold </td>
-                        <td id="strRiskThreshhold">${riskThreshhold}</td>
+                        <td width="30%">Low Risk</td>
+                        <td id="strLowRiskCount">${lowRiskCount}</td>
                     </tr>
                     </tbody>
                 </table>
@@ -297,8 +297,8 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     console.log('Success fetching summary!');
                     jq("#strTotalCount").html(result.totalCount);
                     jq("#strHighRiskCount").html(result.highRiskCount);
+                    jq("#strMediumRiskCount").html(result.mediumRiskCount);
                     jq("#strLowRiskCount").html(result.lowRiskCount);
-                    jq("#strRiskThreshhold").html(result.riskThreshhold);
                 } else {
                     if(notify) display_message('Failed to fetch summary!');
                     console.log('Failed to fetch summary!');

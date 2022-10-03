@@ -19,6 +19,8 @@ import org.openmrs.module.kenyaemrml.MLinKenyaEMRConfig;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+
 /**
  * The main service of this module, which is exposed for other modules. See
  * moduleApplicationContext.xml on how it is wired up.
@@ -50,6 +52,30 @@ public interface MLinKenyaEMRService extends OpenmrsService {
 	 * @return
 	 */
 	PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient);
+
+	/**
+	 * Get all patients with high risk scores
+	 * @return a list of patients
+	 */
+	public Collection<Integer> getAllPatientsWithHighRiskScores();
+
+	/**
+	 * Get all patients with medium risk scores
+	 * @return a list of patients
+	 */
+	public Collection<Integer> getAllPatientsWithMediumRiskScores();
+
+	/**
+	 * Get all patients with low risk scores
+	 * @return a list of patients
+	 */
+	public Collection<Integer> getAllPatientsWithLowRiskScores();
+
+	/**
+	 * Get all patients
+	 * @return a list of patients
+	 */
+	public Collection<Integer> getAllPatients();
 	
 	/**
 	 * Gets a list of risk score for a patient

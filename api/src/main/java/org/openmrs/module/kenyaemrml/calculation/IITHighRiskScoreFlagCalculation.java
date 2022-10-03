@@ -9,28 +9,22 @@
  */
 package org.openmrs.module.kenyaemrml.calculation;
 
-import org.openmrs.GlobalProperty;
-import org.openmrs.Program;
+import java.util.Collection;
+import java.util.Map;
+
 import org.openmrs.api.context.Context;
 import org.openmrs.calculation.patient.PatientCalculationContext;
 import org.openmrs.calculation.result.CalculationResultMap;
 import org.openmrs.module.kenyacore.calculation.AbstractPatientCalculation;
 import org.openmrs.module.kenyacore.calculation.BooleanResult;
-import org.openmrs.module.kenyacore.calculation.Filters;
 import org.openmrs.module.kenyacore.calculation.PatientFlagCalculation;
-import org.openmrs.module.kenyaemr.metadata.HivMetadata;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
-import org.openmrs.module.metadatadeploy.MetadataUtils;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Calculate whether a patient has high IIT risk score based on data pulled from NDWH
  */
-public class HighIITRiskScoreCalculation extends AbstractPatientCalculation implements PatientFlagCalculation {
+public class IITHighRiskScoreFlagCalculation extends AbstractPatientCalculation implements PatientFlagCalculation {
 	
 	private String customMessage;
 	
@@ -45,46 +39,26 @@ public class HighIITRiskScoreCalculation extends AbstractPatientCalculation impl
 	/**
 	 * @see org.openmrs.calculation.patient.PatientCalculation#evaluate(Collection, Map,
 	 *      PatientCalculationContext)
-	 * @should determine whether a patient has high IIT
+	 * @should determine whether a patient has high IIT risk
 	 */
 	@Override
 	public CalculationResultMap evaluate(Collection<Integer> cohort, Map<String, Object> parameterValues,
 	        PatientCalculationContext context) {
 		
-		GlobalProperty highRiskThresholdGP = Context.getAdministrationService().getGlobalPropertyObject(
-		    "kenyaemrml.palantir.high.iit.risk.threshold");
-		
 		CalculationResultMap ret = new CalculationResultMap();
-		
-		if (highRiskThresholdGP != null) {
-			String highRiskThresholdVal = highRiskThresholdGP.getPropertyValue();
-			
-			// Get HIV program
-			Program hivProgram = MetadataUtils.existing(Program.class, HivMetadata._Program.HIV);
-			double highRiskThreshold = Double.valueOf(highRiskThresholdVal);
-			
-			// Get all patients who are alive and in HIV program
-			Set<Integer> alive = Filters.alive(cohort, context);
-			Set<Integer> inHivProgram = Filters.inProgram(hivProgram, alive, context);
-			
-			for (Integer ptId : cohort) {
-				boolean hasHighRiskScore = false;
-				
-				// check if a patient is alive
-				if (inHivProgram.contains(ptId)) {
-					PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
-					        .getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId));
-					if (latestRiskScore != null) {
-						double riskScore = latestRiskScore.getRiskScore();
-						if (riskScore > highRiskThreshold) {
-							hasHighRiskScore = true;
-							setCustomMessage("IIT high risk: " + (Math.floor(riskScore * 100)) + "%");
-						}
-						
-					}
-					
-				}
-				ret.put(ptId, new BooleanResult(hasHighRiskScore, this, context));
+		for (Integer ptId : cohort) {
+			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
+							.getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId));
+			if (latestRiskScore != null) {
+				double riskScore = latestRiskScore.getRiskScore();
+				String riskGroup = latestRiskScore.getDescription();
+				if (riskGroup.trim().equalsIgnoreCase("High Risk")) {
+					System.out.println("Setting Flag HIGH");
+					setCustomMessage("IIT High risk: " + (Math.floor(riskScore * 100)) + "%");
+					ret.put(ptId, new BooleanResult(true, this, context));
+				} else {
+					ret.put(ptId, new BooleanResult(false, this, context));
+				}				
 			}
 		}
 		return ret;

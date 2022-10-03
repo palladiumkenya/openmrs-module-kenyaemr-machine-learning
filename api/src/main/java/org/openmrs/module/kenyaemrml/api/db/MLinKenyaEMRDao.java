@@ -11,6 +11,7 @@ package org.openmrs.module.kenyaemrml.api.db;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Collection;
 
 import org.openmrs.Patient;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
@@ -41,6 +42,30 @@ public interface MLinKenyaEMRDao {
 	 * @return
 	 */
 	public PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient);
+
+	/**
+	 * Get all ML patients with HIGH risk scores
+	 * @return a list of patients
+	 */
+	public Collection<Integer> getAllPatientsWithHighRiskScores();
+
+	/**
+	 * Get all ML patients with MEDIUM risk scores
+	 * @return a list of patients
+	 */
+	public Collection<Integer> getAllPatientsWithMediumRiskScores();
+
+	/**
+	 * Get all ML patients with LOW risk scores
+	 * @return a list of patients
+	 */
+	public Collection<Integer> getAllPatientsWithLowRiskScores();
+
+	/**
+	 * Get all ML patients
+	 * @return a list of patients
+	 */
+	public Collection<Integer> getAllPatients();
 	
 	/**
 	 * Gets a list of risk score for a patient
