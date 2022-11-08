@@ -75,106 +75,65 @@
         </createIndex>
     </changeSet>
 
-    <!--Adding global variables for IIT ML -->
-    <changeSet id="kenyaemr-ML-backend-url-20220329-212630" author="pwaweru">
+
+    <!-- Add description field to the ML table -->
+    <changeSet author="pwaweru" id="kenyaemr-ML-description-field-20220726-123630"> 
         <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM global_property
-                WHERE property = 'kenyaemr.iit.machine.learning.backend.url'
-            </sqlCheck>
+            <tableExists tableName="kenyaemr_ml_patient_risk_score"/>
+            <not>
+                <columnExists columnName="description" tableName="kenyaemr_ml_patient_risk_score"/>
+            </not>
         </preConditions>
-        <comment>Inserting The URL of the data warehouse backend</comment>
-        <insert tableName="global_property">
-            <column name="property" value="kenyaemr.iit.machine.learning.backend.url" />
-            <column name="property_value" value="https://data.kenyahmis.org:9783/api/Dataset" />
-            <column name="description" value="IIT ML - The URL of the data warehouse backend" />
-            <column name="uuid" value="e8f35121-c569-489b-c1d7-6c713fd72198" />
-        </insert>
+        <comment>Adding description column</comment>
+        <addColumn tableName="kenyaemr_ml_patient_risk_score" >
+            <column name="description"  
+                type="varchar(2048)" >  
+                <constraints nullable="true" />  
+            </column>  
+        </addColumn>  
     </changeSet>
 
-    <!--Adding global variables for IIT ML -->
-    <changeSet id="kenyaemr-ML-client-id-20220329-213640" author="pwaweru">
+    <!-- Add risk_factors field to the ML table -->
+    <changeSet author="pwaweru" id="kenyaemr-ML-riskfactors-field-20220726-123630"> 
         <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM global_property
-                WHERE property = 'kenyaemr.iit.machine.learning.client.id'
-            </sqlCheck>
+            <tableExists tableName="kenyaemr_ml_patient_risk_score"/>
+            <not>
+                <columnExists columnName="risk_factors" tableName="kenyaemr_ml_patient_risk_score"/>
+            </not>
         </preConditions>
-        <comment>Inserting The oauth2 client-id of the data warehouse backend</comment>
-        <insert tableName="global_property">
-            <column name="property" value="kenyaemr.iit.machine.learning.client.id" />
-            <column name="property_value" value="test" />
-            <column name="description" value="IIT ML - The oauth2 client-id of the data warehouse backend" />
-            <column name="uuid" value="e8f35121-c569-489b-c1d7-7c713fd72199" />
-        </insert>
+        <comment>Adding risk factors column</comment>
+        <addColumn tableName="kenyaemr_ml_patient_risk_score" >
+            <column name="risk_factors"  
+                type="varchar(4096)" >  
+                <constraints nullable="true" />  
+            </column>  
+        </addColumn>  
     </changeSet>
 
-    <!--Adding global variables for IIT ML -->
-    <changeSet id="kenyaemr-ML-client-secret-20220329-214650" author="pwaweru">
+    <!-- Add not null constraint to the patient_id column -->
+    <changeSet author="pwaweru" id="kenyaemr-ML-patientid-field-20220919-215430"> 
         <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM global_property
-                WHERE property = 'kenyaemr.iit.machine.learning.client.secret'
-            </sqlCheck>
+            <tableExists tableName="kenyaemr_ml_patient_risk_score"/>
+            <columnExists columnName="patient_id" tableName="kenyaemr_ml_patient_risk_score"/>
         </preConditions>
-        <comment>Inserting The oauth2 client-secret of the data warehouse backend</comment>
-        <insert tableName="global_property">
-            <column name="property" value="kenyaemr.iit.machine.learning.client.secret" />
-            <column name="property_value" value="7f11e148-5741-11ec-bf63-0242ac130002" />
-            <column name="description" value="IIT ML - The oauth2 client-secret of the data warehouse backend" />
-            <column name="uuid" value="e8f35121-c569-489b-c1d7-8c713fd72188" />
-        </insert>
+        <comment>Adding not null constraint to patient_id column</comment>
+        <addNotNullConstraint 
+           columnDataType="int"  
+           columnName="patient_id" 
+           tableName="kenyaemr_ml_patient_risk_score"/>
     </changeSet>
 
-    <!--Adding global variables for IIT ML -->
-    <changeSet id="kenyaemr-ML-auth-scope-20220329-215620" author="pwaweru">
+    <!-- Add not null constraint to the description column -->
+    <changeSet author="pwaweru" id="kenyaemr-ML-description-field-20220920-231430"> 
         <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM global_property
-                WHERE property = 'kenyaemr.iit.machine.learning.scope'
-            </sqlCheck>
+            <tableExists tableName="kenyaemr_ml_patient_risk_score"/>
+            <columnExists columnName="description" tableName="kenyaemr_ml_patient_risk_score"/>
         </preConditions>
-        <comment>Inserting The oauth2 scope of the data warehouse backend</comment>
-        <insert tableName="global_property">
-            <column name="property" value="kenyaemr.iit.machine.learning.scope" />
-            <column name="property_value" value="pdapiv1" />
-            <column name="description" value="IIT ML - The oauth2 scope of the data warehouse backend" />
-            <column name="uuid" value="e8f35121-c569-489b-c1d7-9c713fd72155" />
-        </insert>
-    </changeSet>
-
-    <!--Adding global variables for IIT ML -->
-    <changeSet id="kenyaemr-ML-auth-url-20220329-222610" author="pwaweru">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM global_property
-                WHERE property = 'kenyaemr.iit.machine.learning.authorization.url'
-            </sqlCheck>
-        </preConditions>
-        <comment>Inserting The oauth2 authorization_endpoint of the data warehouse backend</comment>
-        <insert tableName="global_property">
-            <column name="property" value="kenyaemr.iit.machine.learning.authorization.url" />
-            <column name="property_value" value="https://auth2.kenyahmis.org:8443/connect/authorize" />
-            <column name="description" value="IIT ML - The oauth2 authorization URL of the data warehouse backend" />
-            <column name="uuid" value="e8f35121-c569-489b-c1d7-dc713fd72144" />
-        </insert>
-    </changeSet>
-
-    <!--Adding global variables for IIT ML -->
-    <changeSet id="kenyaemr-ML-token-url-20220329-223630" author="pwaweru">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM global_property
-                WHERE property = 'kenyaemr.iit.machine.learning.token.url'
-            </sqlCheck>
-        </preConditions>
-        <comment>Inserting The oauth2 token URL of the data warehouse backend</comment>
-        <insert tableName="global_property">
-            <column name="property" value="kenyaemr.iit.machine.learning.token.url" />
-            <column name="property_value" value="https://auth2.kenyahmis.org:8443/connect/token" />
-            <column name="description" value="IIT ML - The oauth2 token URL of the data warehouse backend" />
-            <column name="uuid" value="e8f35121-c669-489b-c1d7-dd713fd72133" />
-        </insert>
+        <comment>Adding not null constraint to description column</comment>
+        <addNotNullConstraint 
+           columnDataType="varchar(2048)"  
+           columnName="description" 
+           tableName="kenyaemr_ml_patient_risk_score"/>
     </changeSet>
  
 </databaseChangeLog>

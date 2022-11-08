@@ -82,6 +82,12 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 #stopPull {
     display: none;
 }
+#message { 
+    min-height: 20px;
+}
+.progress-container {
+    min-height: 30px;
+}
 </style>
 
 <div class="ke-page-sidebar">
@@ -110,12 +116,12 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                         <td id="strHighRiskCount">${highRiskCount}</td>
                     </tr>
                     <tr>
-                        <td width="30%">Low Risk</td>
-                        <td id="strLowRiskCount">${lowRiskCount}</td>
+                        <td width="30%">Medium Risk</td>
+                        <td id="strMediumRiskCount">${mediumRiskCount}</td>
                     </tr>
                     <tr>
-                        <td width="30%">Risk Threshold </td>
-                        <td id="strRiskThreshhold">${riskThreshhold}</td>
+                        <td width="30%">Low Risk</td>
+                        <td id="strLowRiskCount">${lowRiskCount}</td>
                     </tr>
                     </tbody>
                 </table>
@@ -126,22 +132,27 @@ tr:nth-child(even) {background-color: #f2f2f2;}
         <fieldset>
             <legend>Fetch IIT risk scores from Data Warehouse (NDWH)</legend>
             <br/>
-            <div id="message"><span id="lblText" style="color: Red; top: 50px;"></span></div>
+            <div id="message"><span id="lblText" style="color: Red; top: 50px;">Ready</span></div>
+            <br/>
+            <div class="progress-container">
+                <div class="alignHorizontal">
+                    <div class="bootstrap-iso">
+                        <div class="wait-loading prog-bar">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                                    <span class="prog-percentage"></span>
+                                </div>
+                            </div>
+                            <div class="prog-status"></div>
+                        </div>
+                    </div>
+                    <button id="stopPull">Stop the pull</button>
+                </div>
+            </div>
             <br/>
             <div class="alignHorizontal">
                 <button id="updateSummary">Update Summary</button>
                 <button id="fetchRiskScores">Pull Patient scores</button>
-                <div class="bootstrap-iso">
-                    <div class="wait-loading prog-bar">
-                        <div class="progress">
-                            <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
-                                <span class="prog-percentage"></span>
-                            </div>
-                        </div>
-                        <div class="prog-status"></div>
-                    </div>
-                </div>
-                <button id="stopPull">Stop the pull</button>
             </div>
         </fieldset>
     </div>
@@ -158,7 +169,11 @@ tr:nth-child(even) {background-color: #f2f2f2;}
         //show message
         function display_message(msg) {
             jq("#lblText").html(msg);
-            jq('#message').fadeIn('slow').delay(3000).fadeOut('slow');
+            //Show message for 3 seconds
+            //jq('#message').fadeIn('slow').delay(3000).fadeOut('slow');
+            setTimeout(function() {
+                jq("#lblText").html(" ");
+            }, 3000);
         }
 
         // display or hide the data pull progress indicator
@@ -168,6 +183,13 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             } else {
                 jq('.wait-loading').hide();
             }
+        }
+
+        //resets the progress bar to begin from zero
+        function resetProgressBar() {
+            jq(".progress-bar").attr('aria-valuenow', 0).css('width', 0+'%');
+            jq(".prog-status").html(0 + "/" + 0);
+            jq(".prog-percentage").html(0+'%');
         }
 
         // handle click event of the stop pull button
@@ -192,6 +214,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             //Run the fetch task
             console.log('Starting the fetch task!');
             display_message('Starting the fetch task!');
+            resetProgressBar();
             display_loading(true);
             jq('#fetchRiskScores').attr('disabled', true);
             jq('#stopPull').show();
@@ -204,6 +227,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 jq('#stopPull').hide();
                 updateSummaryTable(false);
                 isPullingData = false;
+                resetProgressBar();
             });
 
             fetchStatus();
@@ -228,13 +252,14 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             }).promise();
         }
 
-        // Check the status of the data pull
+        // Check the status of the data pull (one second cyclic async check)
         function fetchStatus() {
             getFetchStatusAsync().done(function(){
                 if(isPullingData) {
                     setTimeout(function() {
+                        updateSummaryTable(false);
                         fetchStatus();
-                    },3000);
+                    },1000);
                 }
             });
         }
@@ -251,7 +276,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     jq(".progress-bar").attr('aria-valuenow', statusPercent).css('width', statusPercent+'%');
                     jq(".prog-status").html(statusDone + "/" + statusTotal);
                     jq(".prog-percentage").html(statusPercent+'%');
-                    updateSummaryTable(false);
+                    //console.log('Got done: ' + statusDone + ' Got total: ' + statusTotal + ' Got percent: ' + statusPercent);
                 } else {
                     console.log('Failed to fetch pull status!');
                 }
@@ -272,8 +297,8 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     console.log('Success fetching summary!');
                     jq("#strTotalCount").html(result.totalCount);
                     jq("#strHighRiskCount").html(result.highRiskCount);
+                    jq("#strMediumRiskCount").html(result.mediumRiskCount);
                     jq("#strLowRiskCount").html(result.lowRiskCount);
-                    jq("#strRiskThreshhold").html(result.riskThreshhold);
                 } else {
                     if(notify) display_message('Failed to fetch summary!');
                     console.log('Failed to fetch summary!');

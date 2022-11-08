@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.openmrs.module</groupId>
 		<artifactId>kenyaemrml</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.1.0</version>
 	</parent>
 
 	<artifactId>kenyaemrml-omod</artifactId>
@@ -13,6 +13,11 @@
 	<description>Omod submodule for ML in KenyaEMR</description>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+		</dependency>
+
         <dependency>
             <groupId>org.openmrs.module</groupId>
             <artifactId>kenyaemrml-api</artifactId>
@@ -112,6 +117,7 @@
 			<type>pom</type>
 			<scope>test</scope>
 		</dependency>
+
 	</dependencies>
 
 	<build>

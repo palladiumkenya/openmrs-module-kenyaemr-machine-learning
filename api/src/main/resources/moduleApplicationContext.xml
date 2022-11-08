@@ -77,6 +77,8 @@
         <property name="commonReports">
             <set>
                 <ref bean="kenyaemrml.hiv.report.highIIT" />
+                <!-- <ref bean="kenyaemrml.hiv.report.mediumIIT" />
+                <ref bean="kenyaemrml.hiv.report.lowIIT" /> -->
             </set>
         </property>
     </bean>
@@ -85,7 +87,23 @@
         <property name="targetUuid" value="01be2a6e-3938-46bf-875d-bba11b420eb6" />
         <property name="name" value="IIT high risk" />
         <property name="description" value="Patients with IIT high risk" />
-        <property name="calculation" value="org.openmrs.module.kenyaemrml.calculation.HighIITRiskScoreCalculation" />
+        <property name="calculation" value="org.openmrs.module.kenyaemrml.calculation.IITHighRiskScoreCalculation" />
         <property name="apps"><set><ref bean="kenyaemr.app.reports" /></set></property>
     </bean>
+
+    <!-- <bean id="kenyaemrml.hiv.report.mediumIIT" class="org.openmrs.module.kenyacore.report.CalculationReportDescriptor">
+        <property name="targetUuid" value="49508697-b98a-472f-9ef7-b5f42d575863" />
+        <property name="name" value="IIT medium risk" />
+        <property name="description" value="Patients with IIT medium risk" />
+        <property name="calculation" value="org.openmrs.module.kenyaemrml.calculation.IITMediumRiskScoreCalculation" />
+        <property name="apps"><set><ref bean="kenyaemr.app.reports" /></set></property>
+    </bean>
+
+    <bean id="kenyaemrml.hiv.report.lowIIT" class="org.openmrs.module.kenyacore.report.CalculationReportDescriptor">
+        <property name="targetUuid" value="83aad7a5-0980-4cee-84e4-82b70b2b1a49" />
+        <property name="name" value="IIT low risk" />
+        <property name="description" value="Patients with IIT low risk" />
+        <property name="calculation" value="org.openmrs.module.kenyaemrml.calculation.IITLowRiskScoreCalculation" />
+        <property name="apps"><set><ref bean="kenyaemr.app.reports" /></set></property>
+    </bean> -->
 </beans>

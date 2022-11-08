@@ -41,8 +41,8 @@ import org.openmrs.module.reporting.common.SortCriteria;
  * Created by codehub on 10/7/15.
  */
 @Component
-@Builds({ "kenyaemrml.hiv.report.highIIT" })
-public class HighIITRiskPatientsReportBuilder extends CalculationReportBuilder {
+@Builds({ "kenyaemrml.hiv.report.lowIIT" })
+public class LowIITRiskPatientsReportBuilder extends CalculationReportBuilder {
 	
 	public static final String DATE_FORMAT = "dd/MM/yyyy";
 	

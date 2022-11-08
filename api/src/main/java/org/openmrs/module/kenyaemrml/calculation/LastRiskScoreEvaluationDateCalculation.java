@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Calculate whether a patient has high IIT risk score based on data pulled from Palantir
+ * Calculate evaluation date for patients
  */
 public class LastRiskScoreEvaluationDateCalculation extends AbstractPatientCalculation {
 	
@@ -48,19 +48,17 @@ public class LastRiskScoreEvaluationDateCalculation extends AbstractPatientCalcu
 		
 		CalculationResultMap ret = new CalculationResultMap();
 		for (Integer ptId : cohort) {
-			Date object = null;
-			
 			// check if a patient is alive
 			if (inHivProgram.contains(ptId)) {
+				Date evaluationDate = null;
 				PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
 				        .getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId));
 				if (latestRiskScore != null) {
-					object = latestRiskScore.getEvaluationDate();
+					evaluationDate = latestRiskScore.getEvaluationDate();
 				}
+				ret.put(ptId, new SimpleResult(evaluationDate, this));
 			}
-			ret.put(ptId, new SimpleResult(object, this));
 		}
 		return ret;
 	}
-	
 }

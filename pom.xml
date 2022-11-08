@@ -10,7 +10,7 @@
 
 	<groupId>org.openmrs.module</groupId>
 	<artifactId>kenyaemrml</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.1.0</version>
 	<packaging>pom</packaging>
 	<name>ML in KenyaEMR</name>
 	<description>Implementation of Machine learning in KenyaEMR</description>
@@ -41,7 +41,7 @@
 		<reportingVersion>1.22.0</reportingVersion>
 		<serializationxstreamVersion>0.2.14</serializationxstreamVersion>
 		<uiframeworkVersion>3.15.0</uiframeworkVersion>
-		<kenyaemrVersion>18.0.0</kenyaemrVersion>
+		<kenyaemrVersion>18.3.0</kenyaemrVersion>
 		<kenyacoreVersion>3.0.0</kenyacoreVersion>
 		<kenyauiVersion>2.0.4</kenyauiVersion>
 		<webservicesRestVersion>2.26.0</webservicesRestVersion>
@@ -57,6 +57,12 @@
 		<dependencies>
 
 			<!-- Begin OpenMRS modules -->
+			<dependency>
+                <groupId>com.googlecode.json-simple</groupId>
+                <artifactId>json-simple</artifactId>
+                <version>1.1</version>
+            </dependency>
+			
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>appframework-api</artifactId>

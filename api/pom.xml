@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.openmrs.module</groupId>
 		<artifactId>kenyaemrml</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.1.0</version>
 	</parent>
 
 	<artifactId>kenyaemrml-api</artifactId>
@@ -14,6 +14,10 @@
 	<dependencies>
 
 		<!-- Begin OpenMRS modules -->
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.openmrs.module</groupId>

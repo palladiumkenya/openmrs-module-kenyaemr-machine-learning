@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.kenyaemrml.api.impl;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -67,5 +68,30 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 	@Override
 	public List<PatientRiskScore> getAllPatientRiskScore() {
 		return mLinKenyaEMRDao.getAllPatientRiskScore();
+	}
+
+	@Override
+	public Date getLatestRiskEvaluationDate() {
+		return mLinKenyaEMRDao.getLatestRiskEvaluationDate();
+	}
+
+	@Override
+	public Collection<Integer> getAllPatientsWithHighRiskScores() {
+		return mLinKenyaEMRDao.getAllPatientsWithHighRiskScores();
+	}
+
+	@Override
+	public Collection<Integer> getAllPatientsWithMediumRiskScores() {
+		return mLinKenyaEMRDao.getAllPatientsWithMediumRiskScores();
+	}
+
+	@Override
+	public Collection<Integer> getAllPatientsWithLowRiskScores() {
+		return mLinKenyaEMRDao.getAllPatientsWithLowRiskScores();
+	}
+
+	@Override
+	public Collection<Integer> getAllPatients() {
+		return mLinKenyaEMRDao.getAllPatients();
 	}
 }
