@@ -40,10 +40,11 @@ public class ModelService {
 			return scoringResult;
 		}
 		catch (Exception e) {
-			e.printStackTrace();
-			log.error("Exception during preparation of input parameters or scoring of values for HTS model. "
+			log.error("Exception during preparation of input parameters or scoring of values for HTS model: "
 			        + e.getMessage());
-			throw new ScoringException("Exception during preparation of input parameters or scoring of values", e);
+			e.printStackTrace();
+			// throw new ScoringException("Exception during preparation of input parameters or scoring of values", e);
+			return(null);
 		}
 	}
 	
