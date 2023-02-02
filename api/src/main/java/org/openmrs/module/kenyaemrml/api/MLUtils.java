@@ -37,10 +37,6 @@ public class MLUtils {
 	public static String MODEL_PARAMETER_VALUE_OBJECT_KEY = "variableValues";
 	
 	public static String MODEL_CONFIG_OBJECT_KEY = "modelConfigs";
-	
-	// public static String[] FACILITY_PROFILE_VARIABLES = { "births", "pregnancies", "literacy", "poverty", "anc", "pnc",
-	//         "sba", "hiv_prev", "hiv_count", "condom", "intercourse", "in_union", "circumcision", "partner_away",
-	//         "partner_men", "partner_women", "sti", "pop_density", "women_reproductive_age", "young_adults" };
 
 	public static String[] FACILITY_PROFILE_VARIABLES = { "births", "pregnancies", "literacy", "poverty", "anc", "pnc", "sba", "hiv_prev", "hiv_count", "condom", "intercourse", "in_union", "circumcision", "partner_away", "partner_men", "partner_women", "sti", "fb" };
 	
