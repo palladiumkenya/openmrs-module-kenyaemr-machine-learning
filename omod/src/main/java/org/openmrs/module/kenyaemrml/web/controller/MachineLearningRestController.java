@@ -54,7 +54,7 @@ public class MachineLearningRestController extends BaseRestController {
 				return new ResponseEntity<Object>("The service requires model, date, and facility information",
 				        new HttpHeaders(), HttpStatus.BAD_REQUEST);
 			}
-			JSONObject profile = MLUtils.getHTSFacilityProfile("SiteCode", facilityMflCode, MLUtils.getFacilityCutOffs());
+			JSONObject profile = MLUtils.getHTSFacilityProfile("FacilityCode", facilityMflCode, MLUtils.getFacilityCutOffs());
 			
 			if (profile == null) {
 				return new ResponseEntity<Object>(
@@ -63,6 +63,8 @@ public class MachineLearningRestController extends BaseRestController {
 			}
 			ModelInputFields inputFields = MLUtils.extractHTSCaseFindingVariablesFromRequestBody(requestBody, facilityMflCode,
 			    encounterDate);
+
+			System.err.println("Using input fields: " + inputFields);
 			
 			ScoringResult scoringResult = modelService.score(modelId, facilityMflCode, encounterDate, inputFields, isDebugMode);
 			return scoringResult;

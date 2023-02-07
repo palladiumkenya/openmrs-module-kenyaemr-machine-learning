@@ -58,8 +58,32 @@
 	</globalProperty>
 
 	<globalProperty>
+		<property>kenyaemrml.hts.lowRiskThreshold</property>
+		<defaultValue>0.002625179</defaultValue>
+		<description>
+			A global property that specifies low risk threshold for the HTS ML model
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kenyaemrml.hts.mediumRiskThreshold</property>
+		<defaultValue>0.010638781</defaultValue>
+		<description>
+			A global property that specifies medium risk threshold for the HTS ML model
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kenyaemrml.hts.highRiskThreshold</property>
+		<defaultValue>0.028924102</defaultValue>
+		<description>
+			A global property that specifies high risk threshold for the HTS ML model
+		</description>
+	</globalProperty>
+
+	<globalProperty>
 		<property>kenyaemrml.casefinding.feature.enabled</property>
-		<defaultValue>false</defaultValue>
+		<defaultValue>true</defaultValue>
 		<description>
 			Defines whether the ML based case finding feature is enabled in the HTS forms
 		</description>
