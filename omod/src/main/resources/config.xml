@@ -59,7 +59,7 @@
 
 	<globalProperty>
 		<property>kenyaemrml.hts.lowRiskThreshold</property>
-		<defaultValue>0.002625179</defaultValue>
+		<defaultValue>0.005011473</defaultValue>
 		<description>
 			A global property that specifies low risk threshold for the HTS ML model
 		</description>
@@ -67,7 +67,7 @@
 
 	<globalProperty>
 		<property>kenyaemrml.hts.mediumRiskThreshold</property>
-		<defaultValue>0.010638781</defaultValue>
+		<defaultValue>0.02795569</defaultValue>
 		<description>
 			A global property that specifies medium risk threshold for the HTS ML model
 		</description>
@@ -75,7 +75,7 @@
 
 	<globalProperty>
 		<property>kenyaemrml.hts.highRiskThreshold</property>
-		<defaultValue>0.028924102</defaultValue>
+		<defaultValue>0.1079255</defaultValue>
 		<description>
 			A global property that specifies high risk threshold for the HTS ML model
 		</description>
