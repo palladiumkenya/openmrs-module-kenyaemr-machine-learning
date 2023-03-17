@@ -79,7 +79,26 @@ public class IitRiskScoreHistoryFragmentController {
 		User user = Context.getUserContext().getAuthenticatedUser();
 		if(user != null) {
 			user.setUserProperty("stopIITMLPull", "1");
+			user.setUserProperty("IITMLPullRunning", "0");
 		}
+	}
+
+	/**
+	 * Get started/stopped status of Fetching data from Data Warehouse task
+	 * 
+	 * @return true if still running and false if stopped
+	 */
+	@AppAction("kenyaemrml.predictions")
+	public Boolean getStartStopStatusOfDataPull(@SpringBean KenyaUiUtils kenyaUi, UiUtils ui) {
+		User user = Context.getUserContext().getAuthenticatedUser();
+		Boolean ret = false;
+		if(user != null) {
+			String status = user.getUserProperty("IITMLPullRunning");
+			if(status != null && status.trim().equalsIgnoreCase("1")) {
+				ret = true;
+			}
+		}
+		return(ret);
 	}
 
 	/**
@@ -117,17 +136,8 @@ public class IitRiskScoreHistoryFragmentController {
 	 */
 	@AppAction("kenyaemrml.predictions")
 	public SimpleObject fetchLocalSummary(@SpringBean KenyaUiUtils kenyaUi, UiUtils ui) {
-		Collection<Integer> high = Context.getService(MLinKenyaEMRService.class).getAllPatientsWithHighRiskScores();
-		Collection<Integer> medium = Context.getService(MLinKenyaEMRService.class).getAllPatientsWithMediumRiskScores();
-		Collection<Integer> low = Context.getService(MLinKenyaEMRService.class).getAllPatientsWithLowRiskScores();
-		Collection<Integer> all = Context.getService(MLinKenyaEMRService.class).getAllPatients();
 		
-		//prepare result
-		SimpleObject summary = new SimpleObject();
-		summary.put("totalCount", all.size());
-		summary.put("highRiskCount", high.size());
-		summary.put("mediumRiskCount", medium.size());
-		summary.put("lowRiskCount", low.size());
+		SimpleObject summary = Context.getService(MLinKenyaEMRService.class).getIITRiskScoresSummary();
 
 		return summary;
 	}

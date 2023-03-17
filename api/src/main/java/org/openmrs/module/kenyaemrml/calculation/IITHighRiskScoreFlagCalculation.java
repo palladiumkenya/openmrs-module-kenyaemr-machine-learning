@@ -9,25 +9,28 @@
  */
 package org.openmrs.module.kenyaemrml.calculation;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.openmrs.Patient;
+import org.openmrs.Program;
+import org.openmrs.Visit;
 import org.openmrs.api.context.Context;
 import org.openmrs.calculation.patient.PatientCalculationContext;
 import org.openmrs.calculation.result.CalculationResultMap;
 import org.openmrs.module.kenyacore.calculation.AbstractPatientCalculation;
 import org.openmrs.module.kenyacore.calculation.BooleanResult;
+import org.openmrs.module.kenyacore.calculation.Filters;
 import org.openmrs.module.kenyacore.calculation.PatientFlagCalculation;
+import org.openmrs.module.kenyaemr.metadata.HivMetadata;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
-
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-import org.openmrs.Patient;
-import org.openmrs.Visit;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
+import org.openmrs.module.metadatadeploy.MetadataUtils;
 
 /**
  * Calculate whether a patient has high IIT risk score based on data pulled from NDWH
@@ -50,35 +53,30 @@ public class IITHighRiskScoreFlagCalculation extends AbstractPatientCalculation 
 	 * @should determine whether a patient has high IIT risk
 	 */
 	@Override
-	public CalculationResultMap evaluate(Collection<Integer> cohort, Map<String, Object> parameterValues,
-	        PatientCalculationContext context) {
+	public CalculationResultMap evaluate(Collection<Integer> cohort, Map<String, Object> parameterValues, PatientCalculationContext context) {
 		
+		Program hivProgram = MetadataUtils.existing(Program.class, HivMetadata._Program.HIV);
+		Set<Integer> alive = Filters.alive(cohort, context);
+		Set<Integer> inHivProgram = Filters.inProgram(hivProgram, alive, context);
+
 		CalculationResultMap ret = new CalculationResultMap();
+
 		for (Integer ptId : cohort) {
-			Patient currentPatient = Context.getPatientService().getPatient(ptId);
-			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(currentPatient);
-			if (latestRiskScore != null) {
-				double riskScore = latestRiskScore.getRiskScore();
-				String riskGroup = latestRiskScore.getDescription();
-				Date evaluationDate = latestRiskScore.getEvaluationDate();
-				Date currentDate = new Date();
-				// Ensure the evaluation date is less than a month ago (30 days)
-				long diffInMillies = Math.abs(currentDate.getTime() - evaluationDate.getTime());
-    			long diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-				// Check if last visit is after evaluation date
-				List<Visit> allVisits = Context.getVisitService().getVisitsByPatient(currentPatient);
-				Date latestVisitDate = getLastVisitDate(allVisits);
-				Boolean checkVisit = latestVisitDate.after(evaluationDate);
-				// Create the High Risk flag given certain conditions (less than 30 days since score was done, no visit after score date)
-				if (riskGroup.trim().equalsIgnoreCase("High Risk") && diff <= 30 && !checkVisit) {
-					System.out.println("Setting Flag HIGH");
-					setCustomMessage("IIT High risk: " + (Math.floor(riskScore * 100)) + "%");
-					ret.put(ptId, new BooleanResult(true, this, context));
-				} else {
-					ret.put(ptId, new BooleanResult(false, this, context));
-				}				
+			if (inHivProgram.contains(ptId)) {
+				Patient currentPatient = Context.getPatientService().getPatient(ptId);
+				PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(currentPatient, false); // We get real time IIT risk score
+				if (latestRiskScore != null) {
+					String riskGroup = latestRiskScore.getDescription();
+					if (riskGroup.trim().equalsIgnoreCase("High Risk")) {					
+						setCustomMessage("IIT High risk");
+						ret.put(ptId, new BooleanResult(true, this, context));
+					} else {
+						ret.put(ptId, new BooleanResult(false, this, context));
+					}
+				}
 			}
 		}
+
 		return ret;
 	}
 
