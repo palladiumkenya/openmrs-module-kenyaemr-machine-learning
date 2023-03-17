@@ -117,17 +117,8 @@ public class IitRiskScoreHistoryFragmentController {
 	 */
 	@AppAction("kenyaemrml.predictions")
 	public SimpleObject fetchLocalSummary(@SpringBean KenyaUiUtils kenyaUi, UiUtils ui) {
-		Collection<Integer> high = Context.getService(MLinKenyaEMRService.class).getAllPatientsWithHighRiskScores();
-		Collection<Integer> medium = Context.getService(MLinKenyaEMRService.class).getAllPatientsWithMediumRiskScores();
-		Collection<Integer> low = Context.getService(MLinKenyaEMRService.class).getAllPatientsWithLowRiskScores();
-		Collection<Integer> all = Context.getService(MLinKenyaEMRService.class).getAllPatients();
 		
-		//prepare result
-		SimpleObject summary = new SimpleObject();
-		summary.put("totalCount", all.size());
-		summary.put("highRiskCount", high.size());
-		summary.put("mediumRiskCount", medium.size());
-		summary.put("lowRiskCount", low.size());
+		SimpleObject summary = Context.getService(MLinKenyaEMRService.class).getIITRiskScoresSummary();
 
 		return summary;
 	}

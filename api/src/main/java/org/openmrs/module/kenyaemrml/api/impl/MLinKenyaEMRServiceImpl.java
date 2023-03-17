@@ -13,18 +13,23 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.openmrs.Patient;
 import org.openmrs.api.UserService;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.api.db.hibernate.HibernateMLinKenyaEMRDao;
+import org.openmrs.module.kenyaemrml.api.service.ModelService;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
+import org.openmrs.ui.framework.SimpleObject;
 
 public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinKenyaEMRService {
 	
 	HibernateMLinKenyaEMRDao mLinKenyaEMRDao;
 	
 	UserService userService;
+
+	ModelService modelService;
 	
 	/**
 	 * Injected in moduleApplicationContext.xml
@@ -39,6 +44,13 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 	public void setUserService(UserService userService) {
 		this.userService = userService;
 	}
+
+	/**
+	 * Injected in moduleApplicationContext.xml
+	 */
+	public void setModelService(ModelService modelService) {
+		this.modelService = modelService;
+	}
 	
 	@Override
 	public PatientRiskScore saveOrUpdateRiskScore(PatientRiskScore riskScore) {
@@ -51,8 +63,28 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 	}
 	
 	@Override
-	public PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient) {
-		return mLinKenyaEMRDao.getLatestPatientRiskScoreByPatient(patient);
+	public PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient, Boolean reporting) {
+		Date lastScore = getPatientLatestRiskEvaluationDate(patient);
+		Date dateToday = new Date();
+		// If it is the same day or we are reporting, fetch from DB
+		if((lastScore != null && DateUtils.isSameDay(lastScore, dateToday)) || reporting) {
+			return mLinKenyaEMRDao.getLatestPatientRiskScoreByPatient(patient);
+		} else {
+			// System.out.println("IIT ML Score: Generating a new risk score || and saving to DB");
+			PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
+			// Save/Update to DB (for reports) -- Incase a record for current date doesnt exist
+			saveOrUpdateRiskScore(patientRiskScore);
+			return(patientRiskScore);
+		}
+	}
+
+	@Override
+	public PatientRiskScore getLatestPatientRiskScoreByPatientRealTime(Patient patient) {
+		// System.out.println("IIT ML Score: Generating a new risk score || and saving to DB");
+		PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
+		// Save/Update to DB (for reports) -- Incase a record for current date doesnt exist
+		saveOrUpdateRiskScore(patientRiskScore);
+		return(patientRiskScore);
 	}
 	
 	@Override
@@ -91,7 +123,17 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 	}
 
 	@Override
+	public SimpleObject getIITRiskScoresSummary() {
+		return mLinKenyaEMRDao.getIITRiskScoresSummary();
+	}
+
+	@Override
 	public Collection<Integer> getAllPatients() {
 		return mLinKenyaEMRDao.getAllPatients();
+	}
+
+	@Override
+	public Date getPatientLatestRiskEvaluationDate(Patient patient) {
+		return mLinKenyaEMRDao.getPatientLatestRiskEvaluationDate(patient);
 	}
 }

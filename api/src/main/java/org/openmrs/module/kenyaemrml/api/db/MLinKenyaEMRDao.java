@@ -15,6 +15,7 @@ import java.util.Collection;
 
 import org.openmrs.Patient;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
+import org.openmrs.ui.framework.SimpleObject;
 
 //@Repository("kenyaemrml.MLinKenyaEMRDao")
 public interface MLinKenyaEMRDao {
@@ -62,6 +63,12 @@ public interface MLinKenyaEMRDao {
 	public Collection<Integer> getAllPatientsWithLowRiskScores();
 
 	/**
+	 * Get a summary of IIT risk scores
+	 * @return a summary
+	 */
+	public SimpleObject getIITRiskScoresSummary();
+
+	/**
 	 * Get all ML patients
 	 * @return a list of patients
 	 */
@@ -90,5 +97,13 @@ public interface MLinKenyaEMRDao {
 	 */
 	public List<PatientRiskScore> getAllPatientRiskScore();
 
+	/**
+	 *  Gets the latest risk evaluation date for all patient records
+	 */
     Date getLatestRiskEvaluationDate();
+
+	/**
+	 *  Gets the latest risk evaluation date for a patient
+	 */
+	Date getPatientLatestRiskEvaluationDate(Patient patient);
 }

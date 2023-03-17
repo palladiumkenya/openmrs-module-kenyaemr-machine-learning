@@ -135,5 +135,29 @@
            columnName="description" 
            tableName="kenyaemr_ml_patient_risk_score"/>
     </changeSet>
+
+    <!-- Optimize the description field in the risk score table by reducing field size and adding an index -->
+    <!-- <changeSet author="pwaweru" id="kenyaemr-ML-optimize-description-field-20230509-100030"> 
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_ml_patient_risk_score"/>
+            <columnExists columnName="description" tableName="kenyaemr_ml_patient_risk_score"/>
+            <not>
+                <indexExists indexName="index_risk_score_description"/>
+            </not>
+        </preConditions>
+        <comment>Modify description field size and add index</comment>
+        <!-- <modifyDataType
+            columnName="description"
+            newDataType="varchar(128)"
+            tableName="kenyaemr_ml_patient_risk_score"/> -->
+        <modifyColumn tableName="kenyaemr_ml_patient_risk_score">
+            <column name="description" type="varchar(128)">
+                <!-- <constraint nullable="false"/> -->
+            </column>
+        </modifyColumn>
+        <createIndex indexName="index_risk_score_description" tableName="kenyaemr_ml_patient_risk_score" unique="false">
+            <column name="description"/>
+        </createIndex>
+    </changeSet> -->
  
 </databaseChangeLog>

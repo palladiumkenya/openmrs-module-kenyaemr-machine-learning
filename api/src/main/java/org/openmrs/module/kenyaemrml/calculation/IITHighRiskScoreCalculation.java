@@ -55,20 +55,10 @@ public class IITHighRiskScoreCalculation extends AbstractPatientCalculation {
 
 		for (Integer ptId : inHivProgram) {
 			Patient currentPatient = Context.getPatientService().getPatient(ptId);
-			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(currentPatient);
+			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(currentPatient, true);
 			if (latestRiskScore != null) {
 				String riskGroup = latestRiskScore.getDescription();
-				Date evaluationDate = latestRiskScore.getEvaluationDate();
-				Date currentDate = new Date();
-				// Ensure the evaluation date is less than a month ago (30 days)
-				long diffInMillies = Math.abs(currentDate.getTime() - evaluationDate.getTime());
-    			long diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-				// Check if last visit is after evaluation date
-				List<Visit> allVisits = Context.getVisitService().getVisitsByPatient(currentPatient);
-				Date latestVisitDate = getLastVisitDate(allVisits);
-				Boolean checkVisit = latestVisitDate.after(evaluationDate);
-				// Create the High Risk flag given certain conditions (less than 30 days since score was done, no visit after score date)
-				if (riskGroup.trim().equalsIgnoreCase("High Risk") && diff <= 30 && !checkVisit) {
+				if (riskGroup.trim().equalsIgnoreCase("High Risk")) {
 					ret.put(ptId, new BooleanResult(true, this, context));
 				}				
 			}

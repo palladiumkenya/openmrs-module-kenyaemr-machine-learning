@@ -51,8 +51,7 @@ public class LastRiskScoreEvaluationDateCalculation extends AbstractPatientCalcu
 			// check if a patient is alive
 			if (inHivProgram.contains(ptId)) {
 				Date evaluationDate = null;
-				PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
-				        .getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId));
+				PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId), true);
 				if (latestRiskScore != null) {
 					evaluationDate = latestRiskScore.getEvaluationDate();
 				}

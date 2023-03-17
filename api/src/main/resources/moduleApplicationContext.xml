@@ -49,6 +49,13 @@
                                     </property>
                                 </bean>
                             </property>
+                            <property name="modelService">
+                                <bean class="org.openmrs.module.kenyaemrml.api.service.ModelService">
+                                    <property name="sessionFactory">
+                                        <ref bean="sessionFactory" />
+                                    </property>
+                                </bean>
+                            </property>
                         </bean>
                     </property>
                     <property name="preInterceptors">

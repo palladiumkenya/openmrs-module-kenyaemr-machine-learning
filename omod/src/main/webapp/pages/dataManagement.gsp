@@ -71,7 +71,16 @@ tr:nth-child(even) {background-color: #f2f2f2;}
     margin-left: 5px;
     display: none;
 }
+.genscores-wait-loading {
+    margin-right: 5px;
+    margin-left: 5px;
+    display: none;
+}
 #fetchRiskScores {
+    margin-right: 5px;
+    margin-left: 5px;
+}
+#generateRiskScores {
     margin-right: 5px;
     margin-left: 5px;
 }
@@ -79,13 +88,26 @@ tr:nth-child(even) {background-color: #f2f2f2;}
     margin-right: 5px;
     margin-left: 5px;
 }
+#updateLocalSummary {
+    margin-right: 5px;
+    margin-left: 5px;
+}
 #stopPull {
+    display: none;
+}
+#stopGen {
     display: none;
 }
 #message { 
     min-height: 20px;
 }
+#generateMessage { 
+    min-height: 20px;
+}
 .progress-container {
+    min-height: 30px;
+}
+.generate-progress-container {
     min-height: 30px;
 }
 </style>
@@ -109,19 +131,19 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     <tbody>
                     <tr>
                         <td width="30%">Total Patients</td>
-                        <td id="strTotalCount">${totalCount}</td>
+                        <td id="strTotalCount">-</td>
                     </tr>
                     <tr>
                         <td width="30%">High Risk</td>
-                        <td id="strHighRiskCount">${highRiskCount}</td>
+                        <td id="strHighRiskCount">-</td>
                     </tr>
                     <tr>
                         <td width="30%">Medium Risk</td>
-                        <td id="strMediumRiskCount">${mediumRiskCount}</td>
+                        <td id="strMediumRiskCount">-</td>
                     </tr>
                     <tr>
                         <td width="30%">Low Risk</td>
-                        <td id="strLowRiskCount">${lowRiskCount}</td>
+                        <td id="strLowRiskCount">-</td>
                     </tr>
                     </tbody>
                 </table>
@@ -156,6 +178,34 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             </div>
         </fieldset>
     </div>
+    <div>
+        <fieldset>
+            <legend>Generate IIT Risk Scores</legend>
+            <br/>
+            <div id="generateMessage"><span id="lblGenScoresText" style="color: Red; top: 50px;">Ready</span></div>
+            <br/>
+            <div class="generate-progress-container">
+                <div class="alignHorizontal">
+                    <div class="bootstrap-iso">
+                        <div class="genscores-wait-loading prog-bar">
+                            <div class="progress">
+                                <div class="genscores-progress-bar progress-bar-striped" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                                    <span class="genscores-prog-percentage"></span>
+                                </div>
+                            </div>
+                            <div class="genscores-prog-status"></div>
+                        </div>
+                    </div>
+                    <button id="stopGen">Stop Generating</button>
+                </div>
+            </div>
+            <br/>
+            <div class="alignHorizontal">
+                <button id="updateLocalSummary">Update Summary</button>
+                <button id="generateRiskScores">Generate Patient Scores</button>
+            </div>
+        </fieldset>
+    </div>
 
 </div>
 
@@ -165,14 +215,25 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 
         var loadingImageURL = ui.resourceLink("kenyaemrml", "images/loading.gif");
         var isPullingData = false;
+        var isGeneratingScores = false;
 
-        //show message
+        //show data pull message
         function display_message(msg) {
             jq("#lblText").html(msg);
             //Show message for 3 seconds
             //jq('#message').fadeIn('slow').delay(3000).fadeOut('slow');
             setTimeout(function() {
                 jq("#lblText").html(" ");
+            }, 3000);
+        }
+
+        //show generate scores message
+        function display_genscores_message(msg) {
+            jq("#lblGenScoresText").html(msg);
+            //Show message for 3 seconds
+            //jq('#message').fadeIn('slow').delay(3000).fadeOut('slow');
+            setTimeout(function() {
+                jq("#lblGenScoresText").html(" ");
             }, 3000);
         }
 
@@ -185,11 +246,27 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             }
         }
 
-        //resets the progress bar to begin from zero
+        // display or hide the generate scores progress indicator
+        function display_genscores_loading(status) {
+            if(status) {
+                jq('.genscores-wait-loading').show();
+            } else {
+                jq('.genscores-wait-loading').hide();
+            }
+        }
+
+        //resets the data pull progress bar to begin from zero
         function resetProgressBar() {
             jq(".progress-bar").attr('aria-valuenow', 0).css('width', 0+'%');
             jq(".prog-status").html(0 + "/" + 0);
             jq(".prog-percentage").html(0+'%');
+        }
+
+        //resets the generate scores progress bar to begin from zero
+        function resetGenScoresProgressBar() {
+            jq(".genscores-progress-bar").attr('aria-valuenow', 0).css('width', 0+'%');
+            jq(".genscores-prog-status").html(0 + "/" + 0);
+            jq(".genscores-prog-percentage").html(0+'%');
         }
 
         // handle click event of the stop pull button
@@ -202,6 +279,18 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             display_loading(false);
             jq('#fetchRiskScores').attr('disabled', false);
             jq('#stopPull').hide();  
+        });
+
+        // handle click event of the stop gen button
+        jq(document).on('click','#stopGen',function () {
+            console.log('Stoping the generation task!');
+            display_genscores_message('Stoping the generation task!');
+            ui.getFragmentActionAsJson('kenyaemrml', 'iitRiskScoreGenerator', 'stopScoreGen', {}, function (result) {
+                //stop generating IIT scores
+            });
+            display_genscores_loading(false);
+            jq('#generateRiskScores').attr('disabled', false);
+            jq('#stopGen').hide();  
         });
 
         // handle click event of the update summary button
@@ -233,6 +322,30 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             fetchStatus();
         });
 
+        // handle click event of the generate scores button
+        jq(document).on('click','#generateRiskScores',function () {
+            //Run the generate scores task
+            console.log('Starting the generate scores task!');
+            display_genscores_message('Starting the generate scores task!');
+            resetGenScoresProgressBar();
+            display_genscores_loading(true);
+            jq('#generateRiskScores').attr('disabled', true);
+            jq('#stopGen').show();
+
+            generateScoresAsync().done(function(){
+                console.log('Finished the generate scores task!');
+                display_genscores_message('Finished the generate scores task!');
+                display_genscores_loading(false);
+                jq('#generateRiskScores').attr('disabled', false);
+                jq('#stopGen').hide();
+                updateSummaryTable(false);
+                isGeneratingScores = false;
+                resetGenScoresProgressBar();
+            });
+
+            generateScoresStatus();
+        });
+
         // fetch the data from DWH asynchronously
         function fetchDataAsync() {
             let dfrd = jq.Deferred();
@@ -252,6 +365,25 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             }).promise();
         }
 
+        // generate scores
+        function generateScoresAsync() {
+            let dfrd = jq.Deferred();
+            isGeneratingScores = true;
+            //The Task
+            ui.getFragmentActionAsJson('kenyaemrml', 'iitRiskScoreGenerator', 'generateIITScores', {}, function (result) {
+                if(result) {
+                    console.log('Success generating scores!');
+                } else {
+                    console.log('Failed to generate scores!');
+                }
+                dfrd.resolve();
+            });
+
+            return jq.when(dfrd).done(function(){
+                console.log('Finished the generate scores task!');
+            }).promise();
+        }
+
         // Check the status of the data pull (one second cyclic async check)
         function fetchStatus() {
             getFetchStatusAsync().done(function(){
@@ -259,6 +391,18 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     setTimeout(function() {
                         updateSummaryTable(false);
                         fetchStatus();
+                    },1000);
+                }
+            });
+        }
+
+        // Check the status of the generate scores task (one second cyclic async check)
+        function generateScoresStatus() {
+            getGenerateScoresStatusAsync().done(function(){
+                if(isGeneratingScores) {
+                    setTimeout(function() {
+                        updateSummaryTable(false);
+                        generateScoresStatus();
                     },1000);
                 }
             });
@@ -288,12 +432,37 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             }).promise();
         }
 
+        // fetch the status of generate scores asynchronously
+        function getGenerateScoresStatusAsync() {
+            let dfrd = jq.Deferred();
+            //The Task
+            ui.getFragmentActionAsJson('kenyaemrml', 'iitRiskScoreGenerator', 'getStatusOfGenerateScores', {}, function (result) {
+                if(result) {
+                    let statusDone = result.done;
+                    let statusTotal = result.total;
+                    let statusPercent = result.percent;
+                    jq(".genscores-progress-bar").attr('aria-valuenow', statusPercent).css('width', statusPercent+'%');
+                    jq(".genscores-prog-status").html(statusDone + "/" + statusTotal);
+                    jq(".genscores-prog-percentage").html(statusPercent+'%');
+                    console.log('Got done: ' + statusDone + ' Got total: ' + statusTotal + ' Got percent: ' + statusPercent);
+                } else {
+                    console.log('Failed to fetch generate scores status!');
+                }
+                dfrd.resolve();
+            });
+
+            return jq.when(dfrd).done(function(){
+                console.log('Finished the generate scores status check!');
+            }).promise();
+        }
+
         // update the summary table
         function updateSummaryTable(notify) {
             notify = typeof notify !== "undefined" ? notify : true;
             ui.getFragmentActionAsJson('kenyaemrml', 'iitRiskScoreHistory', 'fetchLocalSummary', {}, function (result) {
                 if(result) {
                     if(notify) display_message('Success fetching summary!');
+                    if(notify) display_genscores_message('Success fetching summary!');
                     console.log('Success fetching summary!');
                     jq("#strTotalCount").html(result.totalCount);
                     jq("#strHighRiskCount").html(result.highRiskCount);
@@ -301,10 +470,14 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                     jq("#strLowRiskCount").html(result.lowRiskCount);
                 } else {
                     if(notify) display_message('Failed to fetch summary!');
+                    if(notify) display_genscores_message('Failed to fetch summary!');
                     console.log('Failed to fetch summary!');
                 }
             });
         }
+
+        // Fetch the summary only after page load
+        updateSummaryTable(false);
 
     });
 </script>
