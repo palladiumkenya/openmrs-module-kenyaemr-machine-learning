@@ -53,7 +53,7 @@
 		<property>kenyaemrml.casefinding.endpoint</property>
 		<defaultValue>/ws/rest/v1/keml/casefindingscore</defaultValue>
 		<description>
-			A global property that specifies the endpoint for invoking HTS case finding ML model
+			A global property that specifies the local endpoint for invoking HTS case finding ML model
 		</description>
 	</globalProperty>
 
@@ -78,6 +78,46 @@
 		<defaultValue>0.1079255</defaultValue>
 		<description>
 			A global property that specifies high risk threshold for the HTS ML model
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kenyaemrml.iitscore.endpoint</property>
+		<defaultValue>/ws/rest/v1/keml/iitscore</defaultValue>
+		<description>
+			A global property that specifies the local endpoint for invoking IIT scoring ML model
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kenyaemrml.iitscore.updatepatientscore</property>
+		<defaultValue>/ws/rest/v1/keml/updatepatientiitscore</defaultValue>
+		<description>
+			A global property that specifies the local endpoint for updating the IIT score of a patient
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kenyaemrml.iit.lowRiskThreshold</property>
+		<defaultValue>0.04587388</defaultValue>
+		<description>
+			A global property that specifies low risk threshold for the IIT ML model
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kenyaemrml.iit.mediumRiskThreshold</property>
+		<defaultValue>0.1458253</defaultValue>
+		<description>
+			A global property that specifies medium risk threshold for the IIT ML model
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>kenyaemrml.iit.highRiskThreshold</property>
+		<defaultValue>10.00001</defaultValue>
+		<description>
+			A global property that specifies high risk threshold for the IIT ML model
 		</description>
 	</globalProperty>
 

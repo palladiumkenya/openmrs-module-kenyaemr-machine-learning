@@ -10,7 +10,7 @@
 
 	<groupId>org.openmrs.module</groupId>
 	<artifactId>kenyaemrml</artifactId>
-	<version>1.2.0</version>
+	<version>1.3.0</version>
 	<packaging>pom</packaging>
 	<name>ML in KenyaEMR</name>
 	<description>Implementation of Machine learning in KenyaEMR</description>
@@ -41,13 +41,16 @@
 		<reportingVersion>1.22.0</reportingVersion>
 		<serializationxstreamVersion>0.2.14</serializationxstreamVersion>
 		<uiframeworkVersion>3.15.0</uiframeworkVersion>
-		<kenyaemrVersion>18.3.0</kenyaemrVersion>
+		<kenyaemrVersion>18.5.1</kenyaemrVersion>
 		<kenyacoreVersion>3.0.0</kenyacoreVersion>
 		<kenyauiVersion>2.0.4</kenyauiVersion>
 		<webservicesRestVersion>2.26.0</webservicesRestVersion>
 		<jodaTimeVersion>2.9.1</jodaTimeVersion>
-		<jpmml.version>1.5.16</jpmml.version>
+		<jpmml-eval.version>1.5.16</jpmml-eval.version>
+		<jpmml-eval-ext.version>1.5.16</jpmml-eval-ext.version>
 		<legacyUiVersion>1.5.0</legacyUiVersion>
+		<jaxb.version>2.3.1</jaxb.version>
+		<jaxb-impl.version>2.3.1</jaxb-impl.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -275,13 +278,13 @@
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-evaluator</artifactId>
-				<version>${jpmml.version}</version>
+				<version>${jpmml-eval.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.jpmml</groupId>
 				<artifactId>pmml-evaluator-extension</artifactId>
-				<version>${jpmml.version}</version>
+				<version>${jpmml-eval-ext.version}</version>
 			</dependency>			
 			<!-- End external libraries -->
 

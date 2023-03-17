@@ -18,6 +18,7 @@ import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.kenyaemrml.MLinKenyaEMRConfig;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
 import org.springframework.transaction.annotation.Transactional;
+import org.openmrs.ui.framework.SimpleObject;
 
 import java.util.Collection;
 
@@ -51,25 +52,21 @@ public interface MLinKenyaEMRService extends OpenmrsService {
 	 * @param patient
 	 * @return
 	 */
-	PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient);
+	PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient, Boolean reporting);
 
 	/**
-	 * Get all patients with high risk scores
-	 * @return a list of patients
+	 * Gets the latest PatientRiskScore for a patient in real time
+	 * 
+	 * @param patient
+	 * @return
 	 */
-	public Collection<Integer> getAllPatientsWithHighRiskScores();
+	PatientRiskScore getLatestPatientRiskScoreByPatientRealTime(Patient patient);
 
 	/**
-	 * Get all patients with medium risk scores
+	 * Get all IIT risk scores summary
 	 * @return a list of patients
 	 */
-	public Collection<Integer> getAllPatientsWithMediumRiskScores();
-
-	/**
-	 * Get all patients with low risk scores
-	 * @return a list of patients
-	 */
-	public Collection<Integer> getAllPatientsWithLowRiskScores();
+	public SimpleObject getIITRiskScoresSummary();
 
 	/**
 	 * Get all patients
@@ -100,6 +97,13 @@ public interface MLinKenyaEMRService extends OpenmrsService {
 	 */
 	List<PatientRiskScore> getAllPatientRiskScore();
 
+	/**
+	 *  Gets the latest risk evaluation date for all patient records
+	 */
 	Date getLatestRiskEvaluationDate();
 
+	/**
+	 *  Gets the latest risk evaluation date for a patient
+	 */
+	Date getPatientLatestRiskEvaluationDate(Patient patient);
 }

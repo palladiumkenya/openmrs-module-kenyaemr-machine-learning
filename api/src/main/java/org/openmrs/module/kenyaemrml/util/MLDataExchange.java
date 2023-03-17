@@ -30,6 +30,42 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.util.HashSet;
+import java.util.List;
+
+import org.openmrs.Patient;
+import org.openmrs.PatientIdentifierType;
+import org.openmrs.PatientProgram;
+import org.openmrs.Program;
+import org.openmrs.api.PatientService;
+import org.openmrs.api.ProgramWorkflowService;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
+import org.openmrs.module.kenyaemr.metadata.HivMetadata;
+import org.openmrs.module.kenyaemr.nupi.UpiUtilsDataExchange;
+import org.openmrs.module.metadatadeploy.MetadataUtils;
+import org.openmrs.scheduler.tasks.AbstractTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.openmrs.PersonAttributeType;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+
+import org.openmrs.Patient;
+import org.openmrs.api.UserService;
+import org.openmrs.api.impl.BaseOpenmrsService;
+import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
+import org.openmrs.module.kenyaemrml.api.db.hibernate.HibernateMLinKenyaEMRDao;
+import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
+import org.openmrs.ui.framework.SimpleObject;
+import java.text.SimpleDateFormat;
+import org.openmrs.GlobalProperty;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemrml.api.service.ModelService;
+import org.apache.commons.lang.time.DateUtils;
+
 public class MLDataExchange {
 	
 	public static final String DESCRIPTION = "Description";
@@ -388,6 +424,9 @@ public class MLDataExchange {
 	 * @return true when successfull and false on failure
 	 */
 	public boolean fetchDataFromDWH() {
+		// We have finished the data pull task. We now set the flag.
+		setStatusOfPullDataTask(true);
+
 		// Init the auth vars
 		boolean varsOk = initGlobalVars();
 		if (varsOk) {
@@ -409,17 +448,42 @@ public class MLDataExchange {
 					pullAndSave(credentials, totalRemote, lastEvaluationDate);
 				} else {
 					System.err.println("ITT ML - No records on remote side");
+					setStatusOfPullDataTask(false);
 					return (false);
 				}
 			} else {
 				System.err.println("ITT ML - Failed to get the OAuth token");
+				setStatusOfPullDataTask(false);
 				return (false);
 			}
 		} else {
 			System.err.println("ITT ML - Failed to get the OAuth Vars");
+			setStatusOfPullDataTask(false);
 			return (false);
 		}
+
+		// We have finished the data pull task. We now set the flag.
+		setStatusOfPullDataTask(false);
+
 		return (true);
+	}
+
+	/**
+	 * Sets the started/stopped status of the pull data task
+	 * 
+	 * @param stat true - running, false - stopped
+	 */
+	public void setStatusOfPullDataTask(Boolean stat) {
+		User user = Context.getUserContext().getAuthenticatedUser();
+		if(user != null) {
+			if(stat) { // running
+				user.setUserProperty("stopIITMLPull", "0");
+				user.setUserProperty("IITMLPullRunning", "1");
+			} else { // stopped
+				user.setUserProperty("stopIITMLPull", "1");
+				user.setUserProperty("IITMLPullRunning", "0");
+			}
+		}
 	}
 	
 	/**
@@ -448,6 +512,33 @@ public class MLDataExchange {
 		}
 		return (true);
 	}
+
+	/**
+	 * Enables or disables the generate IIT scores thread
+	 * 
+	 * @return false if generating should be stopped and true if generating should continue
+	 */
+	public boolean getContinueGeneratingIITScores() {
+		User user = Context.getUserContext().getAuthenticatedUser();
+		if (user != null) {
+			String stopIITMLPull = user.getUserProperty("stopIITMLGen");
+			if (stopIITMLPull != null) {
+				stopIITMLPull = stopIITMLPull.trim();
+				if (stopIITMLPull.equalsIgnoreCase("0")) {
+					return (true);
+				} else if (stopIITMLPull.equalsIgnoreCase("1")) {
+					return (false);
+				}
+			} else {
+				System.err.println("ITT ML - Failed to get the IIT stop gen var");
+			}
+		} else {
+			//User has logged out, stop generating
+			System.err.println("ITT ML - User has logged out, stop the generation of scores");
+			return (false);
+		}
+		return (true);
+	}
 	
 	/**
 	 * sets the status of data pull so that it is accessible to the user
@@ -461,9 +552,128 @@ public class MLDataExchange {
 			user.setUserProperty("IITMLPullDone", String.valueOf(done));
 			user.setUserProperty("IITMLPullTotal", String.valueOf(total));
 		} else {
-			//User has logged out, stop pulling
+			//User has logged out
 			System.err.println("ITT ML - User has logged out, unable to set pull status");
 		}
+	}
+
+	/**
+	 * sets the status of score generation so that it is accessible to the user
+	 * 
+	 * @param done number of records done
+	 * @param total the total number of records
+	 */
+	public void setScoreGenerationStatus(long done, long total) {
+		User user = Context.getUserContext().getAuthenticatedUser();
+		if (user != null) {
+			user.setUserProperty("IITMLGenDone", String.valueOf(done));
+			user.setUserProperty("IITMLGenTotal", String.valueOf(total));
+		} else {
+			//User has logged out
+			System.err.println("ITT ML - User has logged out, unable to set score generation status");
+		}
+	}
+
+	/**
+	 * Fetches latest IIT scores
+	 * 
+	 * @return true when successfull and false on failure
+	 */
+	public boolean generateIITScores() {
+		Boolean ret = false;
+
+		PatientService patientService = Context.getPatientService();
+		// We have started the IIT score generation task. We now set the flag.
+		setStatusOfIITGenScoresTask(true);
+
+		// Get all patients
+		List<Patient> allPatients = patientService.getAllPatients();
+		System.out.println("IIT ML Gen For All Task: Got all patients: " + allPatients.size());
+
+		// Get patients on HIV program
+		Program hivProgram = MetadataUtils.existing(Program.class, HivMetadata._Program.HIV);
+
+		// loop checking for patients without current IIT scores
+		HashSet<Patient> patientsGroup = new HashSet<Patient>();
+		for (Patient patient : allPatients) {
+			if (!getContinueGeneratingIITScores()) {
+				setStatusOfIITGenScoresTask(false);
+				return (false);
+			}
+			if (patient != null) {
+				ProgramWorkflowService pwfservice = Context.getProgramWorkflowService();
+				List<PatientProgram> programs = pwfservice.getPatientPrograms(patient, hivProgram, null, null, null,null, false);
+				if (programs.size() > 0) {
+					if(patient.getDead() == false) {
+						Date lastScore = mLinKenyaEMRService.getPatientLatestRiskEvaluationDate(patient);
+						Date dateToday = new Date();
+						if((lastScore == null || !DateUtils.isSameDay(lastScore, dateToday))) {
+							patientsGroup.add(patient);
+						}
+					}
+				}
+			}
+		}
+		System.out.println("IIT ML Gen For All Task: Patients to be scored: " + patientsGroup.size());
+
+		ret = generateAndSave(patientsGroup);
+
+		// We have finished the generation task. We now set the flag.
+		setStatusOfIITGenScoresTask(false);
+
+		return(ret);
+	}
+
+	/**
+	 * Sets the started/stopped status of the generate IIT scores task
+	 * 
+	 * @param stat true - running, false - stopped
+	 */
+	public void setStatusOfIITGenScoresTask(Boolean stat) {
+		User user = Context.getUserContext().getAuthenticatedUser();
+		if(user != null) {
+			if(stat) { // running
+				user.setUserProperty("stopIITMLGen", "0");
+				user.setUserProperty("IITMLGenRunning", "1");
+			} else { // stopped
+				user.setUserProperty("stopIITMLGen", "1");
+				user.setUserProperty("IITMLGenRunning", "0");
+			}
+		}
+	}
+
+	/**
+	 * Generates and saves the IIT risk scores
+	 * @param patientsGroup
+	 * @return true when successfull and false on failure
+	 */
+	public Boolean generateAndSave(HashSet<Patient> patientsGroup) {
+		Boolean ret = false;
+
+		ModelService modelService = new ModelService();
+		long totalRemote = patientsGroup.size();
+		long totalPages = patientsGroup.size();
+		long currentPage = 1;
+		for (Patient patient : patientsGroup) {
+			if (!getContinueGeneratingIITScores()) {
+				return (false);
+			}
+			System.out.println("IIT ML Score: Generating a new risk score || and saving to DB");
+
+			try {
+				PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
+				// Save/Update to DB (for reports) -- Incase a record for current date doesn't exist
+				mLinKenyaEMRService.saveOrUpdateRiskScore(patientRiskScore);
+			} catch(Exception ex) {
+				System.err.println("IIT ML Score: ERROR: Failed to generate patient score: " + ex.getMessage());
+				ex.printStackTrace();
+			}
+
+			setScoreGenerationStatus((long)Math.floor(((currentPage * 1.00 / totalPages * 1.00) * totalRemote)), totalRemote);
+			currentPage++;
+		}
+
+		return(ret);
 	}
 	
 }
