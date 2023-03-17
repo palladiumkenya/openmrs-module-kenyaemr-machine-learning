@@ -19,12 +19,19 @@ import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.api.db.hibernate.HibernateMLinKenyaEMRDao;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
+import org.openmrs.ui.framework.SimpleObject;
+import java.text.SimpleDateFormat;
+import org.openmrs.GlobalProperty;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemrml.api.service.ModelService;
 
 public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinKenyaEMRService {
 	
 	HibernateMLinKenyaEMRDao mLinKenyaEMRDao;
 	
 	UserService userService;
+
+	ModelService modelService;
 	
 	/**
 	 * Injected in moduleApplicationContext.xml
@@ -39,6 +46,13 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 	public void setUserService(UserService userService) {
 		this.userService = userService;
 	}
+
+	/**
+	 * Injected in moduleApplicationContext.xml
+	 */
+	public void setModelService(ModelService modelService) {
+		this.modelService = modelService;
+	}
 	
 	@Override
 	public PatientRiskScore saveOrUpdateRiskScore(PatientRiskScore riskScore) {
@@ -52,7 +66,7 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 	
 	@Override
 	public PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient) {
-		return mLinKenyaEMRDao.getLatestPatientRiskScoreByPatient(patient);
+		return modelService.getLatestPatientRiskScoreByPatient(patient);
 	}
 	
 	@Override
