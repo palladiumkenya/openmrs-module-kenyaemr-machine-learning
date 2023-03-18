@@ -15,4 +15,16 @@ public class ModelInputFields {
 	public void setFields(Map<String, Object> fields) {
 		this.fields = fields;
 	}
+
+	@Override
+	public String toString() {
+		String ret = "";
+		StringBuilder mapAsString = new StringBuilder("{");
+		for (String key : fields.keySet()) {
+			mapAsString.append(key + "=" + fields.get(key) + ", ");
+		}
+		mapAsString.delete(mapAsString.length()-2, mapAsString.length()).append("}");
+		ret = "ModelInputFields [fields=" + mapAsString.toString() + "]";
+		return ret;
+	}
 }
