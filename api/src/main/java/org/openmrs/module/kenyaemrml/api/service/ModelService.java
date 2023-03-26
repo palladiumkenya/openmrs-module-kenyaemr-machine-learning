@@ -345,19 +345,20 @@ public class ModelService extends BaseOpenmrsService {
 			// Model name
 			String fullModelFileName = modelId.concat(".pmml");
 
-			System.err.println("zip file: " + fullModelZipFileName);
-			System.err.println("model file: " + fullModelFileName);
+			System.out.println("model zip file: " + fullModelZipFileName);
+			System.out.println("model xml text file: " + fullModelFileName);
 			// Get ZipEntry
 			// // ZipInputStream zis = new ZipInputStream(bistream, Charset.forName("UTF-8"));
-			ZipInputStream zis = new ZipInputStream(stream);
+			ZipInputStream zis = new ZipInputStream(bistream);
 			ZipEntry ze = null;
 
 			while ((ze = zis.getNextEntry()) != null) {
 				if(ze.getName().trim().equalsIgnoreCase(fullModelFileName)) {
 					// Building a model evaluator from a PMML file
-					Evaluator evaluator = new LoadingModelEvaluatorBuilder().load(stream).build();
+					Evaluator evaluator = new LoadingModelEvaluatorBuilder().load(zis).build();
 					evaluator.verify();
 					ScoringResult scoringResult = new ScoringResult(score(evaluator, inputFields, debug));
+					System.out.println("Received the scoring result");
 					return scoringResult;
 				}
 			}
@@ -385,11 +386,11 @@ public class ModelService extends BaseOpenmrsService {
 			// Model name
 			String fullModelFileName = modelId.concat(".pmml");
 
-			System.err.println("zip file: " + fullModelZipFileName);
-			System.err.println("model file: " + fullModelFileName);
+			System.out.println("model zip file: " + fullModelZipFileName);
+			System.out.println("model xml text file: " + fullModelFileName);
 			// Get ZipEntry
 			// // ZipInputStream zis = new ZipInputStream(bistream, Charset.forName("UTF-8"));
-			ZipInputStream zis = new ZipInputStream(stream);
+			ZipInputStream zis = new ZipInputStream(bistream);
 			ZipEntry ze = null;
 
             while ((ze = zis.getNextEntry()) != null) {
@@ -398,6 +399,7 @@ public class ModelService extends BaseOpenmrsService {
 					Evaluator evaluator = new LoadingModelEvaluatorBuilder().load(zis).build();
 					evaluator.verify();
 					ScoringResult scoringResult = new ScoringResult(score(evaluator, inputFields, debug));
+					System.out.println("Received the scoring result");
 					return scoringResult;
 				}
 			}
