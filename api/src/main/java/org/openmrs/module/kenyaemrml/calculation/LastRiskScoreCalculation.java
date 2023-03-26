@@ -50,8 +50,7 @@ public class LastRiskScoreCalculation extends AbstractPatientCalculation {
 			// check if a patient is alive
 			if (inHivProgram.contains(ptId)) {
 				double score = 0.00;
-				PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
-				        .getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId));
+				PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId), true);
 				if (latestRiskScore != null) {
 					score = latestRiskScore.getRiskScore();
 				}

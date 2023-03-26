@@ -91,7 +91,7 @@
 
 	<globalProperty>
 		<property>kenyaemrml.iit.lowRiskThreshold</property>
-		<defaultValue>0.005011473</defaultValue>
+		<defaultValue>0.04587388</defaultValue>
 		<description>
 			A global property that specifies low risk threshold for the IIT ML model
 		</description>
@@ -99,7 +99,7 @@
 
 	<globalProperty>
 		<property>kenyaemrml.iit.mediumRiskThreshold</property>
-		<defaultValue>0.02795569</defaultValue>
+		<defaultValue>0.1458253</defaultValue>
 		<description>
 			A global property that specifies medium risk threshold for the IIT ML model
 		</description>
@@ -107,7 +107,7 @@
 
 	<globalProperty>
 		<property>kenyaemrml.iit.highRiskThreshold</property>
-		<defaultValue>0.1079255</defaultValue>
+		<defaultValue>10.00001</defaultValue>
 		<description>
 			A global property that specifies high risk threshold for the IIT ML model
 		</description>

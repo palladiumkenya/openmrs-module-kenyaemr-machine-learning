@@ -12,8 +12,8 @@ package org.openmrs.module.kenyaemrml.api.db.hibernate;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
+// import java.util.Iterator;
+// import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -22,9 +22,9 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
+// import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.transform.Transformers;
+// import org.hibernate.transform.Transformers;
 import org.openmrs.Patient;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.api.db.MLinKenyaEMRDao;
@@ -38,9 +38,11 @@ import org.openmrs.module.kenyaemr.metadata.HivMetadata;
 import java.util.Set;
 import org.openmrs.module.kenyacore.calculation.Filters;
 import org.openmrs.api.context.Context;
-import org.openmrs.ui.framework.SimpleObject;
-import org.springframework.context.annotation.Bean;
-import org.openmrs.api.context.Context;
+// import org.openmrs.ui.framework.SimpleObject;
+// import org.springframework.context.annotation.Bean;
+// import org.openmrs.api.context.Context;
+// import org.openmrs.module.kenyaemrml.api.service.ModelService;
+// import org.apache.commons.lang.time.DateUtils;
 
 public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 	
@@ -59,6 +61,8 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 	private Session getSession() {
 		return sessionFactory.getCurrentSession();
 	}
+
+	// ModelService modelService = Context.getService(ModelService.class);
 	
 	/**
 	 * Saves or updates risk score
@@ -67,6 +71,7 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 	 * @return
 	 */
 	public PatientRiskScore saveOrUpdateRiskScore(PatientRiskScore riskScore) {
+		System.out.println("IIT ML Score: Saving/Updating the risk score to DB");
 		getSession().saveOrUpdate(riskScore);
 		return riskScore;
 	}
@@ -78,18 +83,18 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 	 * @return
 	 */
 	public PatientRiskScore getPatientRiskScoreById(Integer id) {
-		return (PatientRiskScore) getSession().createCriteria(PatientRiskScore.class).add(Restrictions.eq("id", id))
-		        .uniqueResult();
-		
+		return (PatientRiskScore) getSession().createCriteria(PatientRiskScore.class).add(Restrictions.eq("id", id)).uniqueResult();
 	}
 	
 	/**
 	 * Gets the latest PatientRiskScore for a patient
 	 * 
-	 * @param patient
+	 * @param patient - the patient
+	 * @param reporting - true = for reporting, false = not for reporting
 	 * @return
 	 */
 	public PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient) {
+		System.out.println("IIT ML Score: Getting risk score from DB");
 		Criteria criteria = getSession().createCriteria(PatientRiskScore.class);
 		criteria.add(Restrictions.eq("patient", patient));
 		criteria.addOrder(Order.desc("evaluationDate"));
@@ -130,8 +135,7 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 		
 		HashSet<Integer> ret = new HashSet<>();
 		for (Integer ptId : inHivProgram) {
-			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
-							.getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId));
+			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId), true);
 			if (latestRiskScore != null) {
 				String riskGroup = latestRiskScore.getDescription();
 				if (riskGroup.trim().equalsIgnoreCase("High Risk")) {
@@ -173,8 +177,7 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 
 		HashSet<Integer> ret = new HashSet<>();
 		for (Integer ptId : inHivProgram) {
-			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
-							.getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId));
+			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId), true);
 			if (latestRiskScore != null) {
 				String riskGroup = latestRiskScore.getDescription();
 				if (riskGroup.trim().equalsIgnoreCase("Medium Risk")) {
@@ -216,8 +219,7 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 		
 		HashSet<Integer> ret = new HashSet<>();
 		for (Integer ptId : inHivProgram) {
-			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
-							.getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId));
+			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId), true);
 			if (latestRiskScore != null) {
 				String riskGroup = latestRiskScore.getDescription();
 				if (riskGroup.trim().equalsIgnoreCase("Low Risk")) {
@@ -295,6 +297,9 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 		
 	}
 
+	/**
+	 *  Gets the latest risk evaluation date for all patient records
+	 */
 	@Override
 	public Date getLatestRiskEvaluationDate() {
 		Criteria criteria = getSession().createCriteria(PatientRiskScore.class);
@@ -303,5 +308,22 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 		PatientRiskScore patientRiskScore = (PatientRiskScore) criteria.uniqueResult();
 		return patientRiskScore.getEvaluationDate();
 
+	}
+
+	/**
+	 *  Gets the latest risk evaluation date for a patient
+	 */
+	@Override
+	public Date getPatientLatestRiskEvaluationDate(Patient patient) {
+		Criteria criteria = getSession().createCriteria(PatientRiskScore.class);
+		criteria.add(Restrictions.eq("patient", patient));
+		criteria.addOrder(Order.desc("evaluationDate"));
+		criteria.setMaxResults(1);
+		PatientRiskScore patientRiskScore = (PatientRiskScore) criteria.uniqueResult();
+		if(patientRiskScore != null) {
+			return patientRiskScore.getEvaluationDate();
+		} else {
+			return null;
+		}
 	}
 }

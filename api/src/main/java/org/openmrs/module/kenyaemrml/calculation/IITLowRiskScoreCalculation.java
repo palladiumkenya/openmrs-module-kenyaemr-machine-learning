@@ -59,8 +59,7 @@ public class IITLowRiskScoreCalculation extends AbstractPatientCalculation {
 		Set<Integer> inHivProgram = Filters.inProgram(hivProgram, alive, context);
 
 		for (Integer ptId : inHivProgram) {
-			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
-							.getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId));
+			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId), true);
 			if (latestRiskScore != null) {
 				//double riskScore = latestRiskScore.getRiskScore();
 				String riskGroup = latestRiskScore.getDescription();

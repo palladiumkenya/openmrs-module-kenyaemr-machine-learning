@@ -55,7 +55,7 @@ public class IITHighRiskScoreCalculation extends AbstractPatientCalculation {
 
 		for (Integer ptId : inHivProgram) {
 			Patient currentPatient = Context.getPatientService().getPatient(ptId);
-			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(currentPatient);
+			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(currentPatient, true);
 			if (latestRiskScore != null) {
 				String riskGroup = latestRiskScore.getDescription();
 				if (riskGroup.trim().equalsIgnoreCase("High Risk")) {

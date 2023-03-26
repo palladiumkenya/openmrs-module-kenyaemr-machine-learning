@@ -727,6 +727,7 @@ public class MLUtils {
 			if(scoringResult != null) {
 				ObjectMapper mapper = new ObjectMapper();
 				mlScore = mapper.writeValueAsString(scoringResult);
+				System.out.println("ITT ML - Got IIT Score JSON as: " + mlScore);
 			}
 		}
 		catch (Exception ex) {

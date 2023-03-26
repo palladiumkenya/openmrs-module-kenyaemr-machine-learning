@@ -90,5 +90,13 @@ public interface MLinKenyaEMRDao {
 	 */
 	public List<PatientRiskScore> getAllPatientRiskScore();
 
+	/**
+	 *  Gets the latest risk evaluation date for all patient records
+	 */
     Date getLatestRiskEvaluationDate();
+
+	/**
+	 *  Gets the latest risk evaluation date for a patient
+	 */
+	Date getPatientLatestRiskEvaluationDate(Patient patient);
 }

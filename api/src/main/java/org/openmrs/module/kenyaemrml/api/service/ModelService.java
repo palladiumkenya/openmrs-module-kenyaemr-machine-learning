@@ -1,318 +1,66 @@
 package org.openmrs.module.kenyaemrml.api.service;
 
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.ObjectNode;
 import org.dmg.pmml.FieldName;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.joda.time.Days;
+import org.joda.time.LocalDate;
 import org.jpmml.evaluator.Computable;
 import org.jpmml.evaluator.Evaluator;
 import org.jpmml.evaluator.FieldValue;
 import org.jpmml.evaluator.InputField;
 import org.jpmml.evaluator.LoadingModelEvaluatorBuilder;
 import org.jpmml.evaluator.OutputField;
+import org.openmrs.Concept;
+import org.openmrs.Encounter;
+import org.openmrs.Form;
+import org.openmrs.GlobalProperty;
+import org.openmrs.Location;
+import org.openmrs.Obs;
+import org.openmrs.Patient;
+import org.openmrs.PatientProgram;
+import org.openmrs.Program;
+import org.openmrs.Visit;
+import org.openmrs.api.ProgramWorkflowService;
+import org.openmrs.api.context.Context;
+import org.openmrs.api.impl.BaseOpenmrsService;
+import org.openmrs.module.kenyaemr.Dictionary;
+import org.openmrs.module.kenyaemr.api.KenyaEmrService;
+import org.openmrs.module.kenyaemr.metadata.HivMetadata;
+import org.openmrs.module.kenyaemr.metadata.MchMetadata;
+import org.openmrs.module.kenyaemr.util.EncounterBasedRegimenUtils;
+import org.openmrs.module.kenyaemr.wrapper.PatientWrapper;
+import org.openmrs.module.kenyaemrml.api.MLUtils;
 import org.openmrs.module.kenyaemrml.domain.ModelInputFields;
 import org.openmrs.module.kenyaemrml.domain.ScoringResult;
-import org.openmrs.module.kenyaemrml.exception.ScoringException;
-
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
-import org.openmrs.Patient;
-import org.openmrs.api.UserService;
-import org.openmrs.api.impl.BaseOpenmrsService;
-import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
-import org.openmrs.module.kenyaemrml.api.db.hibernate.HibernateMLinKenyaEMRDao;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
-import org.openmrs.ui.framework.SimpleObject;
-import java.text.SimpleDateFormat;
-import org.openmrs.GlobalProperty;
-import org.openmrs.api.context.Context;
-import org.openmrs.module.kenyaemrml.api.service.ModelService;
-
-import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ObjectNode;
-import org.openmrs.GlobalProperty;
-import org.openmrs.Patient;
-import org.openmrs.User;
-import org.openmrs.api.PatientService;
-import org.openmrs.api.PersonService;
-import org.openmrs.api.context.Context;
-import org.openmrs.module.kenyaemr.api.KenyaEmrService;
-import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
-import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
-import org.openmrs.util.PrivilegeConstants;
-
-import javax.net.ssl.HttpsURLConnection;
-import java.net.HttpURLConnection;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.io.StringWriter;
-import java.io.OutputStream;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.openmrs.api.OpenmrsService;
-import org.openmrs.api.impl.BaseOpenmrsService;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.transform.Transformers;
-import org.openmrs.Patient;
-import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
-import org.openmrs.module.kenyaemrml.api.db.MLinKenyaEMRDao;
-import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
-
-import org.openmrs.Program;
-import org.openmrs.calculation.patient.PatientCalculationContext;
-import org.openmrs.calculation.patient.PatientCalculationService;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
-import org.openmrs.module.kenyaemr.metadata.HivMetadata;
-import java.util.Set;
-import org.openmrs.module.kenyacore.calculation.Filters;
-import org.openmrs.api.context.Context;
-import org.openmrs.ui.framework.SimpleObject;
-import org.springframework.context.annotation.Bean;
-import org.openmrs.api.context.Context;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.StringWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ObjectNode;
-import org.openmrs.Concept;
-import org.openmrs.GlobalProperty;
-import org.openmrs.Location;
-import org.openmrs.Obs;
-import org.openmrs.Patient;
-import org.openmrs.PatientIdentifier;
-import org.openmrs.PatientIdentifierType;
-import org.openmrs.PersonAddress;
-import org.openmrs.PersonAttribute;
-import org.openmrs.PersonAttributeType;
-import org.openmrs.api.context.Context;
-import org.openmrs.module.kenyaemr.Dictionary;
-import org.openmrs.module.kenyaemr.api.KenyaEmrService;
-import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
-import org.openmrs.module.kenyaemr.metadata.HivMetadata;
-import org.openmrs.module.kenyaemr.wrapper.PatientWrapper;
-import org.openmrs.module.metadatadeploy.MetadataUtils;
-import org.openmrs.ui.framework.SimpleObject;
-
-import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ObjectNode;
-import org.openmrs.GlobalProperty;
-import org.openmrs.Patient;
-import org.openmrs.User;
-import org.openmrs.api.PatientService;
-import org.openmrs.api.PersonService;
-import org.openmrs.api.context.Context;
-import org.openmrs.module.kenyaemr.api.KenyaEmrService;
-import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
-import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
-import org.openmrs.util.PrivilegeConstants;
-
-import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.io.StringWriter;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.openmrs.ui.framework.WebConstants;
-
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
-import org.openmrs.Encounter;
-import org.openmrs.Form;
-import org.openmrs.Obs;
-import org.openmrs.Patient;
-import org.openmrs.api.ConceptService;
-import org.openmrs.api.context.Context;
-import org.openmrs.module.kenyaemr.metadata.HivMetadata;
-import org.openmrs.module.kenyaemr.wrapper.PatientWrapper;
-import org.openmrs.module.metadatadeploy.MetadataUtils;
-import org.openmrs.ui.framework.SimpleObject;
-import org.openmrs.ui.framework.annotation.FragmentParam;
-import org.openmrs.ui.framework.fragment.FragmentModel;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import org.openmrs.Concept;
-import org.openmrs.Obs;
-import org.openmrs.api.context.Context;
-import org.openmrs.calculation.patient.PatientCalculationContext;
-import org.openmrs.calculation.result.CalculationResultMap;
-import org.openmrs.calculation.result.ListResult;
-import org.openmrs.calculation.result.SimpleResult;
-import org.openmrs.module.kenyacore.calculation.AbstractPatientCalculation;
-import org.openmrs.module.kenyacore.calculation.CalculationUtils;
-import org.openmrs.module.kenyaemr.calculation.EmrCalculationUtils;
-import org.openmrs.module.kenyaemr.calculation.library.hiv.art.InitialArtStartDateCalculation;
 import org.openmrs.module.reporting.common.Age;
-import org.openmrs.module.reporting.common.TimeQualifier;
-import org.openmrs.module.reporting.data.person.definition.ObsForPersonDataDefinition;
-
-import org.openmrs.module.kenyaemr.util.EncounterBasedRegimenUtils;
-
-import org.openmrs.Patient;
-import org.openmrs.api.context.Context;
-import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
-import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
-import org.openmrs.module.kenyaui.KenyaUiUtils;
-import org.openmrs.ui.framework.UiUtils;
-import org.openmrs.ui.framework.page.PageModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-import org.openmrs.Visit;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
-
 import org.openmrs.parameter.EncounterSearchCriteria;
 import org.openmrs.parameter.EncounterSearchCriteriaBuilder;
-
-import org.apache.commons.lang.time.DateUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.openmrs.Concept;
-import org.openmrs.Encounter;
-import org.openmrs.Form;
-import org.openmrs.Location;
-import org.openmrs.Obs;
-import org.openmrs.annotation.Handler;
-import org.openmrs.api.context.Context;
-import org.openmrs.module.metadatadeploy.MetadataUtils;
-import org.openmrs.module.kenyacore.report.ReportUtils;
-import org.openmrs.module.kenyaemr.Dictionary;
-import org.openmrs.module.kenyaemr.api.KenyaEmrService;
-import org.openmrs.module.kenyaemr.metadata.HivMetadata;
-import org.openmrs.module.kenyaemr.reporting.indicator.HivCareVisitsIndicator;
-import org.openmrs.module.kenyaemr.reporting.library.shared.common.CommonCohortLibrary;
-import org.openmrs.module.reporting.cohort.EvaluatedCohort;
-import org.openmrs.module.reporting.cohort.definition.service.CohortDefinitionService;
-import org.openmrs.module.reporting.common.DateUtil;
-import org.openmrs.module.reporting.evaluation.EvaluationContext;
-import org.openmrs.module.reporting.evaluation.EvaluationException;
-import org.openmrs.module.reporting.indicator.Indicator;
-import org.openmrs.module.reporting.indicator.SimpleIndicatorResult;
-import org.openmrs.module.reporting.indicator.evaluator.IndicatorEvaluator;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
-import org.openmrs.module.kenyaemrml.api.MLUtils;
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
-import org.openmrs.Encounter;
-import org.openmrs.Form;
-import org.openmrs.Obs;
-import org.openmrs.Patient;
-import org.openmrs.api.ConceptService;
-import org.openmrs.api.context.Context;
-import org.openmrs.module.kenyaemr.metadata.HivMetadata;
-import org.openmrs.module.kenyaemr.wrapper.PatientWrapper;
-import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.ui.framework.SimpleObject;
-import org.openmrs.ui.framework.annotation.FragmentParam;
-import org.openmrs.ui.framework.fragment.FragmentModel;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipEntry;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import java.nio.charset.Charset;
-// import javax.xml.bind.JAXBException;
+import java.util.UUID;
 
 /**
  * Service class used to prepare and score models
@@ -345,19 +93,20 @@ public class ModelService extends BaseOpenmrsService {
 			// Model name
 			String fullModelFileName = modelId.concat(".pmml");
 
-			System.err.println("zip file: " + fullModelZipFileName);
-			System.err.println("model file: " + fullModelFileName);
+			System.out.println("model zip file: " + fullModelZipFileName);
+			System.out.println("model xml text file: " + fullModelFileName);
 			// Get ZipEntry
 			// // ZipInputStream zis = new ZipInputStream(bistream, Charset.forName("UTF-8"));
-			ZipInputStream zis = new ZipInputStream(stream);
+			ZipInputStream zis = new ZipInputStream(bistream);
 			ZipEntry ze = null;
 
 			while ((ze = zis.getNextEntry()) != null) {
 				if(ze.getName().trim().equalsIgnoreCase(fullModelFileName)) {
 					// Building a model evaluator from a PMML file
-					Evaluator evaluator = new LoadingModelEvaluatorBuilder().load(stream).build();
+					Evaluator evaluator = new LoadingModelEvaluatorBuilder().load(zis).build();
 					evaluator.verify();
 					ScoringResult scoringResult = new ScoringResult(score(evaluator, inputFields, debug));
+					System.out.println("Received the scoring result");
 					return scoringResult;
 				}
 			}
@@ -385,11 +134,11 @@ public class ModelService extends BaseOpenmrsService {
 			// Model name
 			String fullModelFileName = modelId.concat(".pmml");
 
-			System.err.println("zip file: " + fullModelZipFileName);
-			System.err.println("model file: " + fullModelFileName);
+			System.out.println("model zip file: " + fullModelZipFileName);
+			System.out.println("model xml text file: " + fullModelFileName);
 			// Get ZipEntry
 			// // ZipInputStream zis = new ZipInputStream(bistream, Charset.forName("UTF-8"));
-			ZipInputStream zis = new ZipInputStream(stream);
+			ZipInputStream zis = new ZipInputStream(bistream);
 			ZipEntry ze = null;
 
             while ((ze = zis.getNextEntry()) != null) {
@@ -398,6 +147,7 @@ public class ModelService extends BaseOpenmrsService {
 					Evaluator evaluator = new LoadingModelEvaluatorBuilder().load(zis).build();
 					evaluator.verify();
 					ScoringResult scoringResult = new ScoringResult(score(evaluator, inputFields, debug));
+					System.out.println("Received the scoring result");
 					return scoringResult;
 				}
 			}
@@ -533,6 +283,69 @@ public class ModelService extends BaseOpenmrsService {
 			}
 		}
 		return ret;
+	}
+
+	/**
+	 * Get latest high viral load observation
+	 * @param patient
+	 * @return Double - The latest high VL count
+	 */
+	public Double getLatestHighViralLoadCount(Patient patient) {
+		Double ret = 0.00;
+		Concept concept = Context.getConceptService().getConceptByUuid(Dictionary.HIV_VIRAL_LOAD);
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			for (Obs cur : obsList) {
+				Double vl = cur.getValueNumeric();
+				if(vl >= 1000.00) {
+					ret = vl;
+					return(ret);
+				}
+			}
+		}
+		return(ret);
+	}
+
+	/**
+	 * Get latest low viral load observation
+	 * @param patient
+	 * @return Double - The latest low VL count
+	 */
+	public Double getLatestLowViralLoadCount(Patient patient) {
+		Double ret = 0.00;
+		Concept concept = Context.getConceptService().getConceptByUuid(Dictionary.HIV_VIRAL_LOAD);
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			for (Obs cur : obsList) {
+				Double vl = cur.getValueNumeric();
+				if(vl >= 200.00 && vl < 1000.00) {
+					ret = vl;
+					return(ret);
+				}
+			}
+		}
+		return(ret);
+	}
+
+	/**
+	 * Get latest suppressed viral load observation
+	 * @param patient
+	 * @return Double - The latest suppressed VL count
+	 */
+	public Double getLatestSuppressedViralLoadCount(Patient patient) {
+		Double ret = 0.00;
+		Concept concept = Context.getConceptService().getConceptByUuid(Dictionary.HIV_VIRAL_LOAD);
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			for (Obs cur : obsList) {
+				Double vl = cur.getValueNumeric();
+				if(vl < 200.00) {
+					ret = vl;
+					return(ret);
+				}
+			}
+		}
+		return(ret);
 	}
 
 	/**
@@ -808,6 +621,259 @@ public class ModelService extends BaseOpenmrsService {
 		return(ret);
 	}
 	
+	/**
+	 * Get latest ART adherence
+	 * @param patient
+	 * @return Integer - The latest ART adherence
+	 */
+	public Integer getLatestARTAdherence(Patient patient) {
+		Integer ret = 0;
+		Concept concept = Context.getConceptService().getConceptByUuid("1658AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			Obs cur = obsList.get(0);
+			Concept curConcept = cur.getConcept();
+			if(curConcept == Context.getConceptService().getConceptByUuid("159405AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+				// Good Adherence
+				ret = 1;
+				return(ret);
+			} else if(curConcept == Context.getConceptService().getConceptByUuid("159406AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+				// Fair Adherence
+				ret = 2;
+				return(ret);
+			} else if(curConcept == Context.getConceptService().getConceptByUuid("159598AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+				// Poor Adherence
+				ret = 3;
+				return(ret);
+			}
+		}
+		return(ret);
+	}
+
+	/**
+	 * Get latest CTX adherence
+	 * @param patient
+	 * @return Integer - The latest CTX adherence
+	 */
+	public Integer getLatestCTXAdherence(Patient patient) {
+		Integer ret = 0;
+		Concept concept = Context.getConceptService().getConceptByUuid("161652AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			Obs cur = obsList.get(0);
+			Concept curConcept = cur.getConcept();
+			if(curConcept == Context.getConceptService().getConceptByUuid("159405AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+				// Good Adherence
+				ret = 1;
+				return(ret);
+			} else if(curConcept == Context.getConceptService().getConceptByUuid("163794AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+				// Fair Adherence
+				ret = 2;
+				return(ret);
+			} else if(curConcept == Context.getConceptService().getConceptByUuid("159407AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+				// Poor Adherence
+				ret = 3;
+				return(ret);
+			}
+		}
+		return(ret);
+	}
+
+	/**
+	 * Get Total Poor ART adherence
+	 * @param patient
+	 * @return Integer - The Total Poor ART adherence
+	 */
+	public Integer getTotalPoorARTAdherence(Patient patient) {
+		Integer ret = 0;
+		Concept concept = Context.getConceptService().getConceptByUuid("1658AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			for (Obs cur : obsList) {
+				Concept curConcept = cur.getConcept();
+				if(curConcept == Context.getConceptService().getConceptByUuid("159598AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+					// Poor Adherence
+					ret++;
+				}
+			}
+		}
+		return(ret);
+	}
+
+	/**
+	 * Get Total Fair ART adherence
+	 * @param patient
+	 * @return Integer - The Total Fair ART adherence
+	 */
+	public Integer getTotalFairARTAdherence(Patient patient) {
+		Integer ret = 0;
+		Concept concept = Context.getConceptService().getConceptByUuid("1658AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			for (Obs cur : obsList) {
+				Concept curConcept = cur.getConcept();
+				if(curConcept == Context.getConceptService().getConceptByUuid("159406AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+					// Fair Adherence
+					ret++;
+				}
+			}
+		}
+		return(ret);
+	}
+
+	/**
+	 * Get Total Poor CTX adherence
+	 * @param patient
+	 * @return Integer - The Total Poor CTX adherence
+	 */
+	public Integer getTotalPoorCTXAdherence(Patient patient) {
+		Integer ret = 0;
+		Concept concept = Context.getConceptService().getConceptByUuid("161652AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			for (Obs cur : obsList) {
+				Concept curConcept = cur.getConcept();
+				if(curConcept == Context.getConceptService().getConceptByUuid("159407AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+					// Poor Adherence
+					ret++;
+				}
+			}
+		}
+		return(ret);
+	}
+
+	/**
+	 * Get Total Fair CTX adherence
+	 * @param patient
+	 * @return Integer - The Total Fair CTX adherence
+	 */
+	public Integer getTotalFairCTXAdherence(Patient patient) {
+		Integer ret = 0;
+		Concept concept = Context.getConceptService().getConceptByUuid("161652AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			for (Obs cur : obsList) {
+				Concept curConcept = cur.getConcept();
+				if(curConcept == Context.getConceptService().getConceptByUuid("163794AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+					// Fair Adherence
+					ret++;
+				}
+			}
+		}
+		return(ret);
+	}
+
+	/**
+	 * Get Total ART adherence
+	 * @param patient
+	 * @return Integer - The Total ART adherence
+	 */
+	public Integer getTotalARTAdherence(Patient patient) {
+		Integer ret = 0;
+		Concept concept = Context.getConceptService().getConceptByUuid("1658AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			ret = obsList.size();
+		}
+		return(ret);
+	}
+
+	/**
+	 * Get Total CTX adherence
+	 * @param patient
+	 * @return Integer - The Total CTX adherence
+	 */
+	public Integer getTotalCTXAdherence(Patient patient) {
+		Integer ret = 0;
+		Concept concept = Context.getConceptService().getConceptByUuid("161652AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			ret = obsList.size();
+		}
+		return(ret);
+	}
+
+	/**
+	 * Get average weight in the last 6 months
+	 * @param patient
+	 * @return Double - The average
+	 */
+	public Double getAverageWeightInTheLastSixMonths(Patient patient) {
+		Double ret = 0.00;
+		Integer count = 0;
+		Concept concept = Context.getConceptService().getConceptByUuid(Dictionary.WEIGHT_KG);
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			for (Obs cur : obsList) {
+				Double weight = cur.getValueNumeric();
+				Date obsDate = cur.getObsDatetime();
+				Date currentDate = new Date();
+				Age age = new Age(obsDate, currentDate);
+				long diff = age.getFullMonths();
+				if(diff <= 6) {
+					ret += weight;
+					count++;
+				}
+			}
+		}
+		if(count > 0 && ret > 0) {
+			ret = ((ret * 1.00) / (count * 1.00));
+		}
+		return ret;
+	}
+
+	/**
+	 * Get average BMI in the last 6 months
+	 * @param patient
+	 * @return Double - The average
+	 */
+	public Double getAverageBMIInTheLastSixMonths(Patient patient) {
+		Double ret = 0.00;
+		Integer count = 0;
+		Concept wConcept = Context.getConceptService().getConceptByUuid(Dictionary.WEIGHT_KG);
+		Concept hConcept = Context.getConceptService().getConceptByUuid(Dictionary.HEIGHT_CM);
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, wConcept);
+		if (obsList.size() > 0) {
+			for (Obs cur : obsList) {
+				Double weight = cur.getValueNumeric();
+				Date obsDate = cur.getObsDatetime();
+				Date currentDate = new Date();
+				Age age = new Age(obsDate, currentDate);
+				long diff = age.getFullMonths();
+				if(diff <= 6) {
+					Obs hObs = getObsByConceptPatientAndDate(patient, hConcept, obsDate);
+					if(hObs != null) {
+						Double height = hObs.getValueNumeric();
+						Double bmi = weight / ((height/100.00) * (height/100.00));
+						ret += bmi;
+						count++;
+					}
+				}
+			}
+		}
+		if(count > 0 && ret > 0) {
+			ret = ((ret * 1.00) / (count * 1.00));
+		}
+		return ret;
+	}
+
+	/**
+	 * Get Observation by Concept, Patient and Date
+	 */
+	public Obs getObsByConceptPatientAndDate(Patient patient, Concept concept, Date date) {
+		Obs ret = null;
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			for (Obs cur : obsList) {
+				Date obsDate = cur.getObsDatetime();
+				if(DateUtils.isSameDay(obsDate, date)) {
+					ret = cur;
+					return(ret);
+				}
+			}
+		}
+		return(ret);
+	}
 
 	/**
 	 * Gets the latest patient IIT score
@@ -921,6 +987,8 @@ public class ModelService extends BaseOpenmrsService {
 		}
 
 		// Source BMI
+		patientPredictionVariables.put("BMI", new Double(0.00));
+
 		Obs obsWeight = getLatestObs(patient, Dictionary.WEIGHT_KG);
 		Obs obsHeight = getLatestObs(patient, Dictionary.HEIGHT_CM);
 		Double conWeight = 0.00;
@@ -928,13 +996,22 @@ public class ModelService extends BaseOpenmrsService {
 		if (obsWeight != null && obsHeight != null) {
 			conWeight = obsWeight.getValueNumeric();
 			conHeight = obsHeight.getValueNumeric();
-			Double bmi = conWeight / ((conHeight/100.00) * (conHeight/100.00));
-			patientPredictionVariables.put("BMI", bmi);
+			if(conWeight > 0.00 && conHeight > 0.00) {
+				Double bmi = conWeight / ((conHeight/100.00) * (conHeight/100.00));
+				patientPredictionVariables.put("BMI", bmi);
+			}
 		} else {
-			patientPredictionVariables.put("BMI", 0);
+			patientPredictionVariables.put("BMI", new Double(0.00));
 		}		
 		
-		patientPredictionVariables.put("changeInBMI", 0);
+		patientPredictionVariables.put("changeInBMI", new Double(0.00));
+
+		Double avBMI = getAverageBMIInTheLastSixMonths(patient);
+		Double curBMI = (Double) patientPredictionVariables.get("BMI");
+		if(avBMI > 0.00 && curBMI > 0.00) {
+			Double changeInBMI = ((curBMI * 1.00) / (avBMI * 1.00));
+			patientPredictionVariables.put("changeInBMI", changeInBMI);
+		}
 
 		//Source Weight
 		Obs obsPatientWeight = getLatestObs(patient, Dictionary.WEIGHT_KG);
@@ -948,14 +1025,32 @@ public class ModelService extends BaseOpenmrsService {
 
 		patientPredictionVariables.put("changeInWeight", 0);
 
+		Double avWeight = getAverageWeightInTheLastSixMonths(patient);
+		if(avWeight > 0.00 && conPatientWeight > 0.00) {
+			Double changeInWeight = ((conPatientWeight * 1.00) / (avWeight * 1.00));
+			patientPredictionVariables.put("changeInWeight", changeInWeight);
+		}
+
+		//Source Total Adherence ART/CTX
 		patientPredictionVariables.put("num_adherence_ART", 0);
 		patientPredictionVariables.put("num_adherence_CTX", 0);
 
+		patientPredictionVariables.put("num_adherence_ART", getTotalARTAdherence(patient));
+		patientPredictionVariables.put("num_adherence_CTX", getTotalCTXAdherence(patient));
+
+		//Source Poor Adherence ART/CTX
 		patientPredictionVariables.put("num_poor_ART", 0);
 		patientPredictionVariables.put("num_poor_CTX", 0);
 
+		patientPredictionVariables.put("num_poor_ART", getTotalPoorARTAdherence(patient));
+		patientPredictionVariables.put("num_poor_CTX", getTotalPoorCTXAdherence(patient));
+
+		//Source Fair Adherence ART/CTX
 		patientPredictionVariables.put("num_fair_ART", 0);
 		patientPredictionVariables.put("num_fair_CTX", 0);
+
+		patientPredictionVariables.put("num_fair_ART", getTotalFairARTAdherence(patient));
+		patientPredictionVariables.put("num_fair_CTX", getTotalFairCTXAdherence(patient));
 
 		// Source ALL VL TESTS
 		patientPredictionVariables.put("n_tests_all", 0);
@@ -1007,13 +1102,56 @@ public class ModelService extends BaseOpenmrsService {
 		}
 
 		patientPredictionVariables.put("recent_hvl_rate", 0);
+
+		Integer r_n_hvl_threeyears = (Integer) patientPredictionVariables.get("n_hvl_threeyears");
+		Integer r_n_tests_threeyears = (Integer) patientPredictionVariables.get("n_tests_threeyears");
+		if(r_n_hvl_threeyears > 0 && r_n_tests_threeyears > 0) {
+			Double recent_hvl_rate = ((r_n_hvl_threeyears * 1.00) / (r_n_tests_threeyears * 1.00));
+			patientPredictionVariables.put("recent_hvl_rate", recent_hvl_rate);
+		}
+
 		patientPredictionVariables.put("total_hvl_rate", 0);
 
+		Integer r_n_hvl_all = (Integer) patientPredictionVariables.get("n_hvl_all");
+		Integer r_n_tests_all = (Integer) patientPredictionVariables.get("n_tests_all");
+		if(r_n_hvl_all > 0 && r_n_tests_all > 0) {
+			Double total_hvl_rate = ((r_n_hvl_all * 1.00) / (r_n_tests_all * 1.00));
+			patientPredictionVariables.put("total_hvl_rate", total_hvl_rate);
+		}
+
 		patientPredictionVariables.put("art_poor_adherence_rate", 0);
+
+		Integer r_num_poor_ART = (Integer) patientPredictionVariables.get("num_poor_ART");
+		Integer r_num_adherence_ART = (Integer) patientPredictionVariables.get("num_adherence_ART");
+		if(r_num_poor_ART > 0 && r_num_adherence_ART > 0) {
+			Double art_poor_adherence_rate = ((r_num_poor_ART * 1.00) / (r_num_adherence_ART * 1.00));
+			patientPredictionVariables.put("art_poor_adherence_rate", art_poor_adherence_rate);
+		}
+
 		patientPredictionVariables.put("art_fair_adherence_rate", 0);
 
+		Integer r_num_fair_ART = (Integer) patientPredictionVariables.get("num_fair_ART");
+		if(r_num_fair_ART > 0 && r_num_adherence_ART > 0) {
+			Double art_fair_adherence_rate = ((r_num_fair_ART * 1.00) / (r_num_adherence_ART * 1.00));
+			patientPredictionVariables.put("art_fair_adherence_rate", art_fair_adherence_rate);
+		}
+
 		patientPredictionVariables.put("ctx_poor_adherence_rate", 0);
+
+		Integer r_num_poor_CTX = (Integer) patientPredictionVariables.get("num_poor_CTX");
+		Integer r_num_adherence_CTX = (Integer) patientPredictionVariables.get("num_adherence_CTX");
+		if(r_num_poor_CTX > 0 && r_num_adherence_CTX > 0) {
+			Double ctx_poor_adherence_rate = ((r_num_poor_CTX * 1.00) / (r_num_adherence_CTX * 1.00));
+			patientPredictionVariables.put("ctx_poor_adherence_rate", ctx_poor_adherence_rate);
+		}
+
 		patientPredictionVariables.put("ctx_fair_adherence_rate", 0);
+
+		Integer r_num_fair_CTX = (Integer) patientPredictionVariables.get("num_fair_CTX");
+		if(r_num_fair_CTX > 0 && r_num_adherence_CTX > 0) {
+			Double ctx_fair_adherence_rate = ((r_num_fair_CTX * 1.00) / (r_num_adherence_CTX * 1.00));
+			patientPredictionVariables.put("ctx_fair_adherence_rate", ctx_fair_adherence_rate);
+		}
 
 		// Source the unscheduled rate
 		patientPredictionVariables.put("unscheduled_rate", 0);
@@ -1179,16 +1317,58 @@ public class ModelService extends BaseOpenmrsService {
 		}
 
 		// Source Treatment Type
+		// HIV program / PMTCT Program
+		Program hivProgram = MetadataUtils.existing(Program.class, HivMetadata._Program.HIV);
+		Program pmtctChildProgram = MetadataUtils.existing(Program.class, MchMetadata._Program.MCHCS);
+		Program pmtctMotherProgram = MetadataUtils.existing(Program.class, MchMetadata._Program.MCHMS);
+
 		patientPredictionVariables.put("TreatmentTypeART", 0);
 		patientPredictionVariables.put("TreatmentTypePMTCT", 0);
 
-		// Source Optimized HIV Regimen
+		ProgramWorkflowService pwfservice = Context.getProgramWorkflowService();
+		List<PatientProgram> hivprograms = pwfservice.getPatientPrograms(patient, hivProgram, null, null, null,null, true);
+		if (hivprograms.size() > 0) {
+			patientPredictionVariables.put("TreatmentTypeART", 1);
+		}
+		List<PatientProgram> childprograms = pwfservice.getPatientPrograms(patient, pmtctChildProgram, null, null, null,null, true);
+		List<PatientProgram> motherprograms = pwfservice.getPatientPrograms(patient, pmtctMotherProgram, null, null, null,null, true);
+		if (childprograms.size() > 0 || motherprograms.size() > 0) {
+			patientPredictionVariables.put("TreatmentTypePMTCT", 1);
+		}
+
+		// Source Optimized HIV Regimen (DTG)
 		patientPredictionVariables.put("OptimizedHIVRegimenNo", 0);
 		patientPredictionVariables.put("OptimizedHIVRegimenYes", 0);
+
+		List<SimpleObject> arvRegimenHistory = EncounterBasedRegimenUtils.getRegimenHistoryFromObservations(patient, "ARV");
+		if (arvRegimenHistory != null) {
+			// Current regimen has DTG?
+			if (arvRegimenHistory.size() > 0) {
+				// these are in reverse chronological order
+				SimpleObject rep = arvRegimenHistory.get(0);
+				String strCurRegimen = (String) rep.get("regimenLongDisplay");
+				if (strCurRegimen != null) {
+					if(strCurRegimen.contains("DTG")) {
+						patientPredictionVariables.put("OptimizedHIVRegimenYes", 1);
+					} else {
+						patientPredictionVariables.put("OptimizedHIVRegimenNo", 1);
+					}
+				}
+			}
+		}
 
 		// Source Other Regimen
 		patientPredictionVariables.put("Other_RegimenNo", 0);
 		patientPredictionVariables.put("Other_RegimenYes", 0);
+
+		List<SimpleObject> otherRegimenHistory = EncounterBasedRegimenUtils.getRegimenHistoryFromObservations(patient, "OTHER");
+		if (otherRegimenHistory != null) {
+			if (arvRegimenHistory.size() > 0) {
+				patientPredictionVariables.put("Other_RegimenYes", 1);
+			} else {
+				patientPredictionVariables.put("Other_RegimenNo", 1);
+			}
+		}
 
 		// Source pregnant variable
 		Obs obsPregancyStatus = getLatestObs(patient, Dictionary.PREGNANCY_STATUS);
@@ -1223,21 +1403,63 @@ public class ModelService extends BaseOpenmrsService {
 		}
 
 		//Source Differentiated Care
+		Obs obsDifferentiatedCare = getLatestObs(patient, "1a2dba33-55d6-477a-b171-c09a489bc37f"); //Concept 164947
+		Concept conDifferentiatedCare = null;
+		if (obsDifferentiatedCare != null) {
+			conDifferentiatedCare = obsDifferentiatedCare.getValueCoded();
+		}
+
 		patientPredictionVariables.put("DifferentiatedCareCommunityARTDistributionHCWLed", 0);
 		patientPredictionVariables.put("DifferentiatedCareCommunityARTDistributionpeerled", 0);
 		patientPredictionVariables.put("DifferentiatedCareFacilityARTdistributionGroup", 0);
 		patientPredictionVariables.put("DifferentiatedCareFastTrack", 0);
 		patientPredictionVariables.put("DifferentiatedCareStandardCare", 0);
 
+		if(conDifferentiatedCare != null) {
+			if (conDifferentiatedCare == Context.getConceptService().getConceptByUuid("53447431-147e-4071-9c12-f6baf9463c2f")) {
+				patientPredictionVariables.put("DifferentiatedCareCommunityARTDistributionHCWLed", 1);
+			}
+			if (conDifferentiatedCare == Context.getConceptService().getConceptByUuid("27b7ea34-4ea9-48b5-82a3-9981c430c808")) {
+				patientPredictionVariables.put("DifferentiatedCareCommunityARTDistributionpeerled", 1);
+			}
+			if (conDifferentiatedCare == Context.getConceptService().getConceptByUuid("3740fc18-bb23-4ddc-bba7-b010fba072b7")) {
+				patientPredictionVariables.put("DifferentiatedCareFacilityARTdistributionGroup", 1);
+			}
+			if (conDifferentiatedCare == Context.getConceptService().getConceptByUuid("f55781c1-461c-4f44-b575-d87519d38c34")) {
+				patientPredictionVariables.put("DifferentiatedCareFastTrack", 1);
+			}
+			if (conDifferentiatedCare == Context.getConceptService().getConceptByUuid("7e18712d-8cda-49f5-bfeb-940406cc2e32")) {
+				patientPredictionVariables.put("DifferentiatedCareStandardCare", 1);
+			}
+		}
+
 		//Source most recent art adherence
+		Integer artAdherence = getLatestARTAdherence(patient);
 		patientPredictionVariables.put("most_recent_art_adherencefair", 0);
 		patientPredictionVariables.put("most_recent_art_adherencegood", 0);
 		patientPredictionVariables.put("most_recent_art_adherencepoor", 0);
 
+		if(artAdherence == 1) { // Good
+			patientPredictionVariables.put("most_recent_art_adherencegood", 1);
+		} else if(artAdherence == 2) { // Fair
+			patientPredictionVariables.put("most_recent_art_adherencefair", 1);
+		} else if(artAdherence == 3) { // Poor
+			patientPredictionVariables.put("most_recent_art_adherencepoor", 1);
+		}
+
 		//Source most recent ctx adherence
+		Integer ctxAdherence = getLatestCTXAdherence(patient);
 		patientPredictionVariables.put("most_recent_ctx_adherencefair", 0);
 		patientPredictionVariables.put("most_recent_ctx_adherencegood", 0);
 		patientPredictionVariables.put("most_recent_ctx_adherencepoor", 0);
+
+		if(ctxAdherence == 1) { // Good
+			patientPredictionVariables.put("most_recent_ctx_adherencegood", 1);
+		} else if(ctxAdherence == 2) { // Fair
+			patientPredictionVariables.put("most_recent_ctx_adherencefair", 1);
+		} else if(ctxAdherence == 3) { // Poor
+			patientPredictionVariables.put("most_recent_ctx_adherencepoor", 1);
+		}
 
 		//Source Stability Assessment
 		Obs obsStabilityAssessment = getLatestObs(patient, "1855AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
@@ -1259,8 +1481,19 @@ public class ModelService extends BaseOpenmrsService {
 
 		//Source Most Recent VL
 		patientPredictionVariables.put("most_recent_vlHVL", 0);
+
+		Double most_recent_vlHVL = getLatestHighViralLoadCount(patient);
+		patientPredictionVariables.put("most_recent_vlHVL", most_recent_vlHVL);
+
 		patientPredictionVariables.put("most_recent_vlLVL", 0);
+
+		Double most_recent_vlLVL = getLatestLowViralLoadCount(patient);
+		patientPredictionVariables.put("most_recent_vlLVL", most_recent_vlLVL);
+
 		patientPredictionVariables.put("most_recent_vlSuppressed", 0);
+
+		Double most_recent_vlSuppressed = getLatestSuppressedViralLoadCount(patient);
+		patientPredictionVariables.put("most_recent_vlSuppressed", most_recent_vlSuppressed);
 
 		//Label
 		patientPredictionVariables.put("label", 1);
@@ -1299,6 +1532,9 @@ public class ModelService extends BaseOpenmrsService {
 					}
 					System.out.println("Got ML Description as: " + patientRiskScore.getDescription());
 					patientRiskScore.setEvaluationDate(new Date());
+					String randUUID = UUID.randomUUID().toString(); 
+					patientRiskScore.setSourceSystemUuid(randUUID);
+
 					return(patientRiskScore);
 				} else {
 					System.err.println("Error: Unable to get ML score");

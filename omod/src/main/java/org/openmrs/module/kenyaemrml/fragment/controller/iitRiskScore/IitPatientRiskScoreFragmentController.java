@@ -39,7 +39,7 @@ public class IitPatientRiskScoreFragmentController {
         String description = null;
         String riskFactor = null;
 
-        PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(patient.getPatientId()));
+        PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(patient.getPatientId()), false);
         if (latestRiskScore != null) {
             evaluationDate = latestRiskScore.getEvaluationDate();
             description = latestRiskScore.getDescription();
