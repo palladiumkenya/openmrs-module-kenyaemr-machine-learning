@@ -89,6 +89,7 @@ import org.openmrs.calculation.patient.PatientCalculationContext;
 import org.openmrs.calculation.patient.PatientCalculationService;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.module.kenyaemr.metadata.HivMetadata;
+import org.openmrs.module.kenyaemr.metadata.MchMetadata;
 import java.util.Set;
 import org.openmrs.module.kenyacore.calculation.Filters;
 import org.openmrs.api.context.Context;
@@ -312,7 +313,24 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import java.nio.charset.Charset;
-// import javax.xml.bind.JAXBException;
+import java.util.HashSet;
+import java.util.List;
+
+import org.openmrs.Patient;
+import org.openmrs.PatientIdentifierType;
+import org.openmrs.PatientProgram;
+import org.openmrs.Program;
+import org.openmrs.api.PatientService;
+import org.openmrs.api.ProgramWorkflowService;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
+import org.openmrs.module.kenyaemr.metadata.HivMetadata;
+import org.openmrs.module.kenyaemr.nupi.UpiUtilsDataExchange;
+import org.openmrs.module.metadatadeploy.MetadataUtils;
+import org.openmrs.scheduler.tasks.AbstractTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.openmrs.PersonAttributeType;
 
 /**
  * Service class used to prepare and score models
@@ -1255,13 +1273,56 @@ public class ModelService extends BaseOpenmrsService {
 		}
 
 		patientPredictionVariables.put("recent_hvl_rate", 0);
+
+		Integer r_n_hvl_threeyears = (Integer) patientPredictionVariables.get("n_hvl_threeyears");
+		Integer r_n_tests_threeyears = (Integer) patientPredictionVariables.get("n_tests_threeyears");
+		if(r_n_hvl_threeyears > 0 && r_n_tests_threeyears > 0) {
+			Double recent_hvl_rate = ((r_n_hvl_threeyears * 1.00) / (r_n_tests_threeyears * 1.00));
+			patientPredictionVariables.put("recent_hvl_rate", recent_hvl_rate);
+		}
+
 		patientPredictionVariables.put("total_hvl_rate", 0);
 
+		Integer r_n_hvl_all = (Integer) patientPredictionVariables.get("n_hvl_all");
+		Integer r_n_tests_all = (Integer) patientPredictionVariables.get("n_tests_all");
+		if(r_n_hvl_all > 0 && r_n_tests_all > 0) {
+			Double total_hvl_rate = ((r_n_hvl_all * 1.00) / (r_n_tests_all * 1.00));
+			patientPredictionVariables.put("total_hvl_rate", total_hvl_rate);
+		}
+
 		patientPredictionVariables.put("art_poor_adherence_rate", 0);
+
+		Integer r_num_poor_ART = (Integer) patientPredictionVariables.get("num_poor_ART");
+		Integer r_num_adherence_ART = (Integer) patientPredictionVariables.get("num_adherence_ART");
+		if(r_num_poor_ART > 0 && r_num_adherence_ART > 0) {
+			Double art_poor_adherence_rate = ((r_num_poor_ART * 1.00) / (r_num_adherence_ART * 1.00));
+			patientPredictionVariables.put("art_poor_adherence_rate", art_poor_adherence_rate);
+		}
+
 		patientPredictionVariables.put("art_fair_adherence_rate", 0);
 
+		Integer r_num_fair_ART = (Integer) patientPredictionVariables.get("num_fair_ART");
+		if(r_num_fair_ART > 0 && r_num_adherence_ART > 0) {
+			Double art_fair_adherence_rate = ((r_num_fair_ART * 1.00) / (r_num_adherence_ART * 1.00));
+			patientPredictionVariables.put("art_fair_adherence_rate", art_fair_adherence_rate);
+		}
+
 		patientPredictionVariables.put("ctx_poor_adherence_rate", 0);
+
+		Integer r_num_poor_CTX = (Integer) patientPredictionVariables.get("num_poor_CTX");
+		Integer r_num_adherence_CTX = (Integer) patientPredictionVariables.get("num_adherence_CTX");
+		if(r_num_poor_CTX > 0 && r_num_adherence_CTX > 0) {
+			Double ctx_poor_adherence_rate = ((r_num_poor_CTX * 1.00) / (r_num_adherence_CTX * 1.00));
+			patientPredictionVariables.put("ctx_poor_adherence_rate", ctx_poor_adherence_rate);
+		}
+
 		patientPredictionVariables.put("ctx_fair_adherence_rate", 0);
+
+		Integer r_num_fair_CTX = (Integer) patientPredictionVariables.get("num_fair_CTX");
+		if(r_num_fair_CTX > 0 && r_num_adherence_CTX > 0) {
+			Double ctx_fair_adherence_rate = ((r_num_fair_CTX * 1.00) / (r_num_adherence_CTX * 1.00));
+			patientPredictionVariables.put("ctx_fair_adherence_rate", ctx_fair_adherence_rate);
+		}
 
 		// Source the unscheduled rate
 		patientPredictionVariables.put("unscheduled_rate", 0);
@@ -1427,16 +1488,58 @@ public class ModelService extends BaseOpenmrsService {
 		}
 
 		// Source Treatment Type
+		// HIV program / PMTCT Program
+		Program hivProgram = MetadataUtils.existing(Program.class, HivMetadata._Program.HIV);
+		Program pmtctChildProgram = MetadataUtils.existing(Program.class, MchMetadata._Program.MCHCS);
+		Program pmtctMotherProgram = MetadataUtils.existing(Program.class, MchMetadata._Program.MCHMS);
+
 		patientPredictionVariables.put("TreatmentTypeART", 0);
 		patientPredictionVariables.put("TreatmentTypePMTCT", 0);
 
-		// Source Optimized HIV Regimen
+		ProgramWorkflowService pwfservice = Context.getProgramWorkflowService();
+		List<PatientProgram> hivprograms = pwfservice.getPatientPrograms(patient, hivProgram, null, null, null,null, true);
+		if (hivprograms.size() > 0) {
+			patientPredictionVariables.put("TreatmentTypeART", 1);
+		}
+		List<PatientProgram> childprograms = pwfservice.getPatientPrograms(patient, pmtctChildProgram, null, null, null,null, true);
+		List<PatientProgram> motherprograms = pwfservice.getPatientPrograms(patient, pmtctMotherProgram, null, null, null,null, true);
+		if (childprograms.size() > 0 || motherprograms.size() > 0) {
+			patientPredictionVariables.put("TreatmentTypePMTCT", 1);
+		}
+
+		// Source Optimized HIV Regimen (DTG)
 		patientPredictionVariables.put("OptimizedHIVRegimenNo", 0);
 		patientPredictionVariables.put("OptimizedHIVRegimenYes", 0);
+
+		List<SimpleObject> arvRegimenHistory = EncounterBasedRegimenUtils.getRegimenHistoryFromObservations(patient, "ARV");
+		if (arvRegimenHistory != null) {
+			// Current regimen has DTG?
+			if (arvRegimenHistory.size() > 0) {
+				// these are in reverse chronological order
+				SimpleObject rep = arvRegimenHistory.get(0);
+				String strCurRegimen = (String) rep.get("regimenLongDisplay");
+				if (strCurRegimen != null) {
+					if(strCurRegimen.contains("DTG")) {
+						patientPredictionVariables.put("OptimizedHIVRegimenYes", 1);
+					} else {
+						patientPredictionVariables.put("OptimizedHIVRegimenNo", 1);
+					}
+				}
+			}
+		}
 
 		// Source Other Regimen
 		patientPredictionVariables.put("Other_RegimenNo", 0);
 		patientPredictionVariables.put("Other_RegimenYes", 0);
+
+		List<SimpleObject> otherRegimenHistory = EncounterBasedRegimenUtils.getRegimenHistoryFromObservations(patient, "OTHER");
+		if (otherRegimenHistory != null) {
+			if (arvRegimenHistory.size() > 0) {
+				patientPredictionVariables.put("Other_RegimenYes", 1);
+			} else {
+				patientPredictionVariables.put("Other_RegimenNo", 1);
+			}
+		}
 
 		// Source pregnant variable
 		Obs obsPregancyStatus = getLatestObs(patient, Dictionary.PREGNANCY_STATUS);
@@ -1471,11 +1574,35 @@ public class ModelService extends BaseOpenmrsService {
 		}
 
 		//Source Differentiated Care
+		Obs obsDifferentiatedCare = getLatestObs(patient, "1a2dba33-55d6-477a-b171-c09a489bc37f"); //Concept 164947
+		Concept conDifferentiatedCare = null;
+		if (obsDifferentiatedCare != null) {
+			conDifferentiatedCare = obsDifferentiatedCare.getValueCoded();
+		}
+
 		patientPredictionVariables.put("DifferentiatedCareCommunityARTDistributionHCWLed", 0);
 		patientPredictionVariables.put("DifferentiatedCareCommunityARTDistributionpeerled", 0);
 		patientPredictionVariables.put("DifferentiatedCareFacilityARTdistributionGroup", 0);
 		patientPredictionVariables.put("DifferentiatedCareFastTrack", 0);
 		patientPredictionVariables.put("DifferentiatedCareStandardCare", 0);
+
+		if(conDifferentiatedCare != null) {
+			if (conDifferentiatedCare == Context.getConceptService().getConceptByUuid("53447431-147e-4071-9c12-f6baf9463c2f")) {
+				patientPredictionVariables.put("DifferentiatedCareCommunityARTDistributionHCWLed", 1);
+			}
+			if (conDifferentiatedCare == Context.getConceptService().getConceptByUuid("27b7ea34-4ea9-48b5-82a3-9981c430c808")) {
+				patientPredictionVariables.put("DifferentiatedCareCommunityARTDistributionpeerled", 1);
+			}
+			if (conDifferentiatedCare == Context.getConceptService().getConceptByUuid("3740fc18-bb23-4ddc-bba7-b010fba072b7")) {
+				patientPredictionVariables.put("DifferentiatedCareFacilityARTdistributionGroup", 1);
+			}
+			if (conDifferentiatedCare == Context.getConceptService().getConceptByUuid("f55781c1-461c-4f44-b575-d87519d38c34")) {
+				patientPredictionVariables.put("DifferentiatedCareFastTrack", 1);
+			}
+			if (conDifferentiatedCare == Context.getConceptService().getConceptByUuid("7e18712d-8cda-49f5-bfeb-940406cc2e32")) {
+				patientPredictionVariables.put("DifferentiatedCareStandardCare", 1);
+			}
+		}
 
 		//Source most recent art adherence
 		Integer artAdherence = getLatestARTAdherence(patient);
