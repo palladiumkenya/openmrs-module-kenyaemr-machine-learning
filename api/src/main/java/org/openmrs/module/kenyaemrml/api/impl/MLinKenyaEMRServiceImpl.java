@@ -65,8 +65,8 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 	}
 	
 	@Override
-	public PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient) {
-		return modelService.getLatestPatientRiskScoreByPatient(patient);
+	public PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient, Boolean reporting) {
+		return mLinKenyaEMRDao.getLatestPatientRiskScoreByPatient(patient, reporting);
 	}
 	
 	@Override
@@ -107,5 +107,10 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 	@Override
 	public Collection<Integer> getAllPatients() {
 		return mLinKenyaEMRDao.getAllPatients();
+	}
+
+	@Override
+	public Date getPatientLatestRiskEvaluationDate(Patient patient) {
+		return mLinKenyaEMRDao.getPatientLatestRiskEvaluationDate(patient);
 	}
 }

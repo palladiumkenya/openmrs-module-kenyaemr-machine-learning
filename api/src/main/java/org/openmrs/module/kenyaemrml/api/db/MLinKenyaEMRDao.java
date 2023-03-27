@@ -41,7 +41,7 @@ public interface MLinKenyaEMRDao {
 	 * @param patient
 	 * @return
 	 */
-	public PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient);
+	public PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient, Boolean reporting);
 
 	/**
 	 * Get all ML patients with HIGH risk scores
@@ -90,5 +90,13 @@ public interface MLinKenyaEMRDao {
 	 */
 	public List<PatientRiskScore> getAllPatientRiskScore();
 
+	/**
+	 *  Gets the latest risk evaluation date for all patient records
+	 */
     Date getLatestRiskEvaluationDate();
+
+	/**
+	 *  Gets the latest risk evaluation date for a patient
+	 */
+	Date getPatientLatestRiskEvaluationDate(Patient patient);
 }

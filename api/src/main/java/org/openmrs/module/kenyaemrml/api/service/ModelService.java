@@ -340,6 +340,8 @@ public class ModelService extends BaseOpenmrsService {
 	private Log log = LogFactory.getLog(this.getClass());
 
 	private SessionFactory sessionFactory;
+
+	MLinKenyaEMRService mLinKenyaEMRService = Context.getService(MLinKenyaEMRService.class);
 	
 	public void setSessionFactory(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
@@ -1064,6 +1066,88 @@ public class ModelService extends BaseOpenmrsService {
 	}
 
 	/**
+	 * Get average weight in the last 6 months
+	 * @param patient
+	 * @return Double - The average
+	 */
+	public Double getAverageWeightInTheLastSixMonths(Patient patient) {
+		Double ret = 0.00;
+		Integer count = 0;
+		Concept concept = Context.getConceptService().getConceptByUuid(Dictionary.WEIGHT_KG);
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			for (Obs cur : obsList) {
+				Double weight = cur.getValueNumeric();
+				Date obsDate = cur.getObsDatetime();
+				Date currentDate = new Date();
+				Age age = new Age(obsDate, currentDate);
+				long diff = age.getFullMonths();
+				if(diff <= 6) {
+					ret += weight;
+					count++;
+				}
+			}
+		}
+		if(count > 0 && ret > 0) {
+			ret = ((ret * 1.00) / (count * 1.00));
+		}
+		return ret;
+	}
+
+	/**
+	 * Get average BMI in the last 6 months
+	 * @param patient
+	 * @return Double - The average
+	 */
+	public Double getAverageBMIInTheLastSixMonths(Patient patient) {
+		Double ret = 0.00;
+		Integer count = 0;
+		Concept wConcept = Context.getConceptService().getConceptByUuid(Dictionary.WEIGHT_KG);
+		Concept hConcept = Context.getConceptService().getConceptByUuid(Dictionary.HEIGHT_CM);
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, wConcept);
+		if (obsList.size() > 0) {
+			for (Obs cur : obsList) {
+				Double weight = cur.getValueNumeric();
+				Date obsDate = cur.getObsDatetime();
+				Date currentDate = new Date();
+				Age age = new Age(obsDate, currentDate);
+				long diff = age.getFullMonths();
+				if(diff <= 6) {
+					Obs hObs = getObsByConceptPatientAndDate(patient, hConcept, obsDate);
+					if(hObs != null) {
+						Double height = hObs.getValueNumeric();
+						Double bmi = weight / ((height/100.00) * (height/100.00));
+						ret += bmi;
+						count++;
+					}
+				}
+			}
+		}
+		if(count > 0 && ret > 0) {
+			ret = ((ret * 1.00) / (count * 1.00));
+		}
+		return ret;
+	}
+
+	/**
+	 * Get Observation by Concept, Patient and Date
+	 */
+	public Obs getObsByConceptPatientAndDate(Patient patient, Concept concept, Date date) {
+		Obs ret = null;
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			for (Obs cur : obsList) {
+				Date obsDate = cur.getObsDatetime();
+				if(DateUtils.isSameDay(obsDate, date)) {
+					ret = cur;
+					return(ret);
+				}
+			}
+		}
+		return(ret);
+	}
+
+	/**
 	 * Gets the latest patient IIT score
 	 */
 	public PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient) {
@@ -1190,6 +1274,12 @@ public class ModelService extends BaseOpenmrsService {
 		
 		patientPredictionVariables.put("changeInBMI", 0);
 
+		Double avBMI = getAverageBMIInTheLastSixMonths(patient);
+		Double curBMI = (Double) patientPredictionVariables.get("BMI");
+		if(avBMI > 0.00 && curBMI > 0.00) {
+			Double changeInWeight = ((curBMI * 1.00) / (avBMI * 1.00));
+		}
+
 		//Source Weight
 		Obs obsPatientWeight = getLatestObs(patient, Dictionary.WEIGHT_KG);
 		Double conPatientWeight = 0.00;
@@ -1201,6 +1291,12 @@ public class ModelService extends BaseOpenmrsService {
 		}
 
 		patientPredictionVariables.put("changeInWeight", 0);
+
+		Double avWeight = getAverageWeightInTheLastSixMonths(patient);
+		if(avWeight > 0.00 && conPatientWeight > 0.00) {
+			Double changeInWeight = ((conPatientWeight * 1.00) / (avWeight * 1.00));
+			patientPredictionVariables.put("changeInWeight", changeInWeight);
+		}
 
 		//Source Total Adherence ART/CTX
 		patientPredictionVariables.put("num_adherence_ART", 0);
@@ -1705,6 +1801,12 @@ public class ModelService extends BaseOpenmrsService {
 					patientRiskScore.setEvaluationDate(new Date());
 
 					// Save/Update to DB (for reports) -- Incase a record for current date doesnt exist
+					Date lastScore = mLinKenyaEMRService.getPatientLatestRiskEvaluationDate(patient);
+					// save in case we haven't saved for today
+					Date dateToday = new Date();
+					if(!DateUtils.isSameDay(lastScore, dateToday)) {
+						mLinKenyaEMRService.saveOrUpdateRiskScore(patientRiskScore);
+					}
 
 					return(patientRiskScore);
 				} else {

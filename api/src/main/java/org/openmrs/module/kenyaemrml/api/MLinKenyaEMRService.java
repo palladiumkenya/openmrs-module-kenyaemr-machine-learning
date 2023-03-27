@@ -51,7 +51,7 @@ public interface MLinKenyaEMRService extends OpenmrsService {
 	 * @param patient
 	 * @return
 	 */
-	PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient);
+	PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient, Boolean reporting);
 
 	/**
 	 * Get all patients with high risk scores
@@ -100,6 +100,13 @@ public interface MLinKenyaEMRService extends OpenmrsService {
 	 */
 	List<PatientRiskScore> getAllPatientRiskScore();
 
+	/**
+	 *  Gets the latest risk evaluation date for all patient records
+	 */
 	Date getLatestRiskEvaluationDate();
 
+	/**
+	 *  Gets the latest risk evaluation date for a patient
+	 */
+	Date getPatientLatestRiskEvaluationDate(Patient patient);
 }

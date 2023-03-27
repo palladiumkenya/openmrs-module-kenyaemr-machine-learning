@@ -41,6 +41,8 @@ import org.openmrs.api.context.Context;
 import org.openmrs.ui.framework.SimpleObject;
 import org.springframework.context.annotation.Bean;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemrml.api.service.ModelService;
+import org.apache.commons.lang.time.DateUtils;
 
 public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 	
@@ -59,6 +61,8 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 	private Session getSession() {
 		return sessionFactory.getCurrentSession();
 	}
+
+	ModelService modelService = Context.getService(ModelService.class);
 	
 	/**
 	 * Saves or updates risk score
@@ -67,6 +71,7 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 	 * @return
 	 */
 	public PatientRiskScore saveOrUpdateRiskScore(PatientRiskScore riskScore) {
+		System.out.println("IIT ML Score: Saving/Updating the risk score to DB");
 		getSession().saveOrUpdate(riskScore);
 		return riskScore;
 	}
@@ -78,24 +83,33 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 	 * @return
 	 */
 	public PatientRiskScore getPatientRiskScoreById(Integer id) {
-		return (PatientRiskScore) getSession().createCriteria(PatientRiskScore.class).add(Restrictions.eq("id", id))
-		        .uniqueResult();
-		
+		return (PatientRiskScore) getSession().createCriteria(PatientRiskScore.class).add(Restrictions.eq("id", id)).uniqueResult();
 	}
 	
 	/**
 	 * Gets the latest PatientRiskScore for a patient
 	 * 
-	 * @param patient
+	 * @param patient - the patient
+	 * @param reporting - true = for reporting, false = not for reporting
 	 * @return
 	 */
-	public PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient) {
-		Criteria criteria = getSession().createCriteria(PatientRiskScore.class);
-		criteria.add(Restrictions.eq("patient", patient));
-		criteria.addOrder(Order.desc("evaluationDate"));
-		criteria.setMaxResults(1);
-		
-		PatientRiskScore patientRiskScore = (PatientRiskScore) criteria.uniqueResult();
+	public PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient, Boolean reporting) {
+		PatientRiskScore patientRiskScore = null;
+		Date lastScore = getPatientLatestRiskEvaluationDate(patient);
+		Date dateToday = new Date();
+		// If it is the same day or we are reporting, fetch from DB
+		if(DateUtils.isSameDay(lastScore, dateToday) || reporting) {
+			System.out.println("IIT ML Score: Getting risk score from DB");
+			Criteria criteria = getSession().createCriteria(PatientRiskScore.class);
+			criteria.add(Restrictions.eq("patient", patient));
+			criteria.addOrder(Order.desc("evaluationDate"));
+			criteria.setMaxResults(1);
+			
+			patientRiskScore = (PatientRiskScore) criteria.uniqueResult();
+		} else {
+			System.out.println("IIT ML Score: Generating a new risk score");
+			patientRiskScore = modelService.getLatestPatientRiskScoreByPatient(patient);
+		}
 		
 		return patientRiskScore;
 	}
@@ -130,8 +144,7 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 		
 		HashSet<Integer> ret = new HashSet<>();
 		for (Integer ptId : inHivProgram) {
-			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
-							.getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId));
+			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId), true);
 			if (latestRiskScore != null) {
 				String riskGroup = latestRiskScore.getDescription();
 				if (riskGroup.trim().equalsIgnoreCase("High Risk")) {
@@ -173,8 +186,7 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 
 		HashSet<Integer> ret = new HashSet<>();
 		for (Integer ptId : inHivProgram) {
-			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
-							.getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId));
+			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId), true);
 			if (latestRiskScore != null) {
 				String riskGroup = latestRiskScore.getDescription();
 				if (riskGroup.trim().equalsIgnoreCase("Medium Risk")) {
@@ -216,8 +228,7 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 		
 		HashSet<Integer> ret = new HashSet<>();
 		for (Integer ptId : inHivProgram) {
-			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
-							.getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId));
+			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId), true);
 			if (latestRiskScore != null) {
 				String riskGroup = latestRiskScore.getDescription();
 				if (riskGroup.trim().equalsIgnoreCase("Low Risk")) {
@@ -295,9 +306,26 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 		
 	}
 
+	/**
+	 *  Gets the latest risk evaluation date for all patient records
+	 */
 	@Override
 	public Date getLatestRiskEvaluationDate() {
 		Criteria criteria = getSession().createCriteria(PatientRiskScore.class);
+		criteria.addOrder(Order.desc("evaluationDate"));
+		criteria.setMaxResults(1);
+		PatientRiskScore patientRiskScore = (PatientRiskScore) criteria.uniqueResult();
+		return patientRiskScore.getEvaluationDate();
+
+	}
+
+	/**
+	 *  Gets the latest risk evaluation date for a patient
+	 */
+	@Override
+	public Date getPatientLatestRiskEvaluationDate(Patient patient) {
+		Criteria criteria = getSession().createCriteria(PatientRiskScore.class);
+		criteria.add(Restrictions.eq("patient", patient));
 		criteria.addOrder(Order.desc("evaluationDate"));
 		criteria.setMaxResults(1);
 		PatientRiskScore patientRiskScore = (PatientRiskScore) criteria.uniqueResult();
