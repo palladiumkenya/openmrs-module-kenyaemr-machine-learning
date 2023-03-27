@@ -538,6 +538,69 @@ public class ModelService extends BaseOpenmrsService {
 	}
 
 	/**
+	 * Get latest high viral load observation
+	 * @param patient
+	 * @return Double - The latest high VL count
+	 */
+	public Double getLatestHighViralLoadCount(Patient patient) {
+		Double ret = 0.00;
+		Concept concept = Context.getConceptService().getConceptByUuid(Dictionary.HIV_VIRAL_LOAD);
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			for (Obs cur : obsList) {
+				Double vl = cur.getValueNumeric();
+				if(vl >= 1000.00) {
+					ret = vl;
+					return(ret);
+				}
+			}
+		}
+		return(ret);
+	}
+
+	/**
+	 * Get latest low viral load observation
+	 * @param patient
+	 * @return Double - The latest low VL count
+	 */
+	public Double getLatestLowViralLoadCount(Patient patient) {
+		Double ret = 0.00;
+		Concept concept = Context.getConceptService().getConceptByUuid(Dictionary.HIV_VIRAL_LOAD);
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			for (Obs cur : obsList) {
+				Double vl = cur.getValueNumeric();
+				if(vl >= 200.00 && vl < 1000.00) {
+					ret = vl;
+					return(ret);
+				}
+			}
+		}
+		return(ret);
+	}
+
+	/**
+	 * Get latest suppressed viral load observation
+	 * @param patient
+	 * @return Double - The latest suppressed VL count
+	 */
+	public Double getLatestSuppressedViralLoadCount(Patient patient) {
+		Double ret = 0.00;
+		Concept concept = Context.getConceptService().getConceptByUuid(Dictionary.HIV_VIRAL_LOAD);
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			for (Obs cur : obsList) {
+				Double vl = cur.getValueNumeric();
+				if(vl < 200.00) {
+					ret = vl;
+					return(ret);
+				}
+			}
+		}
+		return(ret);
+	}
+
+	/**
 	 * Get all viral load observations in the last 3 yrs
 	 * @param patient
 	 * @return Integer - The count
@@ -810,6 +873,177 @@ public class ModelService extends BaseOpenmrsService {
 		return(ret);
 	}
 	
+	/**
+	 * Get latest ART adherence
+	 * @param patient
+	 * @return Integer - The latest ART adherence
+	 */
+	public Integer getLatestARTAdherence(Patient patient) {
+		Integer ret = 0;
+		Concept concept = Context.getConceptService().getConceptByUuid("1658AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			Obs cur = obsList.get(0);
+			Concept curConcept = cur.getConcept();
+			if(curConcept == Context.getConceptService().getConceptByUuid("159405AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+				// Good Adherence
+				ret = 1;
+				return(ret);
+			} else if(curConcept == Context.getConceptService().getConceptByUuid("159406AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+				// Fair Adherence
+				ret = 2;
+				return(ret);
+			} else if(curConcept == Context.getConceptService().getConceptByUuid("159598AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+				// Poor Adherence
+				ret = 3;
+				return(ret);
+			}
+		}
+		return(ret);
+	}
+
+	/**
+	 * Get latest CTX adherence
+	 * @param patient
+	 * @return Integer - The latest CTX adherence
+	 */
+	public Integer getLatestCTXAdherence(Patient patient) {
+		Integer ret = 0;
+		Concept concept = Context.getConceptService().getConceptByUuid("161652AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			Obs cur = obsList.get(0);
+			Concept curConcept = cur.getConcept();
+			if(curConcept == Context.getConceptService().getConceptByUuid("159405AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+				// Good Adherence
+				ret = 1;
+				return(ret);
+			} else if(curConcept == Context.getConceptService().getConceptByUuid("163794AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+				// Fair Adherence
+				ret = 2;
+				return(ret);
+			} else if(curConcept == Context.getConceptService().getConceptByUuid("159407AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+				// Poor Adherence
+				ret = 3;
+				return(ret);
+			}
+		}
+		return(ret);
+	}
+
+	/**
+	 * Get Total Poor ART adherence
+	 * @param patient
+	 * @return Integer - The Total Poor ART adherence
+	 */
+	public Integer getTotalPoorARTAdherence(Patient patient) {
+		Integer ret = 0;
+		Concept concept = Context.getConceptService().getConceptByUuid("1658AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			for (Obs cur : obsList) {
+				Concept curConcept = cur.getConcept();
+				if(curConcept == Context.getConceptService().getConceptByUuid("159598AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+					// Poor Adherence
+					ret++;
+				}
+			}
+		}
+		return(ret);
+	}
+
+	/**
+	 * Get Total Fair ART adherence
+	 * @param patient
+	 * @return Integer - The Total Fair ART adherence
+	 */
+	public Integer getTotalFairARTAdherence(Patient patient) {
+		Integer ret = 0;
+		Concept concept = Context.getConceptService().getConceptByUuid("1658AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			for (Obs cur : obsList) {
+				Concept curConcept = cur.getConcept();
+				if(curConcept == Context.getConceptService().getConceptByUuid("159406AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+					// Fair Adherence
+					ret++;
+				}
+			}
+		}
+		return(ret);
+	}
+
+	/**
+	 * Get Total Poor CTX adherence
+	 * @param patient
+	 * @return Integer - The Total Poor CTX adherence
+	 */
+	public Integer getTotalPoorCTXAdherence(Patient patient) {
+		Integer ret = 0;
+		Concept concept = Context.getConceptService().getConceptByUuid("161652AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			for (Obs cur : obsList) {
+				Concept curConcept = cur.getConcept();
+				if(curConcept == Context.getConceptService().getConceptByUuid("159407AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+					// Poor Adherence
+					ret++;
+				}
+			}
+		}
+		return(ret);
+	}
+
+	/**
+	 * Get Total Fair CTX adherence
+	 * @param patient
+	 * @return Integer - The Total Fair CTX adherence
+	 */
+	public Integer getTotalFairCTXAdherence(Patient patient) {
+		Integer ret = 0;
+		Concept concept = Context.getConceptService().getConceptByUuid("161652AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			for (Obs cur : obsList) {
+				Concept curConcept = cur.getConcept();
+				if(curConcept == Context.getConceptService().getConceptByUuid("163794AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+					// Fair Adherence
+					ret++;
+				}
+			}
+		}
+		return(ret);
+	}
+
+	/**
+	 * Get Total ART adherence
+	 * @param patient
+	 * @return Integer - The Total ART adherence
+	 */
+	public Integer getTotalARTAdherence(Patient patient) {
+		Integer ret = 0;
+		Concept concept = Context.getConceptService().getConceptByUuid("1658AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			ret = obsList.size();
+		}
+		return(ret);
+	}
+
+	/**
+	 * Get Total CTX adherence
+	 * @param patient
+	 * @return Integer - The Total CTX adherence
+	 */
+	public Integer getTotalCTXAdherence(Patient patient) {
+		Integer ret = 0;
+		Concept concept = Context.getConceptService().getConceptByUuid("161652AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			ret = obsList.size();
+		}
+		return(ret);
+	}
 
 	/**
 	 * Gets the latest patient IIT score
@@ -950,14 +1184,26 @@ public class ModelService extends BaseOpenmrsService {
 
 		patientPredictionVariables.put("changeInWeight", 0);
 
+		//Source Total Adherence ART/CTX
 		patientPredictionVariables.put("num_adherence_ART", 0);
 		patientPredictionVariables.put("num_adherence_CTX", 0);
 
+		patientPredictionVariables.put("num_adherence_ART", getTotalARTAdherence(patient));
+		patientPredictionVariables.put("num_adherence_CTX", getTotalCTXAdherence(patient));
+
+		//Source Poor Adherence ART/CTX
 		patientPredictionVariables.put("num_poor_ART", 0);
 		patientPredictionVariables.put("num_poor_CTX", 0);
 
+		patientPredictionVariables.put("num_poor_ART", getTotalPoorARTAdherence(patient));
+		patientPredictionVariables.put("num_poor_CTX", getTotalPoorCTXAdherence(patient));
+
+		//Source Fair Adherence ART/CTX
 		patientPredictionVariables.put("num_fair_ART", 0);
 		patientPredictionVariables.put("num_fair_CTX", 0);
+
+		patientPredictionVariables.put("num_fair_ART", getTotalFairARTAdherence(patient));
+		patientPredictionVariables.put("num_fair_CTX", getTotalFairCTXAdherence(patient));
 
 		// Source ALL VL TESTS
 		patientPredictionVariables.put("n_tests_all", 0);
@@ -1232,14 +1478,32 @@ public class ModelService extends BaseOpenmrsService {
 		patientPredictionVariables.put("DifferentiatedCareStandardCare", 0);
 
 		//Source most recent art adherence
+		Integer artAdherence = getLatestARTAdherence(patient);
 		patientPredictionVariables.put("most_recent_art_adherencefair", 0);
 		patientPredictionVariables.put("most_recent_art_adherencegood", 0);
 		patientPredictionVariables.put("most_recent_art_adherencepoor", 0);
 
+		if(artAdherence == 1) { // Good
+			patientPredictionVariables.put("most_recent_art_adherencegood", 1);
+		} else if(artAdherence == 2) { // Fair
+			patientPredictionVariables.put("most_recent_art_adherencefair", 1);
+		} else if(artAdherence == 3) { // Poor
+			patientPredictionVariables.put("most_recent_art_adherencepoor", 1);
+		}
+
 		//Source most recent ctx adherence
+		Integer ctxAdherence = getLatestCTXAdherence(patient);
 		patientPredictionVariables.put("most_recent_ctx_adherencefair", 0);
 		patientPredictionVariables.put("most_recent_ctx_adherencegood", 0);
 		patientPredictionVariables.put("most_recent_ctx_adherencepoor", 0);
+
+		if(ctxAdherence == 1) { // Good
+			patientPredictionVariables.put("most_recent_ctx_adherencegood", 1);
+		} else if(ctxAdherence == 2) { // Fair
+			patientPredictionVariables.put("most_recent_ctx_adherencefair", 1);
+		} else if(ctxAdherence == 3) { // Poor
+			patientPredictionVariables.put("most_recent_ctx_adherencepoor", 1);
+		}
 
 		//Source Stability Assessment
 		Obs obsStabilityAssessment = getLatestObs(patient, "1855AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
@@ -1261,8 +1525,19 @@ public class ModelService extends BaseOpenmrsService {
 
 		//Source Most Recent VL
 		patientPredictionVariables.put("most_recent_vlHVL", 0);
+
+		Double most_recent_vlHVL = getLatestHighViralLoadCount(patient);
+		patientPredictionVariables.put("most_recent_vlHVL", most_recent_vlHVL);
+
 		patientPredictionVariables.put("most_recent_vlLVL", 0);
+
+		Double most_recent_vlLVL = getLatestLowViralLoadCount(patient);
+		patientPredictionVariables.put("most_recent_vlLVL", most_recent_vlLVL);
+
 		patientPredictionVariables.put("most_recent_vlSuppressed", 0);
+
+		Double most_recent_vlSuppressed = getLatestSuppressedViralLoadCount(patient);
+		patientPredictionVariables.put("most_recent_vlSuppressed", most_recent_vlSuppressed);
 
 		//Label
 		patientPredictionVariables.put("label", 1);
@@ -1301,6 +1576,9 @@ public class ModelService extends BaseOpenmrsService {
 					}
 					System.out.println("Got ML Description as: " + patientRiskScore.getDescription());
 					patientRiskScore.setEvaluationDate(new Date());
+
+					// Save/Update to DB (for reports) -- Incase a record for current date doesnt exist
+
 					return(patientRiskScore);
 				} else {
 					System.err.println("Error: Unable to get ML score");
