@@ -556,8 +556,12 @@ public class MLDataExchange {
 
 		PatientService patientService = Context.getPatientService();
 
+		// Get all patients
 		List<Patient> allPatients = patientService.getAllPatients();
 		System.out.println("IIT ML Gen For All Task: Got all patients: " + allPatients.size());
+
+		// Get patients on HIV program
+		Program hivProgram = MetadataUtils.existing(Program.class, HivMetadata._Program.HIV);
 
 		// loop checking for patients without current IIT scores
 		HashSet<Patient> patientsGroup = new HashSet<Patient>();
@@ -566,13 +570,17 @@ public class MLDataExchange {
 				return (false);
 			}
 			if (patient != null) {
-				if(patient.getDead() == false) {
-					Date lastScore = mLinKenyaEMRService.getPatientLatestRiskEvaluationDate(patient);
-					Date dateToday = new Date();
-					if((lastScore == null || !DateUtils.isSameDay(lastScore, dateToday))) {
-						patientsGroup.add(patient);
+				ProgramWorkflowService pwfservice = Context.getProgramWorkflowService();
+				List<PatientProgram> programs = pwfservice.getPatientPrograms(patient, hivProgram, null, null, null,null, true);
+				if (programs.size() > 0) {
+					if(patient.getDead() == false) {
+						Date lastScore = mLinKenyaEMRService.getPatientLatestRiskEvaluationDate(patient);
+						Date dateToday = new Date();
+						if((lastScore == null || !DateUtils.isSameDay(lastScore, dateToday))) {
+							patientsGroup.add(patient);
+						}
 					}
-				}	
+				}
 			}
 		}
 		System.out.println("IIT ML Gen For All Task: Patient to be scored: " + patientsGroup.size());
@@ -599,13 +607,20 @@ public class MLDataExchange {
 				return (false);
 			}
 			System.out.println("IIT ML Score: Generating a new risk score || and saving to DB");
-			PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
-			// Save/Update to DB (for reports) -- Incase a record for current date doesn't exist
-			mLinKenyaEMRService.saveOrUpdateRiskScore(patientRiskScore);
+
+			try {
+				PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
+				// Save/Update to DB (for reports) -- Incase a record for current date doesn't exist
+				mLinKenyaEMRService.saveOrUpdateRiskScore(patientRiskScore);
+			} catch(Exception ex) {
+				System.err.println("IIT ML Score: ERROR: Failed to generate patient score: " + ex.getMessage());
+				ex.printStackTrace();
+			}
 
 			setScoreGenerationStatus((long)Math.floor(((currentPage * 1.00 / totalPages * 1.00) * totalRemote)), totalRemote);
 			currentPage++;
 
+			// NB: No need to delay. The IIT model is slow enough (8 sec)
 			// try {
 			// 	//Delay for 5 seconds
 			// 	Thread.sleep(5000);

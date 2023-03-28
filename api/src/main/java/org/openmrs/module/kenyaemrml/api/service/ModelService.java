@@ -884,671 +884,677 @@ public class ModelService extends BaseOpenmrsService {
 		SimpleObject patientPredictionVariables = new SimpleObject();
 		SimpleObject mlScoringRequestPayload = new SimpleObject();
 		
-		//Threshold
-		String iitLowRiskThresholdGlobal = "kenyaemrml.iit.lowRiskThreshold";
-		GlobalProperty globalIITLowRiskThreshold = Context.getAdministrationService().getGlobalPropertyObject(iitLowRiskThresholdGlobal);
-		String strIITLowRiskThreshold = globalIITLowRiskThreshold.getPropertyValue();
-		Double decIITLowRiskThreshold = Double.valueOf(strIITLowRiskThreshold);
+		try {
+			//Threshold
+			String iitLowRiskThresholdGlobal = "kenyaemrml.iit.lowRiskThreshold";
+			GlobalProperty globalIITLowRiskThreshold = Context.getAdministrationService().getGlobalPropertyObject(iitLowRiskThresholdGlobal);
+			String strIITLowRiskThreshold = globalIITLowRiskThreshold.getPropertyValue();
+			Double decIITLowRiskThreshold = Double.valueOf(strIITLowRiskThreshold);
 
-		String iitMediumRiskThresholdGlobal = "kenyaemrml.iit.mediumRiskThreshold";
-		GlobalProperty globalIITMediumRiskThreshold = Context.getAdministrationService().getGlobalPropertyObject(iitMediumRiskThresholdGlobal);
-		String strIITMediumRiskThreshold = globalIITMediumRiskThreshold.getPropertyValue();
-		Double decIITMediumRiskThreshold = Double.valueOf(strIITMediumRiskThreshold);
+			String iitMediumRiskThresholdGlobal = "kenyaemrml.iit.mediumRiskThreshold";
+			GlobalProperty globalIITMediumRiskThreshold = Context.getAdministrationService().getGlobalPropertyObject(iitMediumRiskThresholdGlobal);
+			String strIITMediumRiskThreshold = globalIITMediumRiskThreshold.getPropertyValue();
+			Double decIITMediumRiskThreshold = Double.valueOf(strIITMediumRiskThreshold);
 
-		String iitHighRiskThresholdGlobal = "kenyaemrml.iit.highRiskThreshold";
-		GlobalProperty globalIITHighRiskThreshold = Context.getAdministrationService().getGlobalPropertyObject(iitHighRiskThresholdGlobal);
-		String strIITHighRiskThreshold = globalIITHighRiskThreshold.getPropertyValue();
-		Double decIITHighRiskThreshold = Double.valueOf(strIITHighRiskThreshold);
-		// Model Configuration
-		modelConfigs.put("modelId", "XGB_IIT_02232023");
-		String today = (new SimpleDateFormat("yyyy-MM-dd")).format(new Date());
-        modelConfigs.put("encounterDate", today);
-        modelConfigs.put("facilityId", "");
-        modelConfigs.put("debug", "true");
-		// Prediction Variables
-		Integer Age = patient.getAge();
-		patientPredictionVariables.put("Age", Age);
-		// Start Facility Profile Matrix
-		patientPredictionVariables.put("births", 0);
-		patientPredictionVariables.put("pregnancies", 0);
-		patientPredictionVariables.put("literacy", 0);
-		patientPredictionVariables.put("poverty", 0);
-		patientPredictionVariables.put("anc", 0);
-		patientPredictionVariables.put("pnc", 0);
-		patientPredictionVariables.put("sba", 0);
-		patientPredictionVariables.put("hiv_prev", 0);
-		patientPredictionVariables.put("hiv_count", 0);
-		patientPredictionVariables.put("condom", 0);
-		patientPredictionVariables.put("intercourse", 0);
-		patientPredictionVariables.put("in_union", 0);
-		patientPredictionVariables.put("circumcision", 0);
-		patientPredictionVariables.put("partner_away", 0);
-		patientPredictionVariables.put("partner_men", 0);
-		patientPredictionVariables.put("partner_women", 0);
-		patientPredictionVariables.put("sti", 0);
-		patientPredictionVariables.put("fb", 0);
-		// End Facility Profile Matrix
+			String iitHighRiskThresholdGlobal = "kenyaemrml.iit.highRiskThreshold";
+			GlobalProperty globalIITHighRiskThreshold = Context.getAdministrationService().getGlobalPropertyObject(iitHighRiskThresholdGlobal);
+			String strIITHighRiskThreshold = globalIITHighRiskThreshold.getPropertyValue();
+			Double decIITHighRiskThreshold = Double.valueOf(strIITHighRiskThreshold);
+			// Model Configuration
+			modelConfigs.put("modelId", "XGB_IIT_02232023");
+			String today = (new SimpleDateFormat("yyyy-MM-dd")).format(new Date());
+			modelConfigs.put("encounterDate", today);
+			modelConfigs.put("facilityId", "");
+			modelConfigs.put("debug", "true");
+			// Prediction Variables
+			Integer Age = patient.getAge();
+			patientPredictionVariables.put("Age", Age);
+			// Start Facility Profile Matrix
+			patientPredictionVariables.put("births", 0);
+			patientPredictionVariables.put("pregnancies", 0);
+			patientPredictionVariables.put("literacy", 0);
+			patientPredictionVariables.put("poverty", 0);
+			patientPredictionVariables.put("anc", 0);
+			patientPredictionVariables.put("pnc", 0);
+			patientPredictionVariables.put("sba", 0);
+			patientPredictionVariables.put("hiv_prev", 0);
+			patientPredictionVariables.put("hiv_count", 0);
+			patientPredictionVariables.put("condom", 0);
+			patientPredictionVariables.put("intercourse", 0);
+			patientPredictionVariables.put("in_union", 0);
+			patientPredictionVariables.put("circumcision", 0);
+			patientPredictionVariables.put("partner_away", 0);
+			patientPredictionVariables.put("partner_men", 0);
+			patientPredictionVariables.put("partner_women", 0);
+			patientPredictionVariables.put("sti", 0);
+			patientPredictionVariables.put("fb", 0);
+			// End Facility Profile Matrix
 
-		Integer n_appts = getTotalAppointments(patient);
-		patientPredictionVariables.put("n_appts", n_appts);
-		
-		// Source missed appointments
-		patientPredictionVariables.put("missed1", 0);
-		patientPredictionVariables.put("missed5", 0);
-		patientPredictionVariables.put("missed30", 0);
-		patientPredictionVariables.put("missed1_last5", 0);
-		patientPredictionVariables.put("missed5_last5", 0);
-		patientPredictionVariables.put("missed30_last5", 0);
+			Integer n_appts = getTotalAppointments(patient);
+			patientPredictionVariables.put("n_appts", n_appts);
+			
+			// Source missed appointments
+			patientPredictionVariables.put("missed1", 0);
+			patientPredictionVariables.put("missed5", 0);
+			patientPredictionVariables.put("missed30", 0);
+			patientPredictionVariables.put("missed1_last5", 0);
+			patientPredictionVariables.put("missed5_last5", 0);
+			patientPredictionVariables.put("missed30_last5", 0);
 
-		SimpleObject soTotalMissedAppointments = getMissedAppointments(patient);
-		Integer totalMissedAppointments = (Integer) soTotalMissedAppointments.get("total");
-		if(totalMissedAppointments > 0) {
-			patientPredictionVariables.put("missed1", totalMissedAppointments);
-		} else if(totalMissedAppointments > 5) {
-			patientPredictionVariables.put("missed5", totalMissedAppointments);
-		} else if(totalMissedAppointments > 30) {
-			patientPredictionVariables.put("missed30", totalMissedAppointments);
-		}
-		Boolean lastfive = (Boolean) soTotalMissedAppointments.get("lastfive");
-		if(totalMissedAppointments > 0 && lastfive == true) {
-			patientPredictionVariables.put("missed1_last5", totalMissedAppointments);
-		} else if(totalMissedAppointments > 5 && lastfive == true) {
-			patientPredictionVariables.put("missed5_last5", totalMissedAppointments);
-		} else if(totalMissedAppointments > 30 && lastfive == true) {
-			patientPredictionVariables.put("missed30_last5", totalMissedAppointments);
-		}
-
-		// Source total regimens for patient
-		patientPredictionVariables.put("num_hiv_regimens", 0);
-
-		List<SimpleObject> arvHistory = EncounterBasedRegimenUtils.getRegimenHistoryFromObservations(patient, "ARV");
-		Integer numberOfRegimens = arvHistory.size();
-		patientPredictionVariables.put("num_hiv_regimens", numberOfRegimens);
-
-		// Source visits (last five)
-		patientPredictionVariables.put("n_visits_lastfive", 0);
-
-		List<Visit> allVisits = Context.getVisitService().getVisitsByPatient(patient);
-		Integer numOfVisits = allVisits.size();
-		if(numOfVisits >= 5) {
-			patientPredictionVariables.put("n_visits_lastfive", 5);
-		} else {
-			patientPredictionVariables.put("n_visits_lastfive", numOfVisits);
-		}
-
-		// Source unscheduled visits (last five)
-		patientPredictionVariables.put("n_unscheduled_lastfive", 0);
-
-		Integer unscheduledVisits = getTotalUnscheduledVisits(patient);
-		if(unscheduledVisits >= 5) {
-			patientPredictionVariables.put("n_unscheduled_lastfive", 5);
-		} else {
-			patientPredictionVariables.put("n_unscheduled_lastfive", unscheduledVisits);
-		}
-
-		// Source BMI
-		patientPredictionVariables.put("BMI", new Double(0.00));
-
-		Obs obsWeight = getLatestObs(patient, Dictionary.WEIGHT_KG);
-		Obs obsHeight = getLatestObs(patient, Dictionary.HEIGHT_CM);
-		Double conWeight = 0.00;
-		Double conHeight = 0.00;
-		if (obsWeight != null && obsHeight != null) {
-			conWeight = obsWeight.getValueNumeric();
-			conHeight = obsHeight.getValueNumeric();
-			if(conWeight > 0.00 && conHeight > 0.00) {
-				Double bmi = conWeight / ((conHeight/100.00) * (conHeight/100.00));
-				patientPredictionVariables.put("BMI", bmi);
+			SimpleObject soTotalMissedAppointments = getMissedAppointments(patient);
+			Integer totalMissedAppointments = (Integer) soTotalMissedAppointments.get("total");
+			if(totalMissedAppointments > 0) {
+				patientPredictionVariables.put("missed1", totalMissedAppointments);
+			} else if(totalMissedAppointments > 5) {
+				patientPredictionVariables.put("missed5", totalMissedAppointments);
+			} else if(totalMissedAppointments > 30) {
+				patientPredictionVariables.put("missed30", totalMissedAppointments);
 			}
-		} else {
+			Boolean lastfive = (Boolean) soTotalMissedAppointments.get("lastfive");
+			if(totalMissedAppointments > 0 && lastfive == true) {
+				patientPredictionVariables.put("missed1_last5", totalMissedAppointments);
+			} else if(totalMissedAppointments > 5 && lastfive == true) {
+				patientPredictionVariables.put("missed5_last5", totalMissedAppointments);
+			} else if(totalMissedAppointments > 30 && lastfive == true) {
+				patientPredictionVariables.put("missed30_last5", totalMissedAppointments);
+			}
+
+			// Source total regimens for patient
+			patientPredictionVariables.put("num_hiv_regimens", 0);
+
+			List<SimpleObject> arvHistory = EncounterBasedRegimenUtils.getRegimenHistoryFromObservations(patient, "ARV");
+			Integer numberOfRegimens = arvHistory.size();
+			patientPredictionVariables.put("num_hiv_regimens", numberOfRegimens);
+
+			// Source visits (last five)
+			patientPredictionVariables.put("n_visits_lastfive", 0);
+
+			List<Visit> allVisits = Context.getVisitService().getVisitsByPatient(patient);
+			Integer numOfVisits = allVisits.size();
+			if(numOfVisits >= 5) {
+				patientPredictionVariables.put("n_visits_lastfive", 5);
+			} else {
+				patientPredictionVariables.put("n_visits_lastfive", numOfVisits);
+			}
+
+			// Source unscheduled visits (last five)
+			patientPredictionVariables.put("n_unscheduled_lastfive", 0);
+
+			Integer unscheduledVisits = getTotalUnscheduledVisits(patient);
+			if(unscheduledVisits >= 5) {
+				patientPredictionVariables.put("n_unscheduled_lastfive", 5);
+			} else {
+				patientPredictionVariables.put("n_unscheduled_lastfive", unscheduledVisits);
+			}
+
+			// Source BMI
 			patientPredictionVariables.put("BMI", new Double(0.00));
-		}		
-		
-		patientPredictionVariables.put("changeInBMI", new Double(0.00));
 
-		Double avBMI = getAverageBMIInTheLastSixMonths(patient);
-		Double curBMI = (Double) patientPredictionVariables.get("BMI");
-		if(avBMI > 0.00 && curBMI > 0.00) {
-			Double changeInBMI = ((curBMI * 1.00) / (avBMI * 1.00));
-			patientPredictionVariables.put("changeInBMI", changeInBMI);
-		}
-
-		//Source Weight
-		Obs obsPatientWeight = getLatestObs(patient, Dictionary.WEIGHT_KG);
-		Double conPatientWeight = 0.00;
-		if (obsPatientWeight != null) {
-			conPatientWeight = obsPatientWeight.getValueNumeric();
-			patientPredictionVariables.put("Weight", conPatientWeight);
-		} else {
-			patientPredictionVariables.put("Weight", 0);
-		}
-
-		patientPredictionVariables.put("changeInWeight", 0);
-
-		Double avWeight = getAverageWeightInTheLastSixMonths(patient);
-		if(avWeight > 0.00 && conPatientWeight > 0.00) {
-			Double changeInWeight = ((conPatientWeight * 1.00) / (avWeight * 1.00));
-			patientPredictionVariables.put("changeInWeight", changeInWeight);
-		}
-
-		//Source Total Adherence ART/CTX
-		patientPredictionVariables.put("num_adherence_ART", 0);
-		patientPredictionVariables.put("num_adherence_CTX", 0);
-
-		patientPredictionVariables.put("num_adherence_ART", getTotalARTAdherence(patient));
-		patientPredictionVariables.put("num_adherence_CTX", getTotalCTXAdherence(patient));
-
-		//Source Poor Adherence ART/CTX
-		patientPredictionVariables.put("num_poor_ART", 0);
-		patientPredictionVariables.put("num_poor_CTX", 0);
-
-		patientPredictionVariables.put("num_poor_ART", getTotalPoorARTAdherence(patient));
-		patientPredictionVariables.put("num_poor_CTX", getTotalPoorCTXAdherence(patient));
-
-		//Source Fair Adherence ART/CTX
-		patientPredictionVariables.put("num_fair_ART", 0);
-		patientPredictionVariables.put("num_fair_CTX", 0);
-
-		patientPredictionVariables.put("num_fair_ART", getTotalFairARTAdherence(patient));
-		patientPredictionVariables.put("num_fair_CTX", getTotalFairCTXAdherence(patient));
-
-		// Source ALL VL TESTS
-		patientPredictionVariables.put("n_tests_all", 0);
-
-		Integer totalTests = getNumberOfObs(patient, Dictionary.HIV_VIRAL_LOAD);
-		patientPredictionVariables.put("n_tests_all", totalTests);
-
-		// Source High VL
-		patientPredictionVariables.put("n_hvl_all", 0);
-
-		Integer highVLTotal = getHighViralLoadCount(patient);
-		patientPredictionVariables.put("n_hvl_all", highVLTotal);
-
-		// Source ALL VL TESTS (Last 3 yrs)
-		patientPredictionVariables.put("n_tests_threeyears", 0);
-
-		Integer n_tests_threeyears = getAllViralLoadCountLastThreeYears(patient);
-		patientPredictionVariables.put("n_tests_threeyears", n_tests_threeyears);
-
-		// Source HIGH VL TESTS (Last 3 yrs)
-		patientPredictionVariables.put("n_hvl_threeyears", 0);
-
-		Integer n_hvl_threeyears = getHighViralLoadCountLastThreeYears(patient);
-		patientPredictionVariables.put("n_hvl_threeyears", n_hvl_threeyears);
-
-		// Source ART data
-		Obs obsARTStartDate = getLatestObs(patient, Dictionary.ANTIRETROVIRAL_TREATMENT_START_DATE);
-		Date dtARTStartDate = null;
-		if (obsARTStartDate != null) {
-			dtARTStartDate = obsARTStartDate.getValueDatetime();
-		}
-
-		patientPredictionVariables.put("timeOnArt", 0);
-
-		if(dtARTStartDate != null) {
-			Date currentDate = new Date();
-			long diffInMillies = Math.abs(currentDate.getTime() - dtARTStartDate.getTime());
-    		long diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS); // Time in days
-			patientPredictionVariables.put("timeOnArt", diff);
-		}
-
-		patientPredictionVariables.put("AgeARTStart", 0);
-
-		if(dtARTStartDate != null) {
-			Date birthDate = patient.getBirthdate();
-			Age age = new Age(birthDate, dtARTStartDate);
-			long diff = age.getFullYears();
-			patientPredictionVariables.put("AgeARTStart", diff);
-		}
-
-		patientPredictionVariables.put("recent_hvl_rate", 0);
-
-		Integer r_n_hvl_threeyears = (Integer) patientPredictionVariables.get("n_hvl_threeyears");
-		Integer r_n_tests_threeyears = (Integer) patientPredictionVariables.get("n_tests_threeyears");
-		if(r_n_hvl_threeyears > 0 && r_n_tests_threeyears > 0) {
-			Double recent_hvl_rate = ((r_n_hvl_threeyears * 1.00) / (r_n_tests_threeyears * 1.00));
-			patientPredictionVariables.put("recent_hvl_rate", recent_hvl_rate);
-		}
-
-		patientPredictionVariables.put("total_hvl_rate", 0);
-
-		Integer r_n_hvl_all = (Integer) patientPredictionVariables.get("n_hvl_all");
-		Integer r_n_tests_all = (Integer) patientPredictionVariables.get("n_tests_all");
-		if(r_n_hvl_all > 0 && r_n_tests_all > 0) {
-			Double total_hvl_rate = ((r_n_hvl_all * 1.00) / (r_n_tests_all * 1.00));
-			patientPredictionVariables.put("total_hvl_rate", total_hvl_rate);
-		}
-
-		patientPredictionVariables.put("art_poor_adherence_rate", 0);
-
-		Integer r_num_poor_ART = (Integer) patientPredictionVariables.get("num_poor_ART");
-		Integer r_num_adherence_ART = (Integer) patientPredictionVariables.get("num_adherence_ART");
-		if(r_num_poor_ART > 0 && r_num_adherence_ART > 0) {
-			Double art_poor_adherence_rate = ((r_num_poor_ART * 1.00) / (r_num_adherence_ART * 1.00));
-			patientPredictionVariables.put("art_poor_adherence_rate", art_poor_adherence_rate);
-		}
-
-		patientPredictionVariables.put("art_fair_adherence_rate", 0);
-
-		Integer r_num_fair_ART = (Integer) patientPredictionVariables.get("num_fair_ART");
-		if(r_num_fair_ART > 0 && r_num_adherence_ART > 0) {
-			Double art_fair_adherence_rate = ((r_num_fair_ART * 1.00) / (r_num_adherence_ART * 1.00));
-			patientPredictionVariables.put("art_fair_adherence_rate", art_fair_adherence_rate);
-		}
-
-		patientPredictionVariables.put("ctx_poor_adherence_rate", 0);
-
-		Integer r_num_poor_CTX = (Integer) patientPredictionVariables.get("num_poor_CTX");
-		Integer r_num_adherence_CTX = (Integer) patientPredictionVariables.get("num_adherence_CTX");
-		if(r_num_poor_CTX > 0 && r_num_adherence_CTX > 0) {
-			Double ctx_poor_adherence_rate = ((r_num_poor_CTX * 1.00) / (r_num_adherence_CTX * 1.00));
-			patientPredictionVariables.put("ctx_poor_adherence_rate", ctx_poor_adherence_rate);
-		}
-
-		patientPredictionVariables.put("ctx_fair_adherence_rate", 0);
-
-		Integer r_num_fair_CTX = (Integer) patientPredictionVariables.get("num_fair_CTX");
-		if(r_num_fair_CTX > 0 && r_num_adherence_CTX > 0) {
-			Double ctx_fair_adherence_rate = ((r_num_fair_CTX * 1.00) / (r_num_adherence_CTX * 1.00));
-			patientPredictionVariables.put("ctx_fair_adherence_rate", ctx_fair_adherence_rate);
-		}
-
-		// Source the unscheduled rate
-		patientPredictionVariables.put("unscheduled_rate", 0);
-
-		if(numOfVisits > 0 && unscheduledVisits > 0) {
-			if(numOfVisits > 0) {
-				Integer calcNumOfVisits = (numOfVisits >= 5) ? 5 : numOfVisits;
-				Integer calcUnscheduledVisits = (unscheduledVisits >= 5) ? 5 : unscheduledVisits;
-				Double unscheduled_rate = ((calcUnscheduledVisits * 1.00) / (calcNumOfVisits * 1.00));
-				patientPredictionVariables.put("unscheduled_rate", unscheduled_rate);
-			}
-		}
-
-		patientPredictionVariables.put("all_late30_rate", 0.00);
-		patientPredictionVariables.put("all_late5_rate", 0.00);
-		patientPredictionVariables.put("all_late1_rate", 0.00);
-
-		Integer late30s = (Integer) patientPredictionVariables.get("missed30");
-		Double all_late30_rate = 0.00;
-		if(n_appts > 0 && late30s > 0) {
-			all_late30_rate = ((late30s * 1.00) / (n_appts * 1.00));
-		}
-		patientPredictionVariables.put("all_late30_rate", all_late30_rate);
-
-		Integer late5s = (Integer) patientPredictionVariables.get("missed5");
-		Double all_late5_rate = 0.00;
-		if(n_appts > 0 && late5s > 0) {
-			all_late5_rate = ((late5s * 1.00) / (n_appts * 1.00));
-		}
-		patientPredictionVariables.put("all_late5_rate", all_late5_rate);
-
-		Integer late1s = (Integer) patientPredictionVariables.get("missed1");
-		Double all_late1_rate = 0.00;
-		if(n_appts > 0 && late1s > 0) {
-			all_late1_rate = ((late1s * 1.00) / (n_appts * 1.00));
-		}
-		patientPredictionVariables.put("all_late1_rate", all_late1_rate);
-
-		patientPredictionVariables.put("recent_late30_rate", 0.00);
-		patientPredictionVariables.put("recent_late5_rate", 0.00);
-		patientPredictionVariables.put("recent_late1_rate", 0.00);
-
-		Integer lastFiveVisits = (Integer) patientPredictionVariables.get("n_visits_lastfive");
-
-		Integer missed30_last5 = (Integer) patientPredictionVariables.get("missed30_last5");
-		Double recent_late30_rate = 0.00;
-		if(lastFiveVisits > 0 && missed30_last5 > 0) {
-			recent_late30_rate = ((missed30_last5 * 1.00) / (lastFiveVisits * 1.00));
-		}
-		patientPredictionVariables.put("recent_late30_rate", recent_late30_rate);
-
-		Integer missed5_last5 = (Integer) patientPredictionVariables.get("missed5_last5");
-		Double recent_late5_rate = 0.00;
-		if(lastFiveVisits > 0 && missed5_last5 > 0) {
-			recent_late5_rate = ((missed5_last5 * 1.00) / (lastFiveVisits * 1.00));
-		}
-		patientPredictionVariables.put("recent_late5_rate", recent_late5_rate);
-
-		Integer missed1_last5 = (Integer) patientPredictionVariables.get("missed1_last5");
-		Double recent_late1_rate = 0.00;
-		if(lastFiveVisits > 0 && missed1_last5 > 0) {
-			recent_late1_rate = ((missed1_last5 * 1.00) / (lastFiveVisits * 1.00));
-		}
-		patientPredictionVariables.put("recent_late1_rate", recent_late1_rate);
-
-		// Source Gender
-		String inGender = patient.getGender().trim().toLowerCase();
-		if(inGender.equalsIgnoreCase("m")) {
-			patientPredictionVariables.put("GenderMale", 1);
-		} else {
-			patientPredictionVariables.put("GenderMale", 0);
-		}
-		if(inGender.equalsIgnoreCase("f")) {
-			patientPredictionVariables.put("GenderFemale", 1);
-		} else {
-			patientPredictionVariables.put("GenderFemale", 0);
-		}
-
-		// Source Patient Source (Entry Point)
-		Obs obsEntryPoint = getLatestObs(patient, Dictionary.METHOD_OF_ENROLLMENT);
-		Concept conEntryPoint = null;
-		if (obsEntryPoint != null) {
-			conEntryPoint = obsEntryPoint.getValueCoded();
-		}
-
-		patientPredictionVariables.put("PatientSourceCCC", 0);
-		patientPredictionVariables.put("PatientSourceIPDAdult", 0);
-		patientPredictionVariables.put("PatientSourceMCH", 0);
-		patientPredictionVariables.put("PatientSourceOPD", 0);
-		patientPredictionVariables.put("PatientSourceOther", 0);
-		patientPredictionVariables.put("PatientSourceTBClinic", 0);
-		patientPredictionVariables.put("PatientSourceVCT", 0);
-
-		if(conEntryPoint != null) {
-			if (conEntryPoint == Context.getConceptService().getConceptByUuid("159940AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
-				patientPredictionVariables.put("PatientSourceVCT", 1);
-			} else if (conEntryPoint == Context.getConceptService().getConceptByUuid("160541AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
-				patientPredictionVariables.put("PatientSourceTBClinic", 1);
-			} else if (conEntryPoint == Context.getConceptService().getConceptByUuid("160542AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
-				patientPredictionVariables.put("PatientSourceOPD", 1);
-			} else if (conEntryPoint == Context.getConceptService().getConceptByUuid("160456AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
-				patientPredictionVariables.put("PatientSourceMCH", 1);
-			} else if (conEntryPoint == Context.getConceptService().getConceptByUuid("5485AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
-				patientPredictionVariables.put("PatientSourceIPDAdult", 1);
-			} else if (conEntryPoint == Context.getConceptService().getConceptByUuid("162050AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
-				patientPredictionVariables.put("PatientSourceCCC", 1);
+			Obs obsWeight = getLatestObs(patient, Dictionary.WEIGHT_KG);
+			Obs obsHeight = getLatestObs(patient, Dictionary.HEIGHT_CM);
+			Double conWeight = 0.00;
+			Double conHeight = 0.00;
+			if (obsWeight != null && obsHeight != null) {
+				conWeight = obsWeight.getValueNumeric();
+				conHeight = obsHeight.getValueNumeric();
+				if(conWeight > 0.00 && conHeight > 0.00) {
+					Double bmi = conWeight / ((conHeight/100.00) * (conHeight/100.00));
+					patientPredictionVariables.put("BMI", bmi);
+				}
 			} else {
-				patientPredictionVariables.put("PatientSourceOther", 1);
+				patientPredictionVariables.put("BMI", new Double(0.00));
+			}		
+			
+			patientPredictionVariables.put("changeInBMI", new Double(0.00));
+
+			Double avBMI = getAverageBMIInTheLastSixMonths(patient);
+			Double curBMI = (Double) patientPredictionVariables.get("BMI");
+			if(avBMI > 0.00 && curBMI > 0.00) {
+				Double changeInBMI = ((curBMI * 1.00) / (avBMI * 1.00));
+				patientPredictionVariables.put("changeInBMI", changeInBMI);
 			}
-		}
 
-		// Source Marital Status
-		Obs obsMaritalStatus = getLatestObs(patient, Dictionary.CIVIL_STATUS);
-		Concept conMaritalStatus = null;
-		if (obsMaritalStatus != null) {
-			conMaritalStatus = obsMaritalStatus.getValueCoded();
-		}
-
-		patientPredictionVariables.put("MaritalStatusDivorced", 0);
-		patientPredictionVariables.put("MaritalStatusMarried", 0);
-		patientPredictionVariables.put("MaritalStatusOther", 0);
-		patientPredictionVariables.put("MaritalStatusPolygamous", 0);
-		patientPredictionVariables.put("MaritalStatusSingle", 0);
-		patientPredictionVariables.put("MaritalStatusWidow", 0);
-		
-		if(conMaritalStatus != null) {
-			if (conMaritalStatus == Dictionary.getConcept(Dictionary.DIVORCED)) {
-				patientPredictionVariables.put("MaritalStatusDivorced", 1);
-			} else if (conMaritalStatus == Dictionary.getConcept(Dictionary.MARRIED_MONOGAMOUS)) {
-				patientPredictionVariables.put("MaritalStatusMarried", 1);
-			} else if (conMaritalStatus == Dictionary.getConcept(Dictionary.MARRIED_POLYGAMOUS)) {
-				patientPredictionVariables.put("MaritalStatusPolygamous", 1);
-			} else if (conMaritalStatus == Dictionary.getConcept(Dictionary.WIDOWED)) {
-				patientPredictionVariables.put("MaritalStatusWidow", 1);
-			} else if (conMaritalStatus == Dictionary.getConcept(Dictionary.NEVER_MARRIED)) {
-				patientPredictionVariables.put("MaritalStatusSingle", 1);			
+			//Source Weight
+			Obs obsPatientWeight = getLatestObs(patient, Dictionary.WEIGHT_KG);
+			Double conPatientWeight = 0.00;
+			if (obsPatientWeight != null) {
+				conPatientWeight = obsPatientWeight.getValueNumeric();
+				patientPredictionVariables.put("Weight", conPatientWeight);
 			} else {
-				patientPredictionVariables.put("MaritalStatusOther", 1);
+				patientPredictionVariables.put("Weight", 0);
 			}
-		}
 
-		// Source Population Type
-		Obs obsPopulationType = getLatestObs(patient, "cf543666-ce76-4e91-8b8d-c0b54a436a2e");
-		Concept conPopulationType = null;
-		if (obsPopulationType != null) {
-			conPopulationType = obsPopulationType.getValueCoded();
-		}
+			patientPredictionVariables.put("changeInWeight", 0);
 
-		patientPredictionVariables.put("PopulationTypeGeneralPopulation", 0);
-		patientPredictionVariables.put("PopulationTypeKeyPopulation", 0);
-		patientPredictionVariables.put("PopulationTypePriorityPopulation", 0);
-		
-		if(conPopulationType != null) {
-			if (conPopulationType == Context.getConceptService().getConceptByUuid("5d308c8c-ad49-45e1-9885-e5d09a8e5587")) {
-				patientPredictionVariables.put("PopulationTypeGeneralPopulation", 1);
+			Double avWeight = getAverageWeightInTheLastSixMonths(patient);
+			if(avWeight > 0.00 && conPatientWeight > 0.00) {
+				Double changeInWeight = ((conPatientWeight * 1.00) / (avWeight * 1.00));
+				patientPredictionVariables.put("changeInWeight", changeInWeight);
 			}
-			if (conPopulationType == Context.getConceptService().getConceptByUuid("bf850dd4-309b-4cbd-9470-9d8110ea5550")) {
-				patientPredictionVariables.put("PopulationTypeKeyPopulation", 1);
+
+			//Source Total Adherence ART/CTX
+			patientPredictionVariables.put("num_adherence_ART", 0);
+			patientPredictionVariables.put("num_adherence_CTX", 0);
+
+			patientPredictionVariables.put("num_adherence_ART", getTotalARTAdherence(patient));
+			patientPredictionVariables.put("num_adherence_CTX", getTotalCTXAdherence(patient));
+
+			//Source Poor Adherence ART/CTX
+			patientPredictionVariables.put("num_poor_ART", 0);
+			patientPredictionVariables.put("num_poor_CTX", 0);
+
+			patientPredictionVariables.put("num_poor_ART", getTotalPoorARTAdherence(patient));
+			patientPredictionVariables.put("num_poor_CTX", getTotalPoorCTXAdherence(patient));
+
+			//Source Fair Adherence ART/CTX
+			patientPredictionVariables.put("num_fair_ART", 0);
+			patientPredictionVariables.put("num_fair_CTX", 0);
+
+			patientPredictionVariables.put("num_fair_ART", getTotalFairARTAdherence(patient));
+			patientPredictionVariables.put("num_fair_CTX", getTotalFairCTXAdherence(patient));
+
+			// Source ALL VL TESTS
+			patientPredictionVariables.put("n_tests_all", 0);
+
+			Integer totalTests = getNumberOfObs(patient, Dictionary.HIV_VIRAL_LOAD);
+			patientPredictionVariables.put("n_tests_all", totalTests);
+
+			// Source High VL
+			patientPredictionVariables.put("n_hvl_all", 0);
+
+			Integer highVLTotal = getHighViralLoadCount(patient);
+			patientPredictionVariables.put("n_hvl_all", highVLTotal);
+
+			// Source ALL VL TESTS (Last 3 yrs)
+			patientPredictionVariables.put("n_tests_threeyears", 0);
+
+			Integer n_tests_threeyears = getAllViralLoadCountLastThreeYears(patient);
+			patientPredictionVariables.put("n_tests_threeyears", n_tests_threeyears);
+
+			// Source HIGH VL TESTS (Last 3 yrs)
+			patientPredictionVariables.put("n_hvl_threeyears", 0);
+
+			Integer n_hvl_threeyears = getHighViralLoadCountLastThreeYears(patient);
+			patientPredictionVariables.put("n_hvl_threeyears", n_hvl_threeyears);
+
+			// Source ART data
+			Obs obsARTStartDate = getLatestObs(patient, Dictionary.ANTIRETROVIRAL_TREATMENT_START_DATE);
+			Date dtARTStartDate = null;
+			if (obsARTStartDate != null) {
+				dtARTStartDate = obsARTStartDate.getValueDatetime();
 			}
-			if (conPopulationType == Context.getConceptService().getConceptByUuid("167143AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
-				patientPredictionVariables.put("PopulationTypePriorityPopulation", 1);
+
+			patientPredictionVariables.put("timeOnArt", 0);
+
+			if(dtARTStartDate != null) {
+				Date currentDate = new Date();
+				long diffInMillies = Math.abs(currentDate.getTime() - dtARTStartDate.getTime());
+				long diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS); // Time in days
+				patientPredictionVariables.put("timeOnArt", diff);
 			}
-		}
 
-		// Source Treatment Type
-		// HIV program / PMTCT Program
-		Program hivProgram = MetadataUtils.existing(Program.class, HivMetadata._Program.HIV);
-		Program pmtctChildProgram = MetadataUtils.existing(Program.class, MchMetadata._Program.MCHCS);
-		Program pmtctMotherProgram = MetadataUtils.existing(Program.class, MchMetadata._Program.MCHMS);
+			patientPredictionVariables.put("AgeARTStart", 0);
 
-		patientPredictionVariables.put("TreatmentTypeART", 0);
-		patientPredictionVariables.put("TreatmentTypePMTCT", 0);
+			if(dtARTStartDate != null) {
+				Date birthDate = patient.getBirthdate();
+				Age age = new Age(birthDate, dtARTStartDate);
+				long diff = age.getFullYears();
+				patientPredictionVariables.put("AgeARTStart", diff);
+			}
 
-		ProgramWorkflowService pwfservice = Context.getProgramWorkflowService();
-		List<PatientProgram> hivprograms = pwfservice.getPatientPrograms(patient, hivProgram, null, null, null,null, true);
-		if (hivprograms.size() > 0) {
-			patientPredictionVariables.put("TreatmentTypeART", 1);
-		}
-		List<PatientProgram> childprograms = pwfservice.getPatientPrograms(patient, pmtctChildProgram, null, null, null,null, true);
-		List<PatientProgram> motherprograms = pwfservice.getPatientPrograms(patient, pmtctMotherProgram, null, null, null,null, true);
-		if (childprograms.size() > 0 || motherprograms.size() > 0) {
-			patientPredictionVariables.put("TreatmentTypePMTCT", 1);
-		}
+			patientPredictionVariables.put("recent_hvl_rate", 0);
 
-		// Source Optimized HIV Regimen (DTG)
-		patientPredictionVariables.put("OptimizedHIVRegimenNo", 0);
-		patientPredictionVariables.put("OptimizedHIVRegimenYes", 0);
+			Integer r_n_hvl_threeyears = (Integer) patientPredictionVariables.get("n_hvl_threeyears");
+			Integer r_n_tests_threeyears = (Integer) patientPredictionVariables.get("n_tests_threeyears");
+			if(r_n_hvl_threeyears > 0 && r_n_tests_threeyears > 0) {
+				Double recent_hvl_rate = ((r_n_hvl_threeyears * 1.00) / (r_n_tests_threeyears * 1.00));
+				patientPredictionVariables.put("recent_hvl_rate", recent_hvl_rate);
+			}
 
-		List<SimpleObject> arvRegimenHistory = EncounterBasedRegimenUtils.getRegimenHistoryFromObservations(patient, "ARV");
-		if (arvRegimenHistory != null) {
-			// Current regimen has DTG?
-			if (arvRegimenHistory.size() > 0) {
-				// these are in reverse chronological order
-				SimpleObject rep = arvRegimenHistory.get(0);
-				String strCurRegimen = (String) rep.get("regimenLongDisplay");
-				if (strCurRegimen != null) {
-					if(strCurRegimen.contains("DTG")) {
-						patientPredictionVariables.put("OptimizedHIVRegimenYes", 1);
-					} else {
-						patientPredictionVariables.put("OptimizedHIVRegimenNo", 1);
+			patientPredictionVariables.put("total_hvl_rate", 0);
+
+			Integer r_n_hvl_all = (Integer) patientPredictionVariables.get("n_hvl_all");
+			Integer r_n_tests_all = (Integer) patientPredictionVariables.get("n_tests_all");
+			if(r_n_hvl_all > 0 && r_n_tests_all > 0) {
+				Double total_hvl_rate = ((r_n_hvl_all * 1.00) / (r_n_tests_all * 1.00));
+				patientPredictionVariables.put("total_hvl_rate", total_hvl_rate);
+			}
+
+			patientPredictionVariables.put("art_poor_adherence_rate", 0);
+
+			Integer r_num_poor_ART = (Integer) patientPredictionVariables.get("num_poor_ART");
+			Integer r_num_adherence_ART = (Integer) patientPredictionVariables.get("num_adherence_ART");
+			if(r_num_poor_ART > 0 && r_num_adherence_ART > 0) {
+				Double art_poor_adherence_rate = ((r_num_poor_ART * 1.00) / (r_num_adherence_ART * 1.00));
+				patientPredictionVariables.put("art_poor_adherence_rate", art_poor_adherence_rate);
+			}
+
+			patientPredictionVariables.put("art_fair_adherence_rate", 0);
+
+			Integer r_num_fair_ART = (Integer) patientPredictionVariables.get("num_fair_ART");
+			if(r_num_fair_ART > 0 && r_num_adherence_ART > 0) {
+				Double art_fair_adherence_rate = ((r_num_fair_ART * 1.00) / (r_num_adherence_ART * 1.00));
+				patientPredictionVariables.put("art_fair_adherence_rate", art_fair_adherence_rate);
+			}
+
+			patientPredictionVariables.put("ctx_poor_adherence_rate", 0);
+
+			Integer r_num_poor_CTX = (Integer) patientPredictionVariables.get("num_poor_CTX");
+			Integer r_num_adherence_CTX = (Integer) patientPredictionVariables.get("num_adherence_CTX");
+			if(r_num_poor_CTX > 0 && r_num_adherence_CTX > 0) {
+				Double ctx_poor_adherence_rate = ((r_num_poor_CTX * 1.00) / (r_num_adherence_CTX * 1.00));
+				patientPredictionVariables.put("ctx_poor_adherence_rate", ctx_poor_adherence_rate);
+			}
+
+			patientPredictionVariables.put("ctx_fair_adherence_rate", 0);
+
+			Integer r_num_fair_CTX = (Integer) patientPredictionVariables.get("num_fair_CTX");
+			if(r_num_fair_CTX > 0 && r_num_adherence_CTX > 0) {
+				Double ctx_fair_adherence_rate = ((r_num_fair_CTX * 1.00) / (r_num_adherence_CTX * 1.00));
+				patientPredictionVariables.put("ctx_fair_adherence_rate", ctx_fair_adherence_rate);
+			}
+
+			// Source the unscheduled rate
+			patientPredictionVariables.put("unscheduled_rate", 0);
+
+			if(numOfVisits > 0 && unscheduledVisits > 0) {
+				if(numOfVisits > 0) {
+					Integer calcNumOfVisits = (numOfVisits >= 5) ? 5 : numOfVisits;
+					Integer calcUnscheduledVisits = (unscheduledVisits >= 5) ? 5 : unscheduledVisits;
+					Double unscheduled_rate = ((calcUnscheduledVisits * 1.00) / (calcNumOfVisits * 1.00));
+					patientPredictionVariables.put("unscheduled_rate", unscheduled_rate);
+				}
+			}
+
+			patientPredictionVariables.put("all_late30_rate", 0.00);
+			patientPredictionVariables.put("all_late5_rate", 0.00);
+			patientPredictionVariables.put("all_late1_rate", 0.00);
+
+			Integer late30s = (Integer) patientPredictionVariables.get("missed30");
+			Double all_late30_rate = 0.00;
+			if(n_appts > 0 && late30s > 0) {
+				all_late30_rate = ((late30s * 1.00) / (n_appts * 1.00));
+			}
+			patientPredictionVariables.put("all_late30_rate", all_late30_rate);
+
+			Integer late5s = (Integer) patientPredictionVariables.get("missed5");
+			Double all_late5_rate = 0.00;
+			if(n_appts > 0 && late5s > 0) {
+				all_late5_rate = ((late5s * 1.00) / (n_appts * 1.00));
+			}
+			patientPredictionVariables.put("all_late5_rate", all_late5_rate);
+
+			Integer late1s = (Integer) patientPredictionVariables.get("missed1");
+			Double all_late1_rate = 0.00;
+			if(n_appts > 0 && late1s > 0) {
+				all_late1_rate = ((late1s * 1.00) / (n_appts * 1.00));
+			}
+			patientPredictionVariables.put("all_late1_rate", all_late1_rate);
+
+			patientPredictionVariables.put("recent_late30_rate", 0.00);
+			patientPredictionVariables.put("recent_late5_rate", 0.00);
+			patientPredictionVariables.put("recent_late1_rate", 0.00);
+
+			Integer lastFiveVisits = (Integer) patientPredictionVariables.get("n_visits_lastfive");
+
+			Integer missed30_last5 = (Integer) patientPredictionVariables.get("missed30_last5");
+			Double recent_late30_rate = 0.00;
+			if(lastFiveVisits > 0 && missed30_last5 > 0) {
+				recent_late30_rate = ((missed30_last5 * 1.00) / (lastFiveVisits * 1.00));
+			}
+			patientPredictionVariables.put("recent_late30_rate", recent_late30_rate);
+
+			Integer missed5_last5 = (Integer) patientPredictionVariables.get("missed5_last5");
+			Double recent_late5_rate = 0.00;
+			if(lastFiveVisits > 0 && missed5_last5 > 0) {
+				recent_late5_rate = ((missed5_last5 * 1.00) / (lastFiveVisits * 1.00));
+			}
+			patientPredictionVariables.put("recent_late5_rate", recent_late5_rate);
+
+			Integer missed1_last5 = (Integer) patientPredictionVariables.get("missed1_last5");
+			Double recent_late1_rate = 0.00;
+			if(lastFiveVisits > 0 && missed1_last5 > 0) {
+				recent_late1_rate = ((missed1_last5 * 1.00) / (lastFiveVisits * 1.00));
+			}
+			patientPredictionVariables.put("recent_late1_rate", recent_late1_rate);
+
+			// Source Gender
+			String inGender = patient.getGender().trim().toLowerCase();
+			if(inGender.equalsIgnoreCase("m")) {
+				patientPredictionVariables.put("GenderMale", 1);
+			} else {
+				patientPredictionVariables.put("GenderMale", 0);
+			}
+			if(inGender.equalsIgnoreCase("f")) {
+				patientPredictionVariables.put("GenderFemale", 1);
+			} else {
+				patientPredictionVariables.put("GenderFemale", 0);
+			}
+
+			// Source Patient Source (Entry Point)
+			Obs obsEntryPoint = getLatestObs(patient, Dictionary.METHOD_OF_ENROLLMENT);
+			Concept conEntryPoint = null;
+			if (obsEntryPoint != null) {
+				conEntryPoint = obsEntryPoint.getValueCoded();
+			}
+
+			patientPredictionVariables.put("PatientSourceCCC", 0);
+			patientPredictionVariables.put("PatientSourceIPDAdult", 0);
+			patientPredictionVariables.put("PatientSourceMCH", 0);
+			patientPredictionVariables.put("PatientSourceOPD", 0);
+			patientPredictionVariables.put("PatientSourceOther", 0);
+			patientPredictionVariables.put("PatientSourceTBClinic", 0);
+			patientPredictionVariables.put("PatientSourceVCT", 0);
+
+			if(conEntryPoint != null) {
+				if (conEntryPoint == Context.getConceptService().getConceptByUuid("159940AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+					patientPredictionVariables.put("PatientSourceVCT", 1);
+				} else if (conEntryPoint == Context.getConceptService().getConceptByUuid("160541AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+					patientPredictionVariables.put("PatientSourceTBClinic", 1);
+				} else if (conEntryPoint == Context.getConceptService().getConceptByUuid("160542AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+					patientPredictionVariables.put("PatientSourceOPD", 1);
+				} else if (conEntryPoint == Context.getConceptService().getConceptByUuid("160456AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+					patientPredictionVariables.put("PatientSourceMCH", 1);
+				} else if (conEntryPoint == Context.getConceptService().getConceptByUuid("5485AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+					patientPredictionVariables.put("PatientSourceIPDAdult", 1);
+				} else if (conEntryPoint == Context.getConceptService().getConceptByUuid("162050AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+					patientPredictionVariables.put("PatientSourceCCC", 1);
+				} else {
+					patientPredictionVariables.put("PatientSourceOther", 1);
+				}
+			}
+
+			// Source Marital Status
+			Obs obsMaritalStatus = getLatestObs(patient, Dictionary.CIVIL_STATUS);
+			Concept conMaritalStatus = null;
+			if (obsMaritalStatus != null) {
+				conMaritalStatus = obsMaritalStatus.getValueCoded();
+			}
+
+			patientPredictionVariables.put("MaritalStatusDivorced", 0);
+			patientPredictionVariables.put("MaritalStatusMarried", 0);
+			patientPredictionVariables.put("MaritalStatusOther", 0);
+			patientPredictionVariables.put("MaritalStatusPolygamous", 0);
+			patientPredictionVariables.put("MaritalStatusSingle", 0);
+			patientPredictionVariables.put("MaritalStatusWidow", 0);
+			
+			if(conMaritalStatus != null) {
+				if (conMaritalStatus == Dictionary.getConcept(Dictionary.DIVORCED)) {
+					patientPredictionVariables.put("MaritalStatusDivorced", 1);
+				} else if (conMaritalStatus == Dictionary.getConcept(Dictionary.MARRIED_MONOGAMOUS)) {
+					patientPredictionVariables.put("MaritalStatusMarried", 1);
+				} else if (conMaritalStatus == Dictionary.getConcept(Dictionary.MARRIED_POLYGAMOUS)) {
+					patientPredictionVariables.put("MaritalStatusPolygamous", 1);
+				} else if (conMaritalStatus == Dictionary.getConcept(Dictionary.WIDOWED)) {
+					patientPredictionVariables.put("MaritalStatusWidow", 1);
+				} else if (conMaritalStatus == Dictionary.getConcept(Dictionary.NEVER_MARRIED)) {
+					patientPredictionVariables.put("MaritalStatusSingle", 1);			
+				} else {
+					patientPredictionVariables.put("MaritalStatusOther", 1);
+				}
+			}
+
+			// Source Population Type
+			Obs obsPopulationType = getLatestObs(patient, "cf543666-ce76-4e91-8b8d-c0b54a436a2e");
+			Concept conPopulationType = null;
+			if (obsPopulationType != null) {
+				conPopulationType = obsPopulationType.getValueCoded();
+			}
+
+			patientPredictionVariables.put("PopulationTypeGeneralPopulation", 0);
+			patientPredictionVariables.put("PopulationTypeKeyPopulation", 0);
+			patientPredictionVariables.put("PopulationTypePriorityPopulation", 0);
+			
+			if(conPopulationType != null) {
+				if (conPopulationType == Context.getConceptService().getConceptByUuid("5d308c8c-ad49-45e1-9885-e5d09a8e5587")) {
+					patientPredictionVariables.put("PopulationTypeGeneralPopulation", 1);
+				}
+				if (conPopulationType == Context.getConceptService().getConceptByUuid("bf850dd4-309b-4cbd-9470-9d8110ea5550")) {
+					patientPredictionVariables.put("PopulationTypeKeyPopulation", 1);
+				}
+				if (conPopulationType == Context.getConceptService().getConceptByUuid("167143AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) {
+					patientPredictionVariables.put("PopulationTypePriorityPopulation", 1);
+				}
+			}
+
+			// Source Treatment Type
+			// HIV program / PMTCT Program
+			Program hivProgram = MetadataUtils.existing(Program.class, HivMetadata._Program.HIV);
+			Program pmtctChildProgram = MetadataUtils.existing(Program.class, MchMetadata._Program.MCHCS);
+			Program pmtctMotherProgram = MetadataUtils.existing(Program.class, MchMetadata._Program.MCHMS);
+
+			patientPredictionVariables.put("TreatmentTypeART", 0);
+			patientPredictionVariables.put("TreatmentTypePMTCT", 0);
+
+			ProgramWorkflowService pwfservice = Context.getProgramWorkflowService();
+			List<PatientProgram> hivprograms = pwfservice.getPatientPrograms(patient, hivProgram, null, null, null,null, true);
+			if (hivprograms.size() > 0) {
+				patientPredictionVariables.put("TreatmentTypeART", 1);
+			}
+			List<PatientProgram> childprograms = pwfservice.getPatientPrograms(patient, pmtctChildProgram, null, null, null,null, true);
+			List<PatientProgram> motherprograms = pwfservice.getPatientPrograms(patient, pmtctMotherProgram, null, null, null,null, true);
+			if (childprograms.size() > 0 || motherprograms.size() > 0) {
+				patientPredictionVariables.put("TreatmentTypePMTCT", 1);
+			}
+
+			// Source Optimized HIV Regimen (DTG)
+			patientPredictionVariables.put("OptimizedHIVRegimenNo", 0);
+			patientPredictionVariables.put("OptimizedHIVRegimenYes", 0);
+
+			List<SimpleObject> arvRegimenHistory = EncounterBasedRegimenUtils.getRegimenHistoryFromObservations(patient, "ARV");
+			if (arvRegimenHistory != null) {
+				// Current regimen has DTG?
+				if (arvRegimenHistory.size() > 0) {
+					// these are in reverse chronological order
+					SimpleObject rep = arvRegimenHistory.get(0);
+					String strCurRegimen = (String) rep.get("regimenLongDisplay");
+					if (strCurRegimen != null) {
+						if(strCurRegimen.contains("DTG")) {
+							patientPredictionVariables.put("OptimizedHIVRegimenYes", 1);
+						} else {
+							patientPredictionVariables.put("OptimizedHIVRegimenNo", 1);
+						}
 					}
 				}
 			}
-		}
 
-		// Source Other Regimen
-		patientPredictionVariables.put("Other_RegimenNo", 0);
-		patientPredictionVariables.put("Other_RegimenYes", 0);
+			// Source Other Regimen
+			patientPredictionVariables.put("Other_RegimenNo", 0);
+			patientPredictionVariables.put("Other_RegimenYes", 0);
 
-		List<SimpleObject> otherRegimenHistory = EncounterBasedRegimenUtils.getRegimenHistoryFromObservations(patient, "OTHER");
-		if (otherRegimenHistory != null) {
-			if (arvRegimenHistory.size() > 0) {
-				patientPredictionVariables.put("Other_RegimenYes", 1);
-			} else {
-				patientPredictionVariables.put("Other_RegimenNo", 1);
+			List<SimpleObject> otherRegimenHistory = EncounterBasedRegimenUtils.getRegimenHistoryFromObservations(patient, "OTHER");
+			if (otherRegimenHistory != null) {
+				if (arvRegimenHistory.size() > 0) {
+					patientPredictionVariables.put("Other_RegimenYes", 1);
+				} else {
+					patientPredictionVariables.put("Other_RegimenNo", 1);
+				}
 			}
-		}
 
-		// Source pregnant variable
-		Obs obsPregancyStatus = getLatestObs(patient, Dictionary.PREGNANCY_STATUS);
-		Concept conPregancyStatus = null;
-		if (obsPregancyStatus != null) {
-			conPregancyStatus = obsPregancyStatus.getValueCoded();
-		}
+			// Source pregnant variable
+			Obs obsPregancyStatus = getLatestObs(patient, Dictionary.PREGNANCY_STATUS);
+			Concept conPregancyStatus = null;
+			if (obsPregancyStatus != null) {
+				conPregancyStatus = obsPregancyStatus.getValueCoded();
+			}
 
-		if(conPregancyStatus != null) {
-			if (conPregancyStatus == Dictionary.getConcept(Dictionary.NO)) {
-				patientPredictionVariables.put("PregnantNo", 1);
+			if(conPregancyStatus != null) {
+				if (conPregancyStatus == Dictionary.getConcept(Dictionary.NO)) {
+					patientPredictionVariables.put("PregnantNo", 1);
+				} else {
+					patientPredictionVariables.put("PregnantNo", 0);
+				}
+				if (conPregancyStatus == Dictionary.getConcept(Dictionary.YES)) {
+					patientPredictionVariables.put("PregnantYes", 1);
+				} else {
+					patientPredictionVariables.put("PregnantYes", 0);
+				}
+				if (conPregancyStatus == Dictionary.getConcept(Dictionary.UNKNOWN)) {
+					patientPredictionVariables.put("PregnantNR", 1);
+				} else {
+					patientPredictionVariables.put("PregnantNR", 0);
+				}
+				if (conPregancyStatus != Dictionary.getConcept(Dictionary.NO) && conPregancyStatus != Dictionary.getConcept(Dictionary.YES) && conPregancyStatus != Dictionary.getConcept(Dictionary.UNKNOWN)) {
+					patientPredictionVariables.put("PregnantNR", 1);
+				}
 			} else {
 				patientPredictionVariables.put("PregnantNo", 0);
-			}
-			if (conPregancyStatus == Dictionary.getConcept(Dictionary.YES)) {
-				patientPredictionVariables.put("PregnantYes", 1);
-			} else {
 				patientPredictionVariables.put("PregnantYes", 0);
-			}
-			if (conPregancyStatus == Dictionary.getConcept(Dictionary.UNKNOWN)) {
-				patientPredictionVariables.put("PregnantNR", 1);
-			} else {
-				patientPredictionVariables.put("PregnantNR", 0);
-			}
-			if (conPregancyStatus != Dictionary.getConcept(Dictionary.NO) && conPregancyStatus != Dictionary.getConcept(Dictionary.YES) && conPregancyStatus != Dictionary.getConcept(Dictionary.UNKNOWN)) {
 				patientPredictionVariables.put("PregnantNR", 1);
 			}
-		} else {
-			patientPredictionVariables.put("PregnantNo", 0);
-			patientPredictionVariables.put("PregnantYes", 0);
-			patientPredictionVariables.put("PregnantNR", 1);
-		}
 
-		//Source Differentiated Care
-		Obs obsDifferentiatedCare = getLatestObs(patient, "1a2dba33-55d6-477a-b171-c09a489bc37f"); //Concept 164947
-		Concept conDifferentiatedCare = null;
-		if (obsDifferentiatedCare != null) {
-			conDifferentiatedCare = obsDifferentiatedCare.getValueCoded();
-		}
-
-		patientPredictionVariables.put("DifferentiatedCareCommunityARTDistributionHCWLed", 0);
-		patientPredictionVariables.put("DifferentiatedCareCommunityARTDistributionpeerled", 0);
-		patientPredictionVariables.put("DifferentiatedCareFacilityARTdistributionGroup", 0);
-		patientPredictionVariables.put("DifferentiatedCareFastTrack", 0);
-		patientPredictionVariables.put("DifferentiatedCareStandardCare", 0);
-
-		if(conDifferentiatedCare != null) {
-			if (conDifferentiatedCare == Context.getConceptService().getConceptByUuid("53447431-147e-4071-9c12-f6baf9463c2f")) {
-				patientPredictionVariables.put("DifferentiatedCareCommunityARTDistributionHCWLed", 1);
+			//Source Differentiated Care
+			Obs obsDifferentiatedCare = getLatestObs(patient, "1a2dba33-55d6-477a-b171-c09a489bc37f"); //Concept 164947
+			Concept conDifferentiatedCare = null;
+			if (obsDifferentiatedCare != null) {
+				conDifferentiatedCare = obsDifferentiatedCare.getValueCoded();
 			}
-			if (conDifferentiatedCare == Context.getConceptService().getConceptByUuid("27b7ea34-4ea9-48b5-82a3-9981c430c808")) {
-				patientPredictionVariables.put("DifferentiatedCareCommunityARTDistributionpeerled", 1);
-			}
-			if (conDifferentiatedCare == Context.getConceptService().getConceptByUuid("3740fc18-bb23-4ddc-bba7-b010fba072b7")) {
-				patientPredictionVariables.put("DifferentiatedCareFacilityARTdistributionGroup", 1);
-			}
-			if (conDifferentiatedCare == Context.getConceptService().getConceptByUuid("f55781c1-461c-4f44-b575-d87519d38c34")) {
-				patientPredictionVariables.put("DifferentiatedCareFastTrack", 1);
-			}
-			if (conDifferentiatedCare == Context.getConceptService().getConceptByUuid("7e18712d-8cda-49f5-bfeb-940406cc2e32")) {
-				patientPredictionVariables.put("DifferentiatedCareStandardCare", 1);
-			}
-		}
 
-		//Source most recent art adherence
-		Integer artAdherence = getLatestARTAdherence(patient);
-		patientPredictionVariables.put("most_recent_art_adherencefair", 0);
-		patientPredictionVariables.put("most_recent_art_adherencegood", 0);
-		patientPredictionVariables.put("most_recent_art_adherencepoor", 0);
+			patientPredictionVariables.put("DifferentiatedCareCommunityARTDistributionHCWLed", 0);
+			patientPredictionVariables.put("DifferentiatedCareCommunityARTDistributionpeerled", 0);
+			patientPredictionVariables.put("DifferentiatedCareFacilityARTdistributionGroup", 0);
+			patientPredictionVariables.put("DifferentiatedCareFastTrack", 0);
+			patientPredictionVariables.put("DifferentiatedCareStandardCare", 0);
 
-		if(artAdherence == 1) { // Good
-			patientPredictionVariables.put("most_recent_art_adherencegood", 1);
-		} else if(artAdherence == 2) { // Fair
-			patientPredictionVariables.put("most_recent_art_adherencefair", 1);
-		} else if(artAdherence == 3) { // Poor
-			patientPredictionVariables.put("most_recent_art_adherencepoor", 1);
-		}
-
-		//Source most recent ctx adherence
-		Integer ctxAdherence = getLatestCTXAdherence(patient);
-		patientPredictionVariables.put("most_recent_ctx_adherencefair", 0);
-		patientPredictionVariables.put("most_recent_ctx_adherencegood", 0);
-		patientPredictionVariables.put("most_recent_ctx_adherencepoor", 0);
-
-		if(ctxAdherence == 1) { // Good
-			patientPredictionVariables.put("most_recent_ctx_adherencegood", 1);
-		} else if(ctxAdherence == 2) { // Fair
-			patientPredictionVariables.put("most_recent_ctx_adherencefair", 1);
-		} else if(ctxAdherence == 3) { // Poor
-			patientPredictionVariables.put("most_recent_ctx_adherencepoor", 1);
-		}
-
-		//Source Stability Assessment
-		Obs obsStabilityAssessment = getLatestObs(patient, "1855AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-		Boolean bolStabilityAssessment = null; // NB: Null is ok as default because we can test for it in case we dont get an answer below
-		if (obsStabilityAssessment != null) {
-			bolStabilityAssessment = obsStabilityAssessment.getValueBoolean();
-		}
-
-		patientPredictionVariables.put("StabilityAssessmentStable", 0);
-		patientPredictionVariables.put("StabilityAssessmentUnstable", 0);
-
-		if(bolStabilityAssessment != null) {
-			if(bolStabilityAssessment == true) {
-				patientPredictionVariables.put("StabilityAssessmentStable", 1);
-			} else {
-				patientPredictionVariables.put("StabilityAssessmentUnstable", 1);
-			}
-		}
-
-		//Source Most Recent VL
-		patientPredictionVariables.put("most_recent_vlHVL", 0);
-
-		Double most_recent_vlHVL = getLatestHighViralLoadCount(patient);
-		patientPredictionVariables.put("most_recent_vlHVL", most_recent_vlHVL);
-
-		patientPredictionVariables.put("most_recent_vlLVL", 0);
-
-		Double most_recent_vlLVL = getLatestLowViralLoadCount(patient);
-		patientPredictionVariables.put("most_recent_vlLVL", most_recent_vlLVL);
-
-		patientPredictionVariables.put("most_recent_vlSuppressed", 0);
-
-		Double most_recent_vlSuppressed = getLatestSuppressedViralLoadCount(patient);
-		patientPredictionVariables.put("most_recent_vlSuppressed", most_recent_vlSuppressed);
-
-		//Label
-		patientPredictionVariables.put("label", 1);
-
-		// Load model configs and variables
-		mlScoringRequestPayload.put("modelConfigs", modelConfigs);
-		mlScoringRequestPayload.put("variableValues", patientPredictionVariables);
-
-		// Get JSON Payload
-		String payload = mlScoringRequestPayload.toJson();
-		System.out.println("IIT ML Prediction Payload: " + payload);
-		
-		// Get the IIT ML score
-		try {
-			//Extract score from payload
-			// String mlScoreResponse = MLUtils.getIITMLScorePayloadMethod(payload);
-			String mlScoreResponse = MLUtils.getIITMLScoreDirectMethod(payload);
-
-			if(mlScoreResponse != null && !mlScoreResponse.trim().equalsIgnoreCase("")) {
-				ObjectMapper mapper = new ObjectMapper();
-				ObjectNode jsonNode = (ObjectNode) mapper.readTree(mlScoreResponse);
-				if (jsonNode != null) {
-					Double riskScore = jsonNode.get("result").get("predictions").get("Probability_1").getDoubleValue();
-					System.out.println("Got ML score as: " + riskScore);
-					patientRiskScore.setRiskFactors("");
-					patientRiskScore.setRiskScore(riskScore);
-					patientRiskScore.setPatient(patient);
-					if(riskScore <= decIITLowRiskThreshold) {
-						patientRiskScore.setDescription("Low Risk");
-					} else if((riskScore > decIITLowRiskThreshold) && (riskScore <= decIITMediumRiskThreshold)) {
-						patientRiskScore.setDescription("Medium Risk");
-					} else if((riskScore > decIITMediumRiskThreshold) && (riskScore <= decIITHighRiskThreshold)) {
-						patientRiskScore.setDescription("High Risk");
-					} else if(riskScore > decIITHighRiskThreshold) {
-						patientRiskScore.setDescription("Highest Risk");
-					}
-					System.out.println("Got ML Description as: " + patientRiskScore.getDescription());
-					patientRiskScore.setEvaluationDate(new Date());
-					String randUUID = UUID.randomUUID().toString(); 
-					patientRiskScore.setSourceSystemUuid(randUUID);
-
-					return(patientRiskScore);
-				} else {
-					System.err.println("Error: Unable to get ML score");
+			if(conDifferentiatedCare != null) {
+				if (conDifferentiatedCare == Context.getConceptService().getConceptByUuid("53447431-147e-4071-9c12-f6baf9463c2f")) {
+					patientPredictionVariables.put("DifferentiatedCareCommunityARTDistributionHCWLed", 1);
+				}
+				if (conDifferentiatedCare == Context.getConceptService().getConceptByUuid("27b7ea34-4ea9-48b5-82a3-9981c430c808")) {
+					patientPredictionVariables.put("DifferentiatedCareCommunityARTDistributionpeerled", 1);
+				}
+				if (conDifferentiatedCare == Context.getConceptService().getConceptByUuid("3740fc18-bb23-4ddc-bba7-b010fba072b7")) {
+					patientPredictionVariables.put("DifferentiatedCareFacilityARTdistributionGroup", 1);
+				}
+				if (conDifferentiatedCare == Context.getConceptService().getConceptByUuid("f55781c1-461c-4f44-b575-d87519d38c34")) {
+					patientPredictionVariables.put("DifferentiatedCareFastTrack", 1);
+				}
+				if (conDifferentiatedCare == Context.getConceptService().getConceptByUuid("7e18712d-8cda-49f5-bfeb-940406cc2e32")) {
+					patientPredictionVariables.put("DifferentiatedCareStandardCare", 1);
 				}
 			}
+
+			//Source most recent art adherence
+			Integer artAdherence = getLatestARTAdherence(patient);
+			patientPredictionVariables.put("most_recent_art_adherencefair", 0);
+			patientPredictionVariables.put("most_recent_art_adherencegood", 0);
+			patientPredictionVariables.put("most_recent_art_adherencepoor", 0);
+
+			if(artAdherence == 1) { // Good
+				patientPredictionVariables.put("most_recent_art_adherencegood", 1);
+			} else if(artAdherence == 2) { // Fair
+				patientPredictionVariables.put("most_recent_art_adherencefair", 1);
+			} else if(artAdherence == 3) { // Poor
+				patientPredictionVariables.put("most_recent_art_adherencepoor", 1);
+			}
+
+			//Source most recent ctx adherence
+			Integer ctxAdherence = getLatestCTXAdherence(patient);
+			patientPredictionVariables.put("most_recent_ctx_adherencefair", 0);
+			patientPredictionVariables.put("most_recent_ctx_adherencegood", 0);
+			patientPredictionVariables.put("most_recent_ctx_adherencepoor", 0);
+
+			if(ctxAdherence == 1) { // Good
+				patientPredictionVariables.put("most_recent_ctx_adherencegood", 1);
+			} else if(ctxAdherence == 2) { // Fair
+				patientPredictionVariables.put("most_recent_ctx_adherencefair", 1);
+			} else if(ctxAdherence == 3) { // Poor
+				patientPredictionVariables.put("most_recent_ctx_adherencepoor", 1);
+			}
+
+			//Source Stability Assessment
+			Obs obsStabilityAssessment = getLatestObs(patient, "1855AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+			Boolean bolStabilityAssessment = null; // NB: Null is ok as default because we can test for it in case we dont get an answer below
+			if (obsStabilityAssessment != null) {
+				bolStabilityAssessment = obsStabilityAssessment.getValueBoolean();
+			}
+
+			patientPredictionVariables.put("StabilityAssessmentStable", 0);
+			patientPredictionVariables.put("StabilityAssessmentUnstable", 0);
+
+			if(bolStabilityAssessment != null) {
+				if(bolStabilityAssessment == true) {
+					patientPredictionVariables.put("StabilityAssessmentStable", 1);
+				} else {
+					patientPredictionVariables.put("StabilityAssessmentUnstable", 1);
+				}
+			}
+
+			//Source Most Recent VL
+			patientPredictionVariables.put("most_recent_vlHVL", 0);
+
+			Double most_recent_vlHVL = getLatestHighViralLoadCount(patient);
+			patientPredictionVariables.put("most_recent_vlHVL", most_recent_vlHVL);
+
+			patientPredictionVariables.put("most_recent_vlLVL", 0);
+
+			Double most_recent_vlLVL = getLatestLowViralLoadCount(patient);
+			patientPredictionVariables.put("most_recent_vlLVL", most_recent_vlLVL);
+
+			patientPredictionVariables.put("most_recent_vlSuppressed", 0);
+
+			Double most_recent_vlSuppressed = getLatestSuppressedViralLoadCount(patient);
+			patientPredictionVariables.put("most_recent_vlSuppressed", most_recent_vlSuppressed);
+
+			//Label
+			patientPredictionVariables.put("label", 1);
+
+			// Load model configs and variables
+			mlScoringRequestPayload.put("modelConfigs", modelConfigs);
+			mlScoringRequestPayload.put("variableValues", patientPredictionVariables);
+
+			// Get JSON Payload
+			String payload = mlScoringRequestPayload.toJson();
+			System.out.println("IIT ML Prediction Payload: " + payload);
+			
+			// Get the IIT ML score
+			try {
+				//Extract score from payload
+				// String mlScoreResponse = MLUtils.getIITMLScorePayloadMethod(payload);
+				String mlScoreResponse = MLUtils.getIITMLScoreDirectMethod(payload);
+
+				if(mlScoreResponse != null && !mlScoreResponse.trim().equalsIgnoreCase("")) {
+					ObjectMapper mapper = new ObjectMapper();
+					ObjectNode jsonNode = (ObjectNode) mapper.readTree(mlScoreResponse);
+					if (jsonNode != null) {
+						Double riskScore = jsonNode.get("result").get("predictions").get("Probability_1").getDoubleValue();
+						System.out.println("Got ML score as: " + riskScore);
+						patientRiskScore.setRiskFactors("");
+						patientRiskScore.setRiskScore(riskScore);
+						patientRiskScore.setPatient(patient);
+						if(riskScore <= decIITLowRiskThreshold) {
+							patientRiskScore.setDescription("Low Risk");
+						} else if((riskScore > decIITLowRiskThreshold) && (riskScore <= decIITMediumRiskThreshold)) {
+							patientRiskScore.setDescription("Medium Risk");
+						} else if((riskScore > decIITMediumRiskThreshold) && (riskScore <= decIITHighRiskThreshold)) {
+							patientRiskScore.setDescription("High Risk");
+						} else if(riskScore > decIITHighRiskThreshold) {
+							patientRiskScore.setDescription("Highest Risk");
+						}
+						System.out.println("Got ML Description as: " + patientRiskScore.getDescription());
+						patientRiskScore.setEvaluationDate(new Date());
+						String randUUID = UUID.randomUUID().toString(); 
+						patientRiskScore.setSourceSystemUuid(randUUID);
+
+						return(patientRiskScore);
+					} else {
+						System.err.println("Error: Unable to get ML score");
+					}
+				}
+			}
+			catch (Exception em) {
+				System.err.println("ITT ML - Could not get the IIT Score: Error Calling IIT Model " + em.getMessage());
+				em.printStackTrace();
+			}
 		}
-		catch (Exception e) {
-			System.err.println("ITT ML - Could not get the IIT Score: " + e.getMessage());
-			e.printStackTrace();
+		catch (Exception ex) {
+			System.err.println("ITT ML - Could not get the IIT Score: Error sourcing model vars " + ex.getMessage());
+			ex.printStackTrace();
 		}
 
 		//In case of an error
 		patientRiskScore.setRiskFactors("");
-		patientRiskScore.setRiskScore(1.00);
+		patientRiskScore.setRiskScore(0.00);
 		patientRiskScore.setPatient(patient);
 		patientRiskScore.setDescription("Unknown Risk");
 		patientRiskScore.setEvaluationDate(new Date());
