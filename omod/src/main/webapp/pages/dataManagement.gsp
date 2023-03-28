@@ -95,10 +95,19 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 #stopPull {
     display: none;
 }
+#stopGen {
+    display: none;
+}
 #message { 
     min-height: 20px;
 }
+#generateMessage { 
+    min-height: 20px;
+}
 .progress-container {
+    min-height: 30px;
+}
+.generate-progress-container {
     min-height: 30px;
 }
 </style>

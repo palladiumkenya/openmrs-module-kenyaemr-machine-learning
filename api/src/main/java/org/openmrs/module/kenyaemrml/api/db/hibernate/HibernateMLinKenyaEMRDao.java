@@ -90,11 +90,10 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 	 * Gets the latest PatientRiskScore for a patient
 	 * 
 	 * @param patient - the patient
-	 * @param reporting - true = for reporting, false = not for reporting
 	 * @return
 	 */
 	public PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient) {
-		System.out.println("IIT ML Score: Getting risk score from DB");
+		// System.out.println("IIT ML Score: Getting risk score from DB");
 		Criteria criteria = getSession().createCriteria(PatientRiskScore.class);
 		criteria.add(Restrictions.eq("patient", patient));
 		criteria.addOrder(Order.desc("evaluationDate"));
@@ -242,7 +241,6 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 		Criteria criteria = getSession().createCriteria(PatientRiskScore.class);
 
 		List<PatientRiskScore> pList = criteria.list();
-		System.out.println("Major: " + pList.size());
 		HashSet<Integer> hIds = new HashSet<>();
 
 		for (PatientRiskScore patientRiskScore : pList) {
@@ -323,7 +321,7 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 		if(patientRiskScore != null) {
 			return patientRiskScore.getEvaluationDate();
 		} else {
-			return null;
+			return(null);
 		}
 	}
 }

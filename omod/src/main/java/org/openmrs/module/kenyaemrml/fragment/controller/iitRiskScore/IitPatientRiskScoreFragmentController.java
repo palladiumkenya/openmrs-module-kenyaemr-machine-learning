@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * Controller for getting a history of risk score and grouped by the date of evaluation
+ * Calls Score Generator for the current patient if the last score date was earlier than today or patient has never been scored
  */
 public class IitPatientRiskScoreFragmentController {
 

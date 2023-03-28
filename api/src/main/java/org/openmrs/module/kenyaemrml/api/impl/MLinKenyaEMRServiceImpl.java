@@ -74,7 +74,7 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 			return mLinKenyaEMRDao.getLatestPatientRiskScoreByPatient(patient);
 		} else {
 			System.out.println("IIT ML Score: Generating a new risk score || and saving to DB");
-			PatientRiskScore patientRiskScore = modelService.getLatestPatientRiskScoreByPatient(patient);
+			PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
 			// Save/Update to DB (for reports) -- Incase a record for current date doesnt exist
 			saveOrUpdateRiskScore(patientRiskScore);
 			return(patientRiskScore);

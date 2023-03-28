@@ -87,8 +87,6 @@ public class MLDataExchange {
 	PatientService patientService = Context.getPatientService();
 	
 	MLinKenyaEMRService mLinKenyaEMRService = Context.getService(MLinKenyaEMRService.class);
-
-	ModelService modelService = Context.getService(ModelService.class);
 	
 	//OAuth variables
 	private static final Pattern pat = Pattern.compile(".*\"access_token\"\\s*:\\s*\"([^\"]+)\".*");
@@ -564,11 +562,14 @@ public class MLDataExchange {
 		// loop checking for patients without current IIT scores
 		HashSet<Patient> patientsGroup = new HashSet<Patient>();
 		for (Patient patient : allPatients) {
+			if (!getContinueGeneratingIITScores()) {
+				return (false);
+			}
 			if (patient != null) {
 				if(patient.getDead() == false) {
 					Date lastScore = mLinKenyaEMRService.getPatientLatestRiskEvaluationDate(patient);
 					Date dateToday = new Date();
-					if((lastScore == null && !DateUtils.isSameDay(lastScore, dateToday))) {
+					if((lastScore == null || !DateUtils.isSameDay(lastScore, dateToday))) {
 						patientsGroup.add(patient);
 					}
 				}	
@@ -589,6 +590,7 @@ public class MLDataExchange {
 	public Boolean generateAndSave(HashSet<Patient> patientsGroup) {
 		Boolean ret = false;
 
+		ModelService modelService = new ModelService();
 		long totalRemote = patientsGroup.size();
 		long totalPages = patientsGroup.size();
 		long currentPage = 1;
@@ -597,20 +599,20 @@ public class MLDataExchange {
 				return (false);
 			}
 			System.out.println("IIT ML Score: Generating a new risk score || and saving to DB");
-			PatientRiskScore patientRiskScore = modelService.getLatestPatientRiskScoreByPatient(patient);
+			PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
 			// Save/Update to DB (for reports) -- Incase a record for current date doesn't exist
 			mLinKenyaEMRService.saveOrUpdateRiskScore(patientRiskScore);
 
 			setScoreGenerationStatus((long)Math.floor(((currentPage * 1.00 / totalPages * 1.00) * totalRemote)), totalRemote);
 			currentPage++;
 
-			try {
-				//Delay for 5 seconds
-				Thread.sleep(5000);
-			}
-			catch (Exception ie) {
-				Thread.currentThread().interrupt();
-			}
+			// try {
+			// 	//Delay for 5 seconds
+			// 	Thread.sleep(5000);
+			// }
+			// catch (Exception ie) {
+			// 	Thread.currentThread().interrupt();
+			// }
 		}
 
 		return(ret);
