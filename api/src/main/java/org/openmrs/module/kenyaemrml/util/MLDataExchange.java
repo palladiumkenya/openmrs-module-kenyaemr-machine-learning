@@ -30,6 +30,42 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.util.HashSet;
+import java.util.List;
+
+import org.openmrs.Patient;
+import org.openmrs.PatientIdentifierType;
+import org.openmrs.PatientProgram;
+import org.openmrs.Program;
+import org.openmrs.api.PatientService;
+import org.openmrs.api.ProgramWorkflowService;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
+import org.openmrs.module.kenyaemr.metadata.HivMetadata;
+import org.openmrs.module.kenyaemr.nupi.UpiUtilsDataExchange;
+import org.openmrs.module.metadatadeploy.MetadataUtils;
+import org.openmrs.scheduler.tasks.AbstractTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.openmrs.PersonAttributeType;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+
+import org.openmrs.Patient;
+import org.openmrs.api.UserService;
+import org.openmrs.api.impl.BaseOpenmrsService;
+import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
+import org.openmrs.module.kenyaemrml.api.db.hibernate.HibernateMLinKenyaEMRDao;
+import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
+import org.openmrs.ui.framework.SimpleObject;
+import java.text.SimpleDateFormat;
+import org.openmrs.GlobalProperty;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemrml.api.service.ModelService;
+import org.apache.commons.lang.time.DateUtils;
+
 public class MLDataExchange {
 	
 	public static final String DESCRIPTION = "Description";
@@ -51,6 +87,8 @@ public class MLDataExchange {
 	PatientService patientService = Context.getPatientService();
 	
 	MLinKenyaEMRService mLinKenyaEMRService = Context.getService(MLinKenyaEMRService.class);
+
+	ModelService modelService = Context.getService(ModelService.class);
 	
 	//OAuth variables
 	private static final Pattern pat = Pattern.compile(".*\"access_token\"\\s*:\\s*\"([^\"]+)\".*");
@@ -448,6 +486,33 @@ public class MLDataExchange {
 		}
 		return (true);
 	}
+
+	/**
+	 * Enables or disables the generate IIT scores thread
+	 * 
+	 * @return false if generating should be stopped and true if generating should continue
+	 */
+	public boolean getContinueGeneratingIITScores() {
+		User user = Context.getUserContext().getAuthenticatedUser();
+		if (user != null) {
+			String stopIITMLPull = user.getUserProperty("stopIITMLGen");
+			if (stopIITMLPull != null) {
+				stopIITMLPull = stopIITMLPull.trim();
+				if (stopIITMLPull.equalsIgnoreCase("0")) {
+					return (true);
+				} else if (stopIITMLPull.equalsIgnoreCase("1")) {
+					return (false);
+				}
+			} else {
+				System.err.println("ITT ML - Failed to get the IIT stop gen var");
+			}
+		} else {
+			//User has logged out, stop generating
+			System.err.println("ITT ML - User has logged out, stop the generation of scores");
+			return (false);
+		}
+		return (true);
+	}
 	
 	/**
 	 * sets the status of data pull so that it is accessible to the user
@@ -461,9 +526,94 @@ public class MLDataExchange {
 			user.setUserProperty("IITMLPullDone", String.valueOf(done));
 			user.setUserProperty("IITMLPullTotal", String.valueOf(total));
 		} else {
-			//User has logged out, stop pulling
+			//User has logged out
 			System.err.println("ITT ML - User has logged out, unable to set pull status");
 		}
+	}
+
+	/**
+	 * sets the status of score generation so that it is accessible to the user
+	 * 
+	 * @param done number of records done
+	 * @param total the total number of records
+	 */
+	public void setScoreGenerationStatus(long done, long total) {
+		User user = Context.getUserContext().getAuthenticatedUser();
+		if (user != null) {
+			user.setUserProperty("IITMLGenDone", String.valueOf(done));
+			user.setUserProperty("IITMLGenTotal", String.valueOf(total));
+		} else {
+			//User has logged out
+			System.err.println("ITT ML - User has logged out, unable to set score generation status");
+		}
+	}
+
+	/**
+	 * Fetches latest IIT scores
+	 * 
+	 * @return true when successfull and false on failure
+	 */
+	public boolean generateIITScores() {
+		Boolean ret = false;
+
+		PatientService patientService = Context.getPatientService();
+
+		List<Patient> allPatients = patientService.getAllPatients();
+		System.out.println("IIT ML Gen For All Task: Got all patients: " + allPatients.size());
+
+		// loop checking for patients without current IIT scores
+		HashSet<Patient> patientsGroup = new HashSet<Patient>();
+		for (Patient patient : allPatients) {
+			if (patient != null) {
+				if(patient.getDead() == false) {
+					Date lastScore = mLinKenyaEMRService.getPatientLatestRiskEvaluationDate(patient);
+					Date dateToday = new Date();
+					if((lastScore == null && !DateUtils.isSameDay(lastScore, dateToday))) {
+						patientsGroup.add(patient);
+					}
+				}	
+			}
+		}
+		System.out.println("IIT ML Gen For All Task: Patient to be scored: " + patientsGroup.size());
+
+		ret = generateAndSave(patientsGroup);
+
+		return(ret);
+	}
+
+	/**
+	 * Generates and saves the IIT risk scores
+	 * @param patientsGroup
+	 * @return true when successfull and false on failure
+	 */
+	public Boolean generateAndSave(HashSet<Patient> patientsGroup) {
+		Boolean ret = false;
+
+		long totalRemote = patientsGroup.size();
+		long totalPages = patientsGroup.size();
+		long currentPage = 1;
+		for (Patient patient : patientsGroup) {
+			if (!getContinueGeneratingIITScores()) {
+				return (false);
+			}
+			System.out.println("IIT ML Score: Generating a new risk score || and saving to DB");
+			PatientRiskScore patientRiskScore = modelService.getLatestPatientRiskScoreByPatient(patient);
+			// Save/Update to DB (for reports) -- Incase a record for current date doesn't exist
+			mLinKenyaEMRService.saveOrUpdateRiskScore(patientRiskScore);
+
+			setScoreGenerationStatus((long)Math.floor(((currentPage * 1.00 / totalPages * 1.00) * totalRemote)), totalRemote);
+			currentPage++;
+
+			try {
+				//Delay for 5 seconds
+				Thread.sleep(5000);
+			}
+			catch (Exception ie) {
+				Thread.currentThread().interrupt();
+			}
+		}
+
+		return(ret);
 	}
 	
 }
