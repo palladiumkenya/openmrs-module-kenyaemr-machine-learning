@@ -62,6 +62,26 @@ import org.openmrs.parameter.EncounterSearchCriteriaBuilder;
 import org.openmrs.ui.framework.SimpleObject;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
+import org.openmrs.Encounter;
+import org.openmrs.Obs;
+import org.openmrs.api.context.Context;
+import org.openmrs.calculation.patient.PatientCalculationContext;
+import org.openmrs.calculation.result.CalculationResultMap;
+import org.openmrs.calculation.result.SimpleResult;
+import org.openmrs.module.kenyacore.calculation.Calculations;
+import org.openmrs.module.kenyaemr.Dictionary;
+import org.openmrs.module.kenyaemr.calculation.BaseEmrCalculation;
+import org.openmrs.module.kenyaemr.calculation.EmrCalculationUtils;
+import org.openmrs.module.kenyaemr.util.EncounterBasedRegimenUtils;
+import org.openmrs.ui.framework.SimpleObject;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+
 /**
  * Service class used to prepare and score models
  */
@@ -1121,10 +1141,26 @@ public class ModelService extends BaseOpenmrsService {
 			patientPredictionVariables.put("n_hvl_threeyears", n_hvl_threeyears);
 
 			// Source ART data
+			SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MMM-yyyy");
 			Obs obsARTStartDate = getLatestObs(patient, Dictionary.ANTIRETROVIRAL_TREATMENT_START_DATE);
 			Date dtARTStartDate = null;
 			if (obsARTStartDate != null) {
 				dtARTStartDate = obsARTStartDate.getValueDatetime();
+			} else {
+				Encounter firstDrugRegimenEditorEncounter = EncounterBasedRegimenUtils.getFirstEncounterForCategory(patient, "ARV");   //last DRUG_REGIMEN_EDITOR encounter
+
+				if (firstDrugRegimenEditorEncounter != null) {
+					SimpleObject o = EncounterBasedRegimenUtils.buildRegimenChangeObject(firstDrugRegimenEditorEncounter.getAllObs(), firstDrugRegimenEditorEncounter);
+					if (o != null) {
+						try {
+							if (o.get("startDate") != null && StringUtils.isNotBlank(o.get("startDate").toString())) {
+								dtARTStartDate = DATE_FORMAT.parse(o.get("startDate").toString());
+							}
+						} catch (ParseException e) {
+							e.printStackTrace();
+						}
+					}
+				}
 			}
 
 			patientPredictionVariables.put("timeOnArt", 0);
