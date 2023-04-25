@@ -1550,14 +1550,16 @@ public class ModelService extends BaseOpenmrsService {
 				bolStabilityAssessment = obsStabilityAssessment.getValueBoolean();
 			}
 
-			patientPredictionVariables.put("StabilityAssessmentStable", 0);
-			patientPredictionVariables.put("StabilityAssessmentUnstable", 0);
+			patientPredictionVariables.put("StabilityAssessmentStable", "NA");
+			patientPredictionVariables.put("StabilityAssessmentUnstable", "NA");
 
 			if(bolStabilityAssessment != null) {
 				if(bolStabilityAssessment == true) {
 					patientPredictionVariables.put("StabilityAssessmentStable", 1);
+					patientPredictionVariables.put("StabilityAssessmentUnstable", 0);
 				} else {
 					patientPredictionVariables.put("StabilityAssessmentUnstable", 1);
+					patientPredictionVariables.put("StabilityAssessmentStable", 0);
 				}
 			}
 
