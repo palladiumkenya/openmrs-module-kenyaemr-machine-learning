@@ -230,7 +230,7 @@ public class MachineLearningRestController extends BaseRestController {
 			ModelInputFields inputFields = MLUtils.extractHTSCaseFindingVariablesFromRequestBody(requestBody, facilityMflCode,
 			    encounterDate);
 
-			System.err.println("HTS Score: Using input fields: " + inputFields);
+			// System.err.println("HTS Score: Using input fields: " + inputFields);
 			
 			ScoringResult scoringResult = modelService.htsscore(modelId, facilityMflCode, encounterDate, inputFields, isDebugMode);
 			return scoringResult;
@@ -388,7 +388,7 @@ public class MachineLearningRestController extends BaseRestController {
 
 			ModelInputFields inputFields = MLUtils.extractIITVariablesFromRequestBody(requestBody, facilityMflCode, encounterDate);
 
-			System.err.println("IIT Score: Using input fields: " + inputFields);
+			// System.err.println("IIT Score: Using input fields: " + inputFields);
 			
 			ScoringResult scoringResult = modelService.iitscore(modelId, facilityMflCode, encounterDate, inputFields, isDebugMode);
 			return scoringResult;

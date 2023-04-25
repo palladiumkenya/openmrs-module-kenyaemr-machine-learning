@@ -460,7 +460,12 @@ public class ModelService extends BaseOpenmrsService {
 	public SimpleObject getMissedAppointments(Patient patient) {
 		SimpleObject ret = new SimpleObject();
 		Integer total = 0;
-		Boolean lastfive = false;
+		Integer missedByOne = 0;
+		Integer missedByFive = 0;
+		Integer missedByThirty = 0;
+		Integer missedByOneLastFive = 0;
+		Integer missedByFiveLastFive = 0;
+		Integer missedByThirtyLastFive = 0;
 		PatientWrapper patientWrapper = new PatientWrapper(patient);
 		
 		Form hivGreenCardForm = MetadataUtils.existing(Form.class, HivMetadata._Form.HIV_GREEN_CARD);
@@ -474,15 +479,45 @@ public class ModelService extends BaseOpenmrsService {
 				SimpleObject encDetails = getEncDetails(enc.getObs(), enc, hivClinicalEncounters);
 				Boolean appointmentHonoured = (Boolean) encDetails.get("honoured");
 				if(appointmentHonoured == false) {
+					// System.out.println("appointmentPeriod : " + encDetails.get("appointmentPeriod"));
+					// System.out.println("encDate : " + encDetails.get("encDate"));
+					// System.out.println("tcaDate : " + encDetails.get("tcaDate"));
+					int missedBy = (int) encDetails.get("appointmentPeriod"); // days missed
+					if(missedBy == 1) {
+						// Missed by one day
+						missedByOne++;
+					} else if(missedBy <= 5) {
+						// Missed by five days or less
+						missedByFive++;
+					} else if(missedBy <= 30) {
+						// Missed by thirty days or less
+						missedByThirty++;
+					}
 					if(i < 5) {
-						lastfive = true;
+						if(missedBy == 1) {
+							// Missed by one day
+							missedByOneLastFive++;
+						} else if(missedBy <= 5) {
+							// Missed by five days or less
+							missedByFiveLastFive++;
+						} else if(missedBy <= 30) {
+							// Missed by thirty days or less
+							missedByThirtyLastFive++;
+						}
 					}
 					total++;
 				}
 			}
 		}
+
 		ret.put("total", total);
-		ret.put("lastfive", lastfive);
+		ret.put("missedByOne", missedByOne);
+		ret.put("missedByFive", missedByFive);
+		ret.put("missedByThirty", missedByThirty);
+		ret.put("missedByOneLastFive", missedByOneLastFive);
+		ret.put("missedByFiveLastFive", missedByFiveLastFive);
+		ret.put("missedByThirtyLastFive", missedByThirtyLastFive);
+
 		return(ret);
 	}
 
@@ -524,13 +559,11 @@ public class ModelService extends BaseOpenmrsService {
 		Date tcaDate = null;
 		int appointmentDuration = 0;
 		Boolean appointmentHonoured = false;
-		for (Obs obs : obsList) {
-			
+		for (Obs obs : obsList) {	
 			if (obs.getConcept().getConceptId().equals(tcaDateConcept)) {
 				tcaDate = obs.getValueDate();
 				tcaDateString = tcaDate != null ? DATE_FORMAT.format(tcaDate) : "";
-				appointmentDuration = Days.daysBetween(new LocalDate(e.getEncounterDatetime()), new LocalDate(tcaDate))
-				        .getDays();
+				appointmentDuration = Days.daysBetween(new LocalDate(e.getEncounterDatetime()), new LocalDate(tcaDate)).getDays();
 				if (hasVisitOnDate(tcaDate, e.getPatient(), allClinicalEncounters)) {
 					appointmentHonoured = true;
 				}
@@ -943,20 +976,30 @@ public class ModelService extends BaseOpenmrsService {
 
 			SimpleObject soTotalMissedAppointments = getMissedAppointments(patient);
 			Integer totalMissedAppointments = (Integer) soTotalMissedAppointments.get("total");
-			if(totalMissedAppointments > 0) {
-				patientPredictionVariables.put("missed1", totalMissedAppointments);
-			} else if(totalMissedAppointments > 5) {
-				patientPredictionVariables.put("missed5", totalMissedAppointments);
-			} else if(totalMissedAppointments > 30) {
-				patientPredictionVariables.put("missed30", totalMissedAppointments);
+			Integer missedByOneAppointments = (Integer) soTotalMissedAppointments.get("missedByOne");
+			Integer missedByFiveAppointments = (Integer) soTotalMissedAppointments.get("missedByFive");
+			Integer missedByThirtyAppointments = (Integer) soTotalMissedAppointments.get("missedByThirty");
+			Integer missedByOneLastFiveAppointments = (Integer) soTotalMissedAppointments.get("missedByOneLastFive");
+			Integer missedByFiveLastFiveAppointments = (Integer) soTotalMissedAppointments.get("missedByFiveLastFive");
+			Integer missedByThirtyLastFiveAppointments = (Integer) soTotalMissedAppointments.get("missedByThirtyLastFive");
+
+			if(missedByOneAppointments != null) {
+				patientPredictionVariables.put("missed1", missedByOneAppointments);
+			} 
+			if(missedByFiveAppointments != null) {
+				patientPredictionVariables.put("missed5", missedByFiveAppointments);
+			} 
+			if(missedByThirtyAppointments != null) {
+				patientPredictionVariables.put("missed30", missedByThirtyAppointments);
 			}
-			Boolean lastfive = (Boolean) soTotalMissedAppointments.get("lastfive");
-			if(totalMissedAppointments > 0 && lastfive == true) {
-				patientPredictionVariables.put("missed1_last5", totalMissedAppointments);
-			} else if(totalMissedAppointments > 5 && lastfive == true) {
-				patientPredictionVariables.put("missed5_last5", totalMissedAppointments);
-			} else if(totalMissedAppointments > 30 && lastfive == true) {
-				patientPredictionVariables.put("missed30_last5", totalMissedAppointments);
+			if(missedByOneLastFiveAppointments != null) {
+				patientPredictionVariables.put("missed1_last5", missedByOneLastFiveAppointments);
+			}
+			if(missedByFiveLastFiveAppointments != null) {
+				patientPredictionVariables.put("missed5_last5", missedByFiveLastFiveAppointments);
+			}
+			if(missedByThirtyLastFiveAppointments != null) {
+				patientPredictionVariables.put("missed30_last5", missedByThirtyLastFiveAppointments);
 			}
 
 			// Source total regimens for patient
@@ -1087,9 +1130,11 @@ public class ModelService extends BaseOpenmrsService {
 			patientPredictionVariables.put("timeOnArt", 0);
 
 			if(dtARTStartDate != null) {
+				System.out.println("Got ART start date as: " + dtARTStartDate);
 				Date currentDate = new Date();
 				long diffInMillies = Math.abs(currentDate.getTime() - dtARTStartDate.getTime());
 				long diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS); // Time in days
+				System.out.println("Got time on ART (days) as: " + diff);
 				patientPredictionVariables.put("timeOnArt", diff);
 			}
 

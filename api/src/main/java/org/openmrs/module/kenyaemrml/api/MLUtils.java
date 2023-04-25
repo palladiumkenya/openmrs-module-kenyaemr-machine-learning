@@ -720,7 +720,7 @@ public class MLUtils {
 
 			ModelInputFields inputFields = MLUtils.extractIITVariablesFromRequestBody(requestBody, facilityMflCode, encounterDate);
 
-			System.err.println("IIT Score: Using input fields: " + inputFields);
+			// System.err.println("IIT Score: Using input fields: " + inputFields);
 			
 			ScoringResult scoringResult = modelService.iitscore(modelId, facilityMflCode, encounterDate, inputFields, isDebugMode);
 
