@@ -1029,11 +1029,20 @@ public class ModelService extends BaseOpenmrsService {
 			Integer numberOfRegimens = arvHistory.size();
 			patientPredictionVariables.put("num_hiv_regimens", numberOfRegimens);
 
-			// Source visits (last five)
+			// Source visits (last five) -- later changed to appointments TODO: check whether it should be real visits or real appointments
 			patientPredictionVariables.put("n_visits_lastfive", 0);
 
-			List<Visit> allVisits = Context.getVisitService().getVisitsByPatient(patient);
-			Integer numOfVisits = allVisits.size();
+			// Real Visits
+			// List<Visit> allVisits = Context.getVisitService().getVisitsByPatient(patient);
+			// Integer numOfVisits = allVisits.size();
+			// if(numOfVisits >= 5) {
+			// 	patientPredictionVariables.put("n_visits_lastfive", 5);
+			// } else {
+			// 	patientPredictionVariables.put("n_visits_lastfive", numOfVisits);
+			// }
+
+			//Real Appointments
+			Integer numOfVisits = n_appts;
 			if(numOfVisits >= 5) {
 				patientPredictionVariables.put("n_visits_lastfive", 5);
 			} else {
