@@ -39,6 +39,7 @@ public class IitPatientRiskScoreFragmentController {
         Date evaluationDate = null;
         String description = null;
         String riskFactor = null;
+        Double riskScore = 0.00;
 
         PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(patient.getPatientId()), false);
         if (latestRiskScore != null) {
@@ -46,8 +47,9 @@ public class IitPatientRiskScoreFragmentController {
             description = latestRiskScore.getDescription();
             riskFactor = latestRiskScore.getRiskFactors();
             KenyaUiUtils kenyaui = Context.getRegisteredComponents(KenyaUiUtils.class).get(0);
+            riskScore = latestRiskScore.getRiskScore();
 
-            model.put("riskScore", latestRiskScore != null ? latestRiskScore.getRiskScore() : "-");
+            model.put("riskScore", riskScore > 0.00 ? (int) Math.rint((riskScore * 100)) + " %" : "-");
             model.put("evaluationDate", evaluationDate != null ? kenyaui.formatDate(evaluationDate) : "-");
             model.put("description", description != null ? description : "-");
             model.put("riskFactor", riskFactor != null ? riskFactor : "-");

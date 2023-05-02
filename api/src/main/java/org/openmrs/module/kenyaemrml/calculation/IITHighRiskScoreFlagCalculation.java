@@ -29,6 +29,36 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.openmrs.Concept;
+import org.openmrs.Encounter;
+import org.openmrs.EncounterType;
+import org.openmrs.Form;
+import org.openmrs.Obs;
+import org.openmrs.Program;
+import org.openmrs.api.EncounterService;
+import org.openmrs.api.PatientService;
+import org.openmrs.api.context.Context;
+import org.openmrs.calculation.patient.PatientCalculationContext;
+import org.openmrs.calculation.result.CalculationResultMap;
+import org.openmrs.module.kenyacore.calculation.AbstractPatientCalculation;
+import org.openmrs.module.kenyacore.calculation.BooleanResult;
+import org.openmrs.module.kenyacore.calculation.Filters;
+import org.openmrs.module.kenyacore.calculation.PatientFlagCalculation;
+import org.openmrs.module.kenyaemr.Dictionary;
+import org.openmrs.module.kenyaemr.HivConstants;
+import org.openmrs.module.kenyaemr.metadata.HivMetadata;
+import org.openmrs.module.kenyaemr.util.EmrUtils;
+import org.openmrs.module.metadatadeploy.MetadataUtils;
+
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Calculate whether a patient has high IIT risk score based on data pulled from NDWH
  */
@@ -50,21 +80,26 @@ public class IITHighRiskScoreFlagCalculation extends AbstractPatientCalculation 
 	 * @should determine whether a patient has high IIT risk
 	 */
 	@Override
-	public CalculationResultMap evaluate(Collection<Integer> cohort, Map<String, Object> parameterValues,
-	        PatientCalculationContext context) {
+	public CalculationResultMap evaluate(Collection<Integer> cohort, Map<String, Object> parameterValues, PatientCalculationContext context) {
 		
+		Program hivProgram = MetadataUtils.existing(Program.class, HivMetadata._Program.HIV);
+		Set<Integer> alive = Filters.alive(cohort, context);
+		Set<Integer> inHivProgram = Filters.inProgram(hivProgram, alive, context);
+
 		CalculationResultMap ret = new CalculationResultMap();
 
 		for (Integer ptId : cohort) {
-			Patient currentPatient = Context.getPatientService().getPatient(ptId);
-			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(currentPatient, true);
-			if (latestRiskScore != null) {
-				String riskGroup = latestRiskScore.getDescription();
-				if (riskGroup.trim().equalsIgnoreCase("High Risk")) {					
-					setCustomMessage("IIT High risk");
-					ret.put(ptId, new BooleanResult(true, this, context));
-				} else {
-					ret.put(ptId, new BooleanResult(false, this, context));
+			if (inHivProgram.contains(ptId)) {
+				Patient currentPatient = Context.getPatientService().getPatient(ptId);
+				PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(currentPatient, true);
+				if (latestRiskScore != null) {
+					String riskGroup = latestRiskScore.getDescription();
+					if (riskGroup.trim().equalsIgnoreCase("High Risk")) {					
+						setCustomMessage("IIT High risk");
+						ret.put(ptId, new BooleanResult(true, this, context));
+					} else {
+						ret.put(ptId, new BooleanResult(false, this, context));
+					}
 				}
 			}
 		}

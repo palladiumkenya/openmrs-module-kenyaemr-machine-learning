@@ -571,7 +571,7 @@ public class MLDataExchange {
 			}
 			if (patient != null) {
 				ProgramWorkflowService pwfservice = Context.getProgramWorkflowService();
-				List<PatientProgram> programs = pwfservice.getPatientPrograms(patient, hivProgram, null, null, null,null, true);
+				List<PatientProgram> programs = pwfservice.getPatientPrograms(patient, hivProgram, null, null, null,null, false);
 				if (programs.size() > 0) {
 					if(patient.getDead() == false) {
 						Date lastScore = mLinKenyaEMRService.getPatientLatestRiskEvaluationDate(patient);
