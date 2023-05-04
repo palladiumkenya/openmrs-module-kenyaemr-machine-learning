@@ -54,6 +54,14 @@ public interface MLinKenyaEMRService extends OpenmrsService {
 	PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient, Boolean reporting);
 
 	/**
+	 * Gets the latest PatientRiskScore for a patient in real time
+	 * 
+	 * @param patient
+	 * @return
+	 */
+	PatientRiskScore getLatestPatientRiskScoreByPatientRealTime(Patient patient);
+
+	/**
 	 * Get all patients with high risk scores
 	 * @return a list of patients
 	 */

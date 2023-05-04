@@ -90,6 +90,14 @@
 	</globalProperty>
 
 	<globalProperty>
+		<property>kenyaemrml.iitscore.updatepatientscore</property>
+		<defaultValue>/ws/rest/v1/keml/updatepatientiitscore</defaultValue>
+		<description>
+			A global property that specifies the local endpoint for updating the IIT score of a patient
+		</description>
+	</globalProperty>
+
+	<globalProperty>
 		<property>kenyaemrml.iit.lowRiskThreshold</property>
 		<defaultValue>0.04587388</defaultValue>
 		<description>

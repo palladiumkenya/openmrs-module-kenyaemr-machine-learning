@@ -9,6 +9,7 @@ import org.openmrs.module.kenyaemrml.api.MLUtils;
 import org.openmrs.module.kenyaemrml.api.service.ModelService;
 import org.openmrs.module.kenyaemrml.domain.ModelInputFields;
 import org.openmrs.module.kenyaemrml.domain.ScoringResult;
+import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +22,25 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+
+import org.openmrs.Patient;
+import org.openmrs.Visit;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
+import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
+import org.openmrs.module.kenyaui.KenyaUiUtils;
+import org.openmrs.ui.framework.UiUtils;
+import org.openmrs.ui.framework.page.PageModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import org.codehaus.jackson.map.ObjectMapper;
 
 /**
  * The main controller for ML in KenyaEMR
@@ -395,6 +415,38 @@ public class MachineLearningRestController extends BaseRestController {
 		}
 		catch (IOException e) {
 			return new ResponseEntity<Object>("Could not process the IIT Score request", new HttpHeaders(), HttpStatus.UNPROCESSABLE_ENTITY);
+		}
+	}
+
+	/**
+	 * Generates a new risk score for the patient and saves it into DB
+	 * //Query JSON
+	 * {
+	 * 		"patientId": 234
+	 * }
+	 * 
+	 * @param patientId - The patient id
+	 * @return the score JSON {"patientId": 234, "riskScore": 0.12345678, "riskDescription": "High Risk"}
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/updatepatientiitscore")
+	@ResponseBody
+	public Object getPatientIITRiskScore(HttpServletRequest request) {
+		String requestBody = null;
+		try {
+			requestBody = MLUtils.fetchRequestBody(request.getReader());
+			ObjectMapper mapper = new ObjectMapper();
+			ObjectNode payload = (ObjectNode) mapper.readTree(requestBody);
+			Integer patientId = payload.get("patientId").asInt();
+			System.out.println("IIT score got patient id as: " + patientId);
+			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatientRealTime(Context.getPatientService().getPatient(patientId));
+			SimpleObject ret = new SimpleObject();
+			ret.put("patientId", patientId);
+			ret.put("riskScore", latestRiskScore.getRiskScore());
+			ret.put("riskDescription", latestRiskScore.getDescription());
+			System.out.println("IIT score got patient risk score as: " + latestRiskScore.getRiskScore());
+			return ret;
+		} catch(Exception ex) {
+			return new ResponseEntity<Object>("Could not process the patient IIT Score request", new HttpHeaders(), HttpStatus.UNPROCESSABLE_ENTITY);
 		}
 	}
 }
