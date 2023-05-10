@@ -174,7 +174,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             <br/>
             <div class="alignHorizontal">
                 <button id="updateSummary">Update Summary</button>
-                <button id="fetchRiskScores">Pull Patient scores</button>
+                <button id="fetchRiskScores" disabled>Pull Patient scores</button>
             </div>
         </fieldset>
     </div>
@@ -202,7 +202,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
             <br/>
             <div class="alignHorizontal">
                 <button id="updateLocalSummary">Update Summary</button>
-                <button id="generateRiskScores">Generate Patient Scores</button>
+                <button id="generateRiskScores" disabled>Generate Patient Scores</button>
             </div>
         </fieldset>
     </div>
@@ -475,6 +475,52 @@ tr:nth-child(even) {background-color: #f2f2f2;}
                 }
             });
         }
+
+        // check if data pull task is running immediately after page load. If running, enable appropriate displays
+        function checkIfDataPullTaskIsRunning() {
+            ui.getFragmentActionAsJson('kenyaemrml', 'iitRiskScoreHistory', 'getStartStopStatusOfDataPull', {}, function (result) {
+                console.log('Success getting status of data pull: ' + JSON.stringify(result));
+                if(result) {
+                    console.log('Data Pull Task is running. Enabling data pull status display');
+                    isPullingData = true;
+                    display_message('');
+                    display_loading(true);
+                    jq('#fetchRiskScores').attr('disabled', true);
+                    jq('#stopPull').show();
+
+                    fetchStatus();
+                } else {
+                    console.log('Data Pull Task is NOT running');
+                    // Enable the pull button
+                    jq('#fetchRiskScores').attr('disabled', false);
+                }
+            });
+        }
+
+        // check if data IIT score generation Task is running immediately after page load. If running, enable appropriate displays
+        function checkIfIITScoreGenTaskIsRunning() {
+            ui.getFragmentActionAsJson('kenyaemrml', 'iitRiskScoreGenerator', 'getStartStopStatusOfScoreGen', {}, function (result) {
+                console.log('Success getting status of IIT score generation Task: ' + JSON.stringify(result));
+                if(result) {
+                    console.log('IIT Score Gen Task is running. Enabling IIT score generation status display');
+                    isGeneratingScores = true;
+                    display_genscores_message('');
+                    display_genscores_loading(true);
+                    jq('#generateRiskScores').attr('disabled', true);
+                    jq('#stopGen').show();
+
+                    generateScoresStatus();
+                } else {
+                    console.log('IIT Score Gen Task is NOT running');
+                    // Enable the generate button
+                    jq('#generateRiskScores').attr('disabled', false);
+                }
+            });
+        }
+
+        // Check if background tasks are running
+        checkIfDataPullTaskIsRunning();
+        checkIfIITScoreGenTaskIsRunning();
 
         // Fetch the summary only after page load
         updateSummaryTable(false);

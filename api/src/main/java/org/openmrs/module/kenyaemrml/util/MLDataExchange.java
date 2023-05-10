@@ -424,6 +424,9 @@ public class MLDataExchange {
 	 * @return true when successfull and false on failure
 	 */
 	public boolean fetchDataFromDWH() {
+		// We have finished the data pull task. We now set the flag.
+		setStatusOfPullDataTask(true);
+
 		// Init the auth vars
 		boolean varsOk = initGlobalVars();
 		if (varsOk) {
@@ -445,17 +448,42 @@ public class MLDataExchange {
 					pullAndSave(credentials, totalRemote, lastEvaluationDate);
 				} else {
 					System.err.println("ITT ML - No records on remote side");
+					setStatusOfPullDataTask(false);
 					return (false);
 				}
 			} else {
 				System.err.println("ITT ML - Failed to get the OAuth token");
+				setStatusOfPullDataTask(false);
 				return (false);
 			}
 		} else {
 			System.err.println("ITT ML - Failed to get the OAuth Vars");
+			setStatusOfPullDataTask(false);
 			return (false);
 		}
+
+		// We have finished the data pull task. We now set the flag.
+		setStatusOfPullDataTask(false);
+
 		return (true);
+	}
+
+	/**
+	 * Sets the started/stopped status of the pull data task
+	 * 
+	 * @param stat true - running, false - stopped
+	 */
+	public void setStatusOfPullDataTask(Boolean stat) {
+		User user = Context.getUserContext().getAuthenticatedUser();
+		if(user != null) {
+			if(stat) { // running
+				user.setUserProperty("stopIITMLPull", "0");
+				user.setUserProperty("IITMLPullRunning", "1");
+			} else { // stopped
+				user.setUserProperty("stopIITMLPull", "1");
+				user.setUserProperty("IITMLPullRunning", "0");
+			}
+		}
 	}
 	
 	/**
@@ -555,6 +583,8 @@ public class MLDataExchange {
 		Boolean ret = false;
 
 		PatientService patientService = Context.getPatientService();
+		// We have started the IIT score generation task. We now set the flag.
+		setStatusOfIITGenScoresTask(true);
 
 		// Get all patients
 		List<Patient> allPatients = patientService.getAllPatients();
@@ -567,6 +597,7 @@ public class MLDataExchange {
 		HashSet<Patient> patientsGroup = new HashSet<Patient>();
 		for (Patient patient : allPatients) {
 			if (!getContinueGeneratingIITScores()) {
+				setStatusOfIITGenScoresTask(false);
 				return (false);
 			}
 			if (patient != null) {
@@ -583,11 +614,32 @@ public class MLDataExchange {
 				}
 			}
 		}
-		System.out.println("IIT ML Gen For All Task: Patient to be scored: " + patientsGroup.size());
+		System.out.println("IIT ML Gen For All Task: Patients to be scored: " + patientsGroup.size());
 
 		ret = generateAndSave(patientsGroup);
 
+		// We have finished the generation task. We now set the flag.
+		setStatusOfIITGenScoresTask(false);
+
 		return(ret);
+	}
+
+	/**
+	 * Sets the started/stopped status of the generate IIT scores task
+	 * 
+	 * @param stat true - running, false - stopped
+	 */
+	public void setStatusOfIITGenScoresTask(Boolean stat) {
+		User user = Context.getUserContext().getAuthenticatedUser();
+		if(user != null) {
+			if(stat) { // running
+				user.setUserProperty("stopIITMLGen", "0");
+				user.setUserProperty("IITMLGenRunning", "1");
+			} else { // stopped
+				user.setUserProperty("stopIITMLGen", "1");
+				user.setUserProperty("IITMLGenRunning", "0");
+			}
+		}
 	}
 
 	/**
@@ -619,15 +671,6 @@ public class MLDataExchange {
 
 			setScoreGenerationStatus((long)Math.floor(((currentPage * 1.00 / totalPages * 1.00) * totalRemote)), totalRemote);
 			currentPage++;
-
-			// NB: No need to delay. The IIT model is slow enough (8 sec)
-			// try {
-			// 	//Delay for 5 seconds
-			// 	Thread.sleep(5000);
-			// }
-			// catch (Exception ie) {
-			// 	Thread.currentThread().interrupt();
-			// }
 		}
 
 		return(ret);

@@ -444,67 +444,64 @@ public class MLUtils {
 		return(mlScore);
 	}
 
-	/**
-	 * Get the IIT ML score using backend method
-	 * 
-	 * @param payload - the Json payload
-	 * @return String - The Json response
-	 */
-	public static String getIITMLScoreBackendMethod(String payload) {
-		String mlScore = "";
-		//Connection Params (Build the URL)
-		String iitMLbackEndURLGlobal = "kenyaemrml.iitscore.endpoint";
-		GlobalProperty globalIITMLbackEndURL = Context.getAdministrationService().getGlobalPropertyObject(iitMLbackEndURLGlobal);
-		String strIITMLbackEndURL = globalIITMLbackEndURL.getPropertyValue();
-		strIITMLbackEndURL = strIITMLbackEndURL.trim();
-		// System.out.println("Got global IIT url part as: " + strIITMLbackEndURL);
-		// final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString().trim();
-		// System.out.println("Got base url part as: " + baseUrl);
-		if(!strIITMLbackEndURL.startsWith("http")) {
-			final String baseUrl = "http://127.0.0.1:8080/" + WebConstants.CONTEXT_PATH;
-			strIITMLbackEndURL = baseUrl + strIITMLbackEndURL;
-		}
-		// System.out.println("Got full IIT backend url as: " + strIITMLbackEndURL);
+	// /**
+	//  * Get the IIT ML score using backend method
+	//  * 
+	//  * @param payload - the Json payload
+	//  * @return String - The Json response
+	//  */
+	// public static String getIITMLScoreBackendMethod(String payload) {
+	// 	String mlScore = "";
+	// 	//Connection Params (Build the URL)
+	// 	String iitMLbackEndURLGlobal = "kenyaemrml.iitscore.endpoint";
+	// 	GlobalProperty globalIITMLbackEndURL = Context.getAdministrationService().getGlobalPropertyObject(iitMLbackEndURLGlobal);
+	// 	String strIITMLbackEndURL = globalIITMLbackEndURL.getPropertyValue();
+	// 	strIITMLbackEndURL = strIITMLbackEndURL.trim();
 
-		//Call endpoint to get the score
-		BufferedReader reader = null;
-		HttpURLConnection connection = null;
-		try {
-			URL url = new URL(strIITMLbackEndURL);
-			// System.out.println("Calling IIT backend using: " + url);
-			connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestMethod("POST");
-			connection.setRequestProperty("Content-Type", "application/json");
-			connection.setRequestProperty("Accept", "application/json");
-			connection.setDoOutput(true);
-			OutputStream outputStream = connection.getOutputStream();
-			byte[] output = payload.getBytes("utf-8");
-			outputStream.write(output, 0, output.length);
-			reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-			StringBuilder response = new StringBuilder();
-			String responseLine = null;
-			while ((responseLine = reader.readLine()) != null) {
-				response.append(responseLine.trim());
-			}
-			String mlScoreResponse = response.toString();
-			// System.out.println("ITT ML - Got IIT Score JSON as: " + mlScoreResponse);
+	// 	if(!strIITMLbackEndURL.startsWith("http")) {
+	// 		final String baseUrl = "http://127.0.0.1:8080/" + WebConstants.CONTEXT_PATH;
+	// 		strIITMLbackEndURL = baseUrl + strIITMLbackEndURL;
+	// 	}
+
+	// 	//Call endpoint to get the score
+	// 	BufferedReader reader = null;
+	// 	HttpURLConnection connection = null;
+	// 	try {
+	// 		URL url = new URL(strIITMLbackEndURL);
+	// 		// System.out.println("Calling IIT backend using: " + url);
+	// 		connection = (HttpURLConnection) url.openConnection();
+	// 		connection.setRequestMethod("POST");
+	// 		connection.setRequestProperty("Content-Type", "application/json");
+	// 		connection.setRequestProperty("Accept", "application/json");
+	// 		connection.setDoOutput(true);
+	// 		OutputStream outputStream = connection.getOutputStream();
+	// 		byte[] output = payload.getBytes("utf-8");
+	// 		outputStream.write(output, 0, output.length);
+	// 		reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+	// 		StringBuilder response = new StringBuilder();
+	// 		String responseLine = null;
+	// 		while ((responseLine = reader.readLine()) != null) {
+	// 			response.append(responseLine.trim());
+	// 		}
+	// 		String mlScoreResponse = response.toString();
+	// 		// System.out.println("ITT ML - Got IIT Score JSON as: " + mlScoreResponse);
 			
-			mlScore = mlScoreResponse;
-		}
-		catch (Exception e) {
-			System.err.println("ITT ML - Error getting IIT Score: " + e.getMessage());
-			e.printStackTrace();
-		}
-		finally {
-			if (reader != null) {
-				try {
-					reader.close();
-				}
-				catch (IOException e) {}
-			}
-			connection.disconnect();
-		}
-		return(mlScore);
-	}
+	// 		mlScore = mlScoreResponse;
+	// 	}
+	// 	catch (Exception e) {
+	// 		System.err.println("ITT ML - Error getting IIT Score: " + e.getMessage());
+	// 		e.printStackTrace();
+	// 	}
+	// 	finally {
+	// 		if (reader != null) {
+	// 			try {
+	// 				reader.close();
+	// 			}
+	// 			catch (IOException e) {}
+	// 		}
+	// 		connection.disconnect();
+	// 	}
+	// 	return(mlScore);
+	// }
 	
 }

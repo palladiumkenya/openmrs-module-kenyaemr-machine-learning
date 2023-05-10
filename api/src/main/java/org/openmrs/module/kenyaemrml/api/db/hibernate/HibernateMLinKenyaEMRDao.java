@@ -249,10 +249,9 @@ public class HibernateMLinKenyaEMRDao implements MLinKenyaEMRDao {
 		Integer lowRiskCount = 0;
 		Program hivProgram = MetadataUtils.existing(Program.class, HivMetadata._Program.HIV);
 		ProgramWorkflowService pwfservice = Context.getProgramWorkflowService();
-		Criteria criteria = getSession().createCriteria(PatientRiskScore.class);
-		// criteria.setProjection(Projections.distinct(Projections.property("patient"))).setResultTransformer(Transformers.aliasToBean(PatientRiskScore.class));
-		criteria.setProjection(Projections.distinct(Projections.projectionList().add(Projections.property("patient"), "patient"))).setResultTransformer(Transformers.aliasToBean(PatientRiskScore.class));
 
+		Criteria criteria = getSession().createCriteria(PatientRiskScore.class);
+		criteria.setProjection(Projections.distinct(Projections.projectionList().add(Projections.property("patient"), "patient"))).setResultTransformer(Transformers.aliasToBean(PatientRiskScore.class));
 		List<PatientRiskScore> pList = criteria.list();
 
 		for (PatientRiskScore patientRiskScore : pList) {

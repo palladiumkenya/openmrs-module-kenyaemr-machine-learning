@@ -79,7 +79,26 @@ public class IitRiskScoreHistoryFragmentController {
 		User user = Context.getUserContext().getAuthenticatedUser();
 		if(user != null) {
 			user.setUserProperty("stopIITMLPull", "1");
+			user.setUserProperty("IITMLPullRunning", "0");
 		}
+	}
+
+	/**
+	 * Get started/stopped status of Fetching data from Data Warehouse task
+	 * 
+	 * @return true if still running and false if stopped
+	 */
+	@AppAction("kenyaemrml.predictions")
+	public Boolean getStartStopStatusOfDataPull(@SpringBean KenyaUiUtils kenyaUi, UiUtils ui) {
+		User user = Context.getUserContext().getAuthenticatedUser();
+		Boolean ret = false;
+		if(user != null) {
+			String status = user.getUserProperty("IITMLPullRunning");
+			if(status != null && status.trim().equalsIgnoreCase("1")) {
+				ret = true;
+			}
+		}
+		return(ret);
 	}
 
 	/**

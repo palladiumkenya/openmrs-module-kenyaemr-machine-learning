@@ -45,7 +45,7 @@ public class IitRiskScoreGeneratorFragmentController {
 	}
 	
 	/**
-	 * Fetch data from Data Warehouse
+	 * Generate IIT risk scores
 	 * 
 	 * @return true on success and false on failure
 	 */
@@ -72,7 +72,7 @@ public class IitRiskScoreGeneratorFragmentController {
 	}
 
 	/**
-	 * Stop Fetching data from Data Warehouse
+	 * Stop generating IIT scores
 	 * 
 	 */
 	@AppAction("kenyaemrml.predictions")
@@ -80,12 +80,32 @@ public class IitRiskScoreGeneratorFragmentController {
 		User user = Context.getUserContext().getAuthenticatedUser();
 		if(user != null) {
 			user.setUserProperty("stopIITMLGen", "1");
+			user.setUserProperty("IITMLGenRunning", "0");
 		}
 	}
 
 	/**
-	 * Get current status of Fetching data from Data Warehouse
+	 * Get started/stopped status of the IIT scores generation task
 	 * 
+	 * @return true if still running and false if stopped
+	 */
+	@AppAction("kenyaemrml.predictions")
+	public Boolean getStartStopStatusOfScoreGen(@SpringBean KenyaUiUtils kenyaUi, UiUtils ui) {
+		User user = Context.getUserContext().getAuthenticatedUser();
+		Boolean ret = false;
+		if(user != null) {
+			String status = user.getUserProperty("IITMLGenRunning");
+			if(status != null && status.trim().equalsIgnoreCase("1")) {
+				ret = true;
+			}
+		}
+		return(ret);
+	}
+
+	/**
+	 * Get progress status of the IIT scores generation task
+	 * 
+	 * @return SimpleObject done - number of records done, total - total number of records, percent - percentage of work done
 	 */
 	@AppAction("kenyaemrml.predictions")
 	public SimpleObject getStatusOfGenerateScores(@SpringBean KenyaUiUtils kenyaUi, UiUtils ui) {
