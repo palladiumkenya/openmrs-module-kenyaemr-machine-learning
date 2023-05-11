@@ -48,24 +48,19 @@ public class HighIITRiskPatientsReportBuilder extends CalculationReportBuilder {
 	
 	@Override
 	protected void addColumns(CohortReportDescriptor report, PatientDataSetDefinition dsd) {
-		PatientIdentifierType upn = MetadataUtils.existing(PatientIdentifierType.class,
-		    HivMetadata._PatientIdentifierType.UNIQUE_PATIENT_NUMBER);
-		DataDefinition identifierDef = new ConvertedPatientDataDefinition("identifier", new PatientIdentifierDataDefinition(
-		        upn.getName(), upn), new IdentifierConverter());
+		PatientIdentifierType upn = MetadataUtils.existing(PatientIdentifierType.class, HivMetadata._PatientIdentifierType.UNIQUE_PATIENT_NUMBER);
+		DataDefinition identifierDef = new ConvertedPatientDataDefinition("identifier", new PatientIdentifierDataDefinition(upn.getName(), upn), new IdentifierConverter());
 		
 		addStandardColumns(report, dsd);
 		dsd.addColumn("UPN", identifierDef, "");
-		dsd.addColumn("Last risk score",
-		    new CalculationDataDefinition("Last risk score (%)", new LastRiskScoreCalculation()), "", null);
-		dsd.addColumn("Evaluation Date", new CalculationDataDefinition("Evaluation Date",
-		        new LastRiskScoreEvaluationDateCalculation()), "", new CalculationResultConverter());
-		dsd.addColumn("Enrollment Date", new CalculationDataDefinition("Enrollment Date",
-		        new DateOfEnrollmentArtCalculation()), "", new DateArtStartDateConverter());
+		dsd.addColumn("Last risk score", new CalculationDataDefinition("Last risk score (%)", new LastRiskScoreCalculation()), "", null);
+		dsd.addColumn("Evaluation Date", new CalculationDataDefinition("Evaluation Date", new LastRiskScoreEvaluationDateCalculation()), "", new CalculationResultConverter());
+		dsd.addColumn("Enrollment Date", new CalculationDataDefinition("Enrollment Date", new DateOfEnrollmentArtCalculation()), "", new DateArtStartDateConverter());
 		dsd.addColumn("Art Start Date", new ETLArtStartDateDataDefinition(), "", new DateConverter(DATE_FORMAT));
 		dsd.addColumn("First Regimen", new ETLFirstRegimenDataDefinition(), "");
 		dsd.addColumn("Current Regimen", new ETLCurrentRegimenDataDefinition(), "");
 		dsd.addColumn("Current Regimen Line", new ETLCurrentRegLineDataDefinition(), "");
-		dsd.addColumn("Stability", new ETLStabilityDataDefinition(), "");
+		dsd.addColumn("Establishment", new ETLStabilityDataDefinition(), "");
 		dsd.addColumn("Last Visit Date", new ETLLastVisitDateDataDefinition(), "", new DateConverter(DATE_FORMAT));
 		dsd.addColumn("Next Appointment Date", new ETLNextAppointmentDateDataDefinition(), "",
 		    new DateConverter(DATE_FORMAT));

@@ -11,36 +11,24 @@ package org.openmrs.module.kenyaemrml.calculation;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
+import org.openmrs.Program;
 import org.openmrs.api.context.Context;
 import org.openmrs.calculation.patient.PatientCalculationContext;
 import org.openmrs.calculation.result.CalculationResultMap;
 import org.openmrs.module.kenyacore.calculation.AbstractPatientCalculation;
 import org.openmrs.module.kenyacore.calculation.BooleanResult;
-import org.openmrs.module.kenyacore.calculation.PatientFlagCalculation;
-import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
-import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
-
-import org.openmrs.Program;
-import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.module.kenyacore.calculation.Filters;
 import org.openmrs.module.kenyaemr.metadata.HivMetadata;
-import java.util.Set;
+import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
+import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
+import org.openmrs.module.metadatadeploy.MetadataUtils;
 
 /**
  * Calculate whether a patient has medium IIT risk score based on data pulled from NDWH
  */
 public class IITMediumRiskScoreCalculation extends AbstractPatientCalculation {
-	
-	// private String customMessage;
-	
-	/**
-	 * @see PatientFlagCalculation#getFlagMessage()
-	 */
-	// @Override
-	// public String getFlagMessage() {
-	// 	return customMessage;
-	// }
 	
 	/**
 	 * @see org.openmrs.calculation.patient.PatientCalculation#evaluate(Collection, Map,
@@ -59,8 +47,7 @@ public class IITMediumRiskScoreCalculation extends AbstractPatientCalculation {
 		Set<Integer> inHivProgram = Filters.inProgram(hivProgram, alive, context);
 
 		for (Integer ptId : inHivProgram) {
-			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
-							.getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId));
+			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(Context.getPatientService().getPatient(ptId), true);
 			if (latestRiskScore != null) {
 				//double riskScore = latestRiskScore.getRiskScore();
 				String riskGroup = latestRiskScore.getDescription();
@@ -69,20 +56,8 @@ public class IITMediumRiskScoreCalculation extends AbstractPatientCalculation {
 				}				
 			}
 		}
-		// System.err.println("Getting Medium");
-		// CalculationResultMap ret = new CalculationResultMap();
-		// Collection<Integer> medium = Context.getService(MLinKenyaEMRService.class).getAllPatientsWithMediumRiskScores();
-		// for (Integer ptId : medium) {
-		// 	ret.put(ptId, new BooleanResult(true, this, context));
-		// }
+		
 		return ret;
 	}
 	
-	// public String getCustomMessage() {
-	// 	return customMessage;
-	// }
-	
-	// public void setCustomMessage(String customMessage) {
-	// 	this.customMessage = customMessage;
-	// }
 }
