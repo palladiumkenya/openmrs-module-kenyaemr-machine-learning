@@ -287,6 +287,23 @@ public class ModelService extends BaseOpenmrsService {
 	}
 
 	/**
+	 * Get latest viral load observation
+	 * @param patient
+	 * @return Double - The latest VL count
+	 */
+	public Double getLatestViralLoadCount(Patient patient) {
+		Double ret = 0.00;
+		Concept concept = Context.getConceptService().getConceptByUuid(Dictionary.HIV_VIRAL_LOAD);
+		List<Obs> obsList = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
+		if (obsList.size() > 0) {
+			Obs cur = obsList.get(0);
+			Double vl = cur.getValueNumeric();
+			ret = vl;
+		}
+		return(ret);
+	}
+
+	/**
 	 * Get latest high viral load observation
 	 * @param patient
 	 * @return Double - The latest high VL count
@@ -1556,18 +1573,16 @@ public class ModelService extends BaseOpenmrsService {
 			//Source Most Recent VL
 			patientPredictionVariables.put("most_recent_vlHVL", 0);
 
-			Double most_recent_vlHVL = getLatestHighViralLoadCount(patient);
-			patientPredictionVariables.put("most_recent_vlHVL", most_recent_vlHVL);
+			Double most_recent_vl = getLatestViralLoadCount(patient);
+			patientPredictionVariables.put("most_recent_vlHVL", most_recent_vl > 1000.00 ? 1 : 0);
 
 			patientPredictionVariables.put("most_recent_vlLVL", 0);
 
-			Double most_recent_vlLVL = getLatestLowViralLoadCount(patient);
-			patientPredictionVariables.put("most_recent_vlLVL", most_recent_vlLVL);
+			patientPredictionVariables.put("most_recent_vlLVL", (most_recent_vl >= 200.00 && most_recent_vl < 1000.00) ? 1 : 0);
 
 			patientPredictionVariables.put("most_recent_vlSuppressed", 0);
 
-			Double most_recent_vlSuppressed = getLatestSuppressedViralLoadCount(patient);
-			patientPredictionVariables.put("most_recent_vlSuppressed", most_recent_vlSuppressed);
+			patientPredictionVariables.put("most_recent_vlSuppressed", most_recent_vl < 200.00 ? 1 : 0);
 
 			//Label
 			patientPredictionVariables.put("label", 1);
