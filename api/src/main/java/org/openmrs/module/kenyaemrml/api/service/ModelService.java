@@ -1593,7 +1593,7 @@ public class ModelService extends BaseOpenmrsService {
 
 			// Get JSON Payload
 			String payload = mlScoringRequestPayload.toJson();
-			// System.out.println("IIT ML Prediction Payload: " + payload);
+			System.out.println("IIT ML Prediction Payload: " + payload);
 			
 			// Get the IIT ML score
 			try {
