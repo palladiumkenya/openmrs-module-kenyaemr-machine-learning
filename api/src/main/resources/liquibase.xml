@@ -87,7 +87,7 @@
         <comment>Adding description column</comment>
         <addColumn tableName="kenyaemr_ml_patient_risk_score" >
             <column name="description"  
-                type="varchar(2048)" >  
+                type="varchar(128)" >  
                 <constraints nullable="true" />  
             </column>  
         </addColumn>  
@@ -128,10 +128,13 @@
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="kenyaemr_ml_patient_risk_score"/>
             <columnExists columnName="description" tableName="kenyaemr_ml_patient_risk_score"/>
+            <not>
+                <indexExists indexName="index_risk_score_description"/>
+            </not>
         </preConditions>
         <comment>Adding not null constraint to description column</comment>
         <addNotNullConstraint 
-           columnDataType="varchar(2048)"  
+           columnDataType="varchar(128)"  
            columnName="description" 
            tableName="kenyaemr_ml_patient_risk_score"/>
     </changeSet>
