@@ -29,26 +29,26 @@
 	</modules>
 
 	<properties>
-		<openMRSVersion>2.3.3</openMRSVersion>
+		<openMRSVersion>2.6.1</openMRSVersion>
 		<!-- Module dependencies -->
 		<appframeworkVersion>2.13.0</appframeworkVersion>
 		<calculationVersion>1.2</calculationVersion>
-		<htmlformentryVersion>3.9.2</htmlformentryVersion>
+		<htmlformentryVersion>5.1.0</htmlformentryVersion>
 		<htmlwidgetsVersion>1.10.0</htmlwidgetsVersion>
 		<idgenVersion>4.5.0</idgenVersion>
 		<metadatadeployVersion>1.11.0</metadatadeployVersion>
 		<metadatasharingVersion>1.5.0</metadatasharingVersion>
-		<reportingVersion>1.22.0</reportingVersion>
+		<reportingVersion>1.25.0</reportingVersion>
 		<serializationxstreamVersion>0.2.14</serializationxstreamVersion>
-		<uiframeworkVersion>3.15.0</uiframeworkVersion>
-		<kenyaemrVersion>18.5.1</kenyaemrVersion>
+		<uiframeworkVersion>3.23.0</uiframeworkVersion>
+		<kenyaemrVersion>18.6.0</kenyaemrVersion>
 		<kenyacoreVersion>3.0.0</kenyacoreVersion>
-		<kenyauiVersion>2.0.4</kenyauiVersion>
-		<webservicesRestVersion>2.26.0</webservicesRestVersion>
+		<kenyauiVersion>3.0.0</kenyauiVersion>
+		<webservicesRestVersion>2.38.0</webservicesRestVersion>
 		<jodaTimeVersion>2.9.1</jodaTimeVersion>
 		<jpmml-eval.version>1.5.16</jpmml-eval.version>
 		<jpmml-eval-ext.version>1.5.16</jpmml-eval-ext.version>
-		<legacyUiVersion>1.5.0</legacyUiVersion>
+		<legacyUiVersion>1.15.0</legacyUiVersion>
 		<jaxb.version>2.3.1</jaxb.version>
 		<jaxb-impl.version>2.3.1</jaxb-impl.version>
 
@@ -326,7 +326,7 @@
 			<id>central</id>
 			<name>Maven Repository Switchboard</name>
 			<layout>default</layout>
-			<url>http://repo1.maven.org/maven2</url>
+			<url>https://repo1.maven.org/maven2</url>
 		</repository>
 	</repositories>
 	<pluginRepositories>
