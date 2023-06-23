@@ -37,8 +37,7 @@ public class IITHighRiskScoreCalculation extends AbstractPatientCalculation {
 	 * @should determine whether a patient has high IIT risk
 	 */
 	@Override
-	public CalculationResultMap evaluate(Collection<Integer> cohort, Map<String, Object> parameterValues,
-	        PatientCalculationContext context) {
+	public CalculationResultMap evaluate(Collection<Integer> cohort, Map<String, Object> parameterValues, PatientCalculationContext context) {
 		
 		CalculationResultMap ret = new CalculationResultMap();
 		// Get HIV program
@@ -47,15 +46,25 @@ public class IITHighRiskScoreCalculation extends AbstractPatientCalculation {
 		Set<Integer> alive = Filters.alive(cohort, context);
 		Set<Integer> inHivProgram = Filters.inProgram(hivProgram, alive, context);
 
-		for (Integer ptId : inHivProgram) {
-			Patient currentPatient = Context.getPatientService().getPatient(ptId);
-			PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(currentPatient, true);
-			if (latestRiskScore != null) {
-				String riskGroup = latestRiskScore.getDescription();
-				if (riskGroup.trim().equalsIgnoreCase("High Risk")) {
-					ret.put(ptId, new BooleanResult(true, this, context));
-				}				
+		try {
+			for (Integer ptId : inHivProgram) {
+				try {
+					Patient currentPatient = Context.getPatientService().getPatient(ptId);
+					PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(currentPatient, true);
+					if (latestRiskScore != null) {
+						String riskGroup = latestRiskScore.getDescription();
+						if (riskGroup.trim().equalsIgnoreCase("High Risk")) {
+							ret.put(ptId, new BooleanResult(true, this, context));
+						}				
+					}
+				} catch(Exception em) {
+					System.err.println("IIT ML: " + em.getMessage());
+					em.printStackTrace();
+				}
 			}
+		} catch(Exception ex) {
+			System.err.println("IIT ML: " + ex.getMessage());
+			ex.printStackTrace();
 		}
 		
 		return ret;
