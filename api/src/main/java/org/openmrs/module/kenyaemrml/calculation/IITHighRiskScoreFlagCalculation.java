@@ -61,20 +61,30 @@ public class IITHighRiskScoreFlagCalculation extends AbstractPatientCalculation 
 
 		CalculationResultMap ret = new CalculationResultMap();
 
-		for (Integer ptId : cohort) {
-			if (inHivProgram.contains(ptId)) {
-				Patient currentPatient = Context.getPatientService().getPatient(ptId);
-				PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(currentPatient, false); // We get real time IIT risk score
-				if (latestRiskScore != null) {
-					String riskGroup = latestRiskScore.getDescription();
-					if (riskGroup.trim().equalsIgnoreCase("High Risk")) {					
-						setCustomMessage("IIT High risk");
-						ret.put(ptId, new BooleanResult(true, this, context));
-					} else {
-						ret.put(ptId, new BooleanResult(false, this, context));
+		try {
+			for (Integer ptId : cohort) {
+				try {
+					if (inHivProgram.contains(ptId)) {
+						Patient currentPatient = Context.getPatientService().getPatient(ptId);
+						PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(currentPatient, false); // We get real time IIT risk score
+						if (latestRiskScore != null) {
+							String riskGroup = latestRiskScore.getDescription();
+							if (riskGroup.trim().equalsIgnoreCase("High Risk")) {					
+								setCustomMessage("IIT High risk");
+								ret.put(ptId, new BooleanResult(true, this, context));
+							} else {
+								ret.put(ptId, new BooleanResult(false, this, context));
+							}
+						}
 					}
+				} catch(Exception em) {
+					System.err.println("IIT ML: " + em.getMessage());
+					em.printStackTrace();
 				}
 			}
+		} catch(Exception ex) {
+			System.err.println("IIT ML: " + ex.getMessage());
+			ex.printStackTrace();
 		}
 
 		return ret;

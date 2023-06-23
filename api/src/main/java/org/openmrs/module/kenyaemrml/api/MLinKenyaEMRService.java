@@ -44,6 +44,7 @@ public interface MLinKenyaEMRService extends OpenmrsService {
 	 * @param id
 	 * @return
 	 */
+	@Transactional
 	PatientRiskScore getPatientRiskScoreById(Integer id);
 	
 	/**
@@ -52,6 +53,7 @@ public interface MLinKenyaEMRService extends OpenmrsService {
 	 * @param patient
 	 * @return
 	 */
+	@Transactional
 	PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient, Boolean reporting);
 
 	/**
@@ -60,18 +62,21 @@ public interface MLinKenyaEMRService extends OpenmrsService {
 	 * @param patient
 	 * @return
 	 */
+	@Transactional
 	PatientRiskScore getLatestPatientRiskScoreByPatientRealTime(Patient patient);
 
 	/**
 	 * Get all IIT risk scores summary
 	 * @return a list of patients
 	 */
+	@Transactional
 	public SimpleObject getIITRiskScoresSummary();
 
 	/**
 	 * Get all patients
 	 * @return a list of patients
 	 */
+	@Transactional
 	public Collection<Integer> getAllPatients();
 	
 	/**
@@ -80,6 +85,7 @@ public interface MLinKenyaEMRService extends OpenmrsService {
 	 * @param patient
 	 * @return
 	 */
+	@Transactional
 	List<PatientRiskScore> getPatientRiskScoreByPatient(Patient patient);
 	
 	/**
@@ -88,6 +94,7 @@ public interface MLinKenyaEMRService extends OpenmrsService {
 	 * @param patient
 	 * @return
 	 */
+	@Transactional
 	List<PatientRiskScore> getPatientRiskScoreByPatient(Patient patient, Date onOrBefore, Date onOrAfter);
 	
 	/**
@@ -95,15 +102,18 @@ public interface MLinKenyaEMRService extends OpenmrsService {
 	 * 
 	 * @return
 	 */
+	@Transactional
 	List<PatientRiskScore> getAllPatientRiskScore();
 
 	/**
 	 *  Gets the latest risk evaluation date for all patient records
 	 */
+	@Transactional
 	Date getLatestRiskEvaluationDate();
 
 	/**
 	 *  Gets the latest risk evaluation date for a patient
 	 */
+	@Transactional
 	Date getPatientLatestRiskEvaluationDate(Patient patient);
 }

@@ -1593,7 +1593,7 @@ public class ModelService extends BaseOpenmrsService {
 
 			// Get JSON Payload
 			String payload = mlScoringRequestPayload.toJson();
-			// System.out.println("IIT ML Prediction Payload: " + payload);
+			// System.out.println("IIT ML: Prediction Payload: " + payload);
 			
 			// Get the IIT ML score
 			try {
@@ -1604,8 +1604,12 @@ public class ModelService extends BaseOpenmrsService {
 					ObjectMapper mapper = new ObjectMapper();
 					ObjectNode jsonNode = (ObjectNode) mapper.readTree(mlScoreResponse);
 					if (jsonNode != null) {
+						// System.out.println("IIT ML: Got ML Score Payload as: " + mlScoreResponse);
 						Double riskScore = jsonNode.get("result").get("predictions").get("Probability_1").getDoubleValue();
-						// System.out.println("Got ML score as: " + riskScore);
+						System.out.println("IIT ML: Got ML score as: " + riskScore);
+						if(riskScore == null) {
+							riskScore = 0.00;
+						}
 						patientRiskScore.setRiskFactors("");
 						patientRiskScore.setRiskScore(riskScore);
 						patientRiskScore.setPatient(patient);
@@ -1618,24 +1622,25 @@ public class ModelService extends BaseOpenmrsService {
 						} else if(riskScore > decIITHighRiskThreshold) {
 							patientRiskScore.setDescription("Highest Risk");
 						}
-						// System.out.println("Got ML Description as: " + patientRiskScore.getDescription());
+						// System.out.println("IIT ML: Got ML Description as: " + patientRiskScore.getDescription());
 						patientRiskScore.setEvaluationDate(new Date());
 						String randUUID = UUID.randomUUID().toString(); 
 						patientRiskScore.setSourceSystemUuid(randUUID);
+						System.out.println("IIT ML: PatientRiskScore is: " + patientRiskScore.toString());
 
 						return(patientRiskScore);
 					} else {
-						System.err.println("Error: Unable to get ML score");
+						System.err.println("IIT ML: Error: Unable to get ML score");
 					}
 				}
 			}
 			catch (Exception em) {
-				System.err.println("ITT ML - Could not get the IIT Score: Error Calling IIT Model " + em.getMessage());
+				System.err.println("ITT ML: Could not get the IIT Score: Error Calling IIT Model " + em.getMessage());
 				em.printStackTrace();
 			}
 		}
 		catch (Exception ex) {
-			System.err.println("ITT ML - Could not get the IIT Score: Error sourcing model vars " + ex.getMessage());
+			System.err.println("ITT ML: Could not get the IIT Score: Error sourcing model vars " + ex.getMessage());
 			ex.printStackTrace();
 		}
 
