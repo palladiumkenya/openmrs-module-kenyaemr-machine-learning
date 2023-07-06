@@ -66,7 +66,16 @@ public class IITHighRiskScoreFlagCalculation extends AbstractPatientCalculation 
 				try {
 					if (inHivProgram.contains(ptId)) {
 						Patient currentPatient = Context.getPatientService().getPatient(ptId);
-						PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(currentPatient, false); // We get real time IIT risk score
+						PatientRiskScore latestRiskScore = new PatientRiskScore();
+						List<Visit> visits = Context.getVisitService().getActiveVisitsByPatient(currentPatient);
+						// Check if we are currently checked in
+						if(visits.size() > 0) {
+							System.err.println("IIT ML: Generating a new patient IIT score");
+							latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatientRealTime(currentPatient);
+						} else {
+							System.err.println("IIT ML: fetching stored patient IIT score");
+							latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(currentPatient, false); // We get real time IIT risk score
+						}
 						if (latestRiskScore != null) {
 							String riskGroup = latestRiskScore.getDescription();
 							if (riskGroup.trim().equalsIgnoreCase("High Risk")) {					
