@@ -4,14 +4,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.openmrs.Encounter;
+import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.User;
+import org.openmrs.api.EncounterService;
+import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemr.api.KenyaEmrService;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
 import org.openmrs.module.kenyaemrml.util.MLDataExchange;
 import org.openmrs.module.kenyaui.KenyaUiUtils;
 import org.openmrs.module.kenyaui.annotation.AppAction;
+import org.openmrs.parameter.EncounterSearchCriteria;
+import org.openmrs.parameter.EncounterSearchCriteriaBuilder;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
@@ -20,6 +27,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Date;
+
+import org.openmrs.Encounter;
+import org.openmrs.Patient;
+import org.openmrs.api.EncounterService;
+import org.openmrs.api.PatientService;
+import org.openmrs.api.context.Context;
+import org.openmrs.Visit;
 
 /**
  * Controller for getting a history of risk score and grouped by the date of evaluation
@@ -152,7 +166,18 @@ public class IitRiskScoreGeneratorFragmentController {
 	public SimpleObject getCurrentIITRiskScore(@RequestParam("patientId") Integer patientId, @SpringBean KenyaUiUtils kenyaUi, UiUtils ui) {
 		SimpleObject ret = new SimpleObject();
 
-		PatientRiskScore patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatientRealTime(Context.getPatientService().getPatient(patientId));
+		PatientRiskScore patientRiskScore = new PatientRiskScore();
+		Patient patient = Context.getPatientService().getPatient(patientId);
+		List<Visit> visits = Context.getVisitService().getActiveVisitsByPatient(patient);
+
+		// Check if we are currently checked in
+		if(visits.size() > 0) {
+			System.err.println("IIT ML: Generating a new patient IIT score");
+			patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatientRealTime(patient);
+		} else {
+			System.err.println("IIT ML: fetching stored patient IIT score");
+			patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient, false);
+		}
 		
 		Date evaluationDate = patientRiskScore.getEvaluationDate();
 		Double riskScore = patientRiskScore.getRiskScore();
