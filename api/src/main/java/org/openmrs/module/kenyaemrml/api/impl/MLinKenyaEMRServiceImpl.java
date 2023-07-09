@@ -61,6 +61,11 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 	public PatientRiskScore getPatientRiskScoreById(Integer id) {
 		return mLinKenyaEMRDao.getPatientRiskScoreById(id);
 	}
+
+	@Override
+	public PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient) {
+		return mLinKenyaEMRDao.getLatestPatientRiskScoreByPatient(patient);
+	}
 	
 	@Override
 	public PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient, Boolean reporting) {

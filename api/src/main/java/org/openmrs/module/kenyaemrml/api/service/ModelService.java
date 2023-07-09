@@ -54,6 +54,7 @@ import org.openmrs.module.kenyaemr.metadata.MchMetadata;
 import org.openmrs.module.kenyaemr.util.EncounterBasedRegimenUtils;
 import org.openmrs.module.kenyaemr.wrapper.PatientWrapper;
 import org.openmrs.module.kenyaemrml.api.MLUtils;
+import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.domain.ModelInputFields;
 import org.openmrs.module.kenyaemrml.domain.ScoringResult;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
@@ -1606,13 +1607,25 @@ public class ModelService extends BaseOpenmrsService {
 					if (jsonNode != null) {
 						// System.out.println("IIT ML: Got ML Score Payload as: " + mlScoreResponse);
 						Double riskScore = jsonNode.get("result").get("predictions").get("Probability_1").getDoubleValue();
+						
 						System.out.println("IIT ML: Got ML score as: " + riskScore);
 						if(riskScore == null) {
-							riskScore = 0.00;
+							riskScore = new Double(0.00);
 						}
+
+						// Check if there is an existing record. In case we want to save, we need to modify record instead of creating a new one
+						PatientRiskScore currentPatientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient);
+						if(currentPatientRiskScore != null) {
+							patientRiskScore = currentPatientRiskScore;
+						} else {
+							patientRiskScore.setPatient(patient);
+							String randUUID = UUID.randomUUID().toString(); 
+							patientRiskScore.setSourceSystemUuid(randUUID);
+						}
+
 						patientRiskScore.setRiskFactors("");
 						patientRiskScore.setRiskScore(riskScore);
-						patientRiskScore.setPatient(patient);
+						
 						if(riskScore <= decIITLowRiskThreshold) {
 							patientRiskScore.setDescription("Low Risk");
 						} else if((riskScore > decIITLowRiskThreshold) && (riskScore <= decIITMediumRiskThreshold)) {
@@ -1622,10 +1635,10 @@ public class ModelService extends BaseOpenmrsService {
 						} else if(riskScore > decIITHighRiskThreshold) {
 							patientRiskScore.setDescription("Highest Risk");
 						}
-						// System.out.println("IIT ML: Got ML Description as: " + patientRiskScore.getDescription());
+
+						System.out.println("IIT ML: Got ML Description as: " + patientRiskScore.getDescription());
 						patientRiskScore.setEvaluationDate(new Date());
-						String randUUID = UUID.randomUUID().toString(); 
-						patientRiskScore.setSourceSystemUuid(randUUID);
+						
 						System.out.println("IIT ML: PatientRiskScore is: " + patientRiskScore.toString());
 
 						return(patientRiskScore);
