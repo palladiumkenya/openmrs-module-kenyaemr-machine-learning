@@ -46,6 +46,15 @@ public interface MLinKenyaEMRService extends OpenmrsService {
 	 */
 	@Transactional
 	PatientRiskScore getPatientRiskScoreById(Integer id);
+
+	/**
+	 * Gets the saved PatientRiskScore for a patient
+	 * 
+	 * @param patient
+	 * @return
+	 */
+	@Transactional
+	PatientRiskScore getLatestPatientRiskScoreByPatient(Patient patient);
 	
 	/**
 	 * Gets the latest PatientRiskScore for a patient

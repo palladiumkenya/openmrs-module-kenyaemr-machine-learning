@@ -1,10 +1,12 @@
 package org.openmrs.module.kenyaemrml.fragment.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 import org.openmrs.Encounter;
+import org.openmrs.Form;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.User;
@@ -12,11 +14,13 @@ import org.openmrs.api.EncounterService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemr.api.KenyaEmrService;
+import org.openmrs.module.kenyaemr.metadata.HivMetadata;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
 import org.openmrs.module.kenyaemrml.util.MLDataExchange;
 import org.openmrs.module.kenyaui.KenyaUiUtils;
 import org.openmrs.module.kenyaui.annotation.AppAction;
+import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.parameter.EncounterSearchCriteria;
 import org.openmrs.parameter.EncounterSearchCriteriaBuilder;
 import org.openmrs.ui.framework.SimpleObject;
@@ -172,11 +176,43 @@ public class IitRiskScoreGeneratorFragmentController {
 
 		// Check if we are currently checked in
 		if(visits.size() > 0) {
-			System.err.println("IIT ML: Generating a new patient IIT score");
-			patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatientRealTime(patient);
+			//check if we have a saved score
+			Date lastScore = Context.getService(MLinKenyaEMRService.class).getPatientLatestRiskEvaluationDate(patient);
+			if(lastScore != null) {
+				//check if a green card has been filled since the last score
+				Form hivGreenCardForm = MetadataUtils.existing(Form.class, HivMetadata._Form.HIV_GREEN_CARD);
+				List<Form> hivCareForms = Arrays.asList(hivGreenCardForm);
+				Location defaultLocation = Context.getService(KenyaEmrService.class).getDefaultLocation();
+				EncounterSearchCriteria encounterSearchCriteria = new EncounterSearchCriteriaBuilder()
+							.setIncludeVoided(false)
+							.setFromDate(lastScore)
+							// .setToDate(new Date())
+							.setPatient(patient)
+							.setEnteredViaForms(hivCareForms)
+							.setLocation(defaultLocation)
+							.createEncounterSearchCriteria();
+				List<Encounter> hivCareEncounters = Context.getEncounterService().getEncounters(encounterSearchCriteria);
+				if(hivCareEncounters.size() > 0) {
+					// We have had a greencard form filled after the last encounter, we can now generate a new score NB: Greencard save should have triggered score generation
+					System.err.println("IIT ML: Greencard has been filled. Generating a new patient IIT score");
+					patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatientRealTime(patient);
+				} else {
+					System.err.println("IIT ML: No greencard filled yet. Fetching stored patient IIT score");
+					patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient);
+				}
+			} else {
+				System.err.println("IIT ML: No stored IIT score. We create a new one");
+				patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient, false);
+			}
 		} else {
-			System.err.println("IIT ML: fetching stored patient IIT score");
-			patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient, false);
+			Date checkScore = Context.getService(MLinKenyaEMRService.class).getPatientLatestRiskEvaluationDate(patient);
+			if(checkScore == null) {
+				System.err.println("IIT ML: fetching stored patient IIT score. Generate if missing");
+				patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient, false);
+			} else {
+				System.err.println("IIT ML: Fetching stored patient IIT score");
+				patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient);
+			}
 		}
 		
 		Date evaluationDate = patientRiskScore.getEvaluationDate();

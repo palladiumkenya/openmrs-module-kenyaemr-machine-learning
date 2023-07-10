@@ -446,6 +446,8 @@ public class MachineLearningRestController extends BaseRestController {
 			System.out.println("IIT score got patient risk score as: " + latestRiskScore.getRiskScore());
 			return ret;
 		} catch(Exception ex) {
+			System.err.println("IIT ML: Error on REST call: /updatepatientiitscore : " + ex.getMessage());
+			ex.printStackTrace();
 			return new ResponseEntity<Object>("Could not process the patient IIT Score request", new HttpHeaders(), HttpStatus.UNPROCESSABLE_ENTITY);
 		}
 	}

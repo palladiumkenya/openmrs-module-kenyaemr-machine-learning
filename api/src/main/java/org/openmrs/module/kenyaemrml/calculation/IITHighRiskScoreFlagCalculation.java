@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemrml.calculation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -17,6 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.openmrs.Encounter;
+import org.openmrs.Form;
+import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Program;
 import org.openmrs.Visit;
@@ -27,10 +31,13 @@ import org.openmrs.module.kenyacore.calculation.AbstractPatientCalculation;
 import org.openmrs.module.kenyacore.calculation.BooleanResult;
 import org.openmrs.module.kenyacore.calculation.Filters;
 import org.openmrs.module.kenyacore.calculation.PatientFlagCalculation;
+import org.openmrs.module.kenyaemr.api.KenyaEmrService;
 import org.openmrs.module.kenyaemr.metadata.HivMetadata;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
+import org.openmrs.parameter.EncounterSearchCriteria;
+import org.openmrs.parameter.EncounterSearchCriteriaBuilder;
 
 /**
  * Calculate whether a patient has high IIT risk score based on data pulled from NDWH
@@ -66,15 +73,38 @@ public class IITHighRiskScoreFlagCalculation extends AbstractPatientCalculation 
 				try {
 					if (inHivProgram.contains(ptId)) {
 						Patient currentPatient = Context.getPatientService().getPatient(ptId);
-						PatientRiskScore latestRiskScore = new PatientRiskScore();
+						PatientRiskScore latestRiskScore = null;
 						List<Visit> visits = Context.getVisitService().getActiveVisitsByPatient(currentPatient);
 						// Check if we are currently checked in
 						if(visits.size() > 0) {
-							System.err.println("IIT ML: Generating a new patient IIT score");
-							latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatientRealTime(currentPatient);
+							//check if we have a saved score
+							Date lastScore = Context.getService(MLinKenyaEMRService.class).getPatientLatestRiskEvaluationDate(currentPatient);
+							if(lastScore != null) {
+								//check if a green card has been filled since the last score
+								Form hivGreenCardForm = MetadataUtils.existing(Form.class, HivMetadata._Form.HIV_GREEN_CARD);
+								List<Form> hivCareForms = Arrays.asList(hivGreenCardForm);
+								Location defaultLocation = Context.getService(KenyaEmrService.class).getDefaultLocation();
+								EncounterSearchCriteria encounterSearchCriteria = new EncounterSearchCriteriaBuilder()
+											.setIncludeVoided(false)
+											.setFromDate(lastScore)
+											// .setToDate(new Date())
+											.setPatient(currentPatient)
+											.setEnteredViaForms(hivCareForms)
+											.setLocation(defaultLocation)
+											.createEncounterSearchCriteria();
+								List<Encounter> hivCareEncounters = Context.getEncounterService().getEncounters(encounterSearchCriteria);
+								if(hivCareEncounters.size() > 0) {
+									// We have had a greencard form filled after the last encounter, we can now generate a new score. NB: Greencard save should have triggered score generation
+									System.err.println("IIT ML: Greencard has been filled. Generating a new patient IIT score");
+									latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatientRealTime(currentPatient);
+								} else {
+									System.err.println("IIT ML: No greencard filled yet. fetching stored patient IIT score");
+									latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(currentPatient);
+								}
+							}
 						} else {
 							System.err.println("IIT ML: fetching stored patient IIT score");
-							latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(currentPatient, false); // We get real time IIT risk score
+							latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(currentPatient);
 						}
 						if (latestRiskScore != null) {
 							String riskGroup = latestRiskScore.getDescription();
