@@ -214,11 +214,18 @@ public class IitRiskScoreGeneratorFragmentController {
 				patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient);
 			}
 		}
+
+		Date evaluationDate = null;
+		Double riskScore = null;
+		String description = null;
+		String riskFactors = null;
 		
-		Date evaluationDate = patientRiskScore.getEvaluationDate();
-		Double riskScore = patientRiskScore.getRiskScore();
-		String description = patientRiskScore.getDescription();
-		String riskFactors = patientRiskScore.getRiskFactors();
+		if(patientRiskScore != null) {
+			evaluationDate = patientRiskScore.getEvaluationDate();
+			riskScore = patientRiskScore.getRiskScore();
+			description = patientRiskScore.getDescription();
+			riskFactors = patientRiskScore.getRiskFactors();
+		}
 
 		ret.put("riskScore", riskScore > 0.00 ? (int) Math.rint((riskScore * 100)) + " %" : "-");
 		ret.put("evaluationDate", evaluationDate != null ? kenyaUi.formatDate(evaluationDate) : "-");
