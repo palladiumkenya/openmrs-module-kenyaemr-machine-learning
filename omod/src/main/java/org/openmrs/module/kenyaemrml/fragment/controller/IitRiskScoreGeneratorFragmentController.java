@@ -194,31 +194,38 @@ public class IitRiskScoreGeneratorFragmentController {
 				List<Encounter> hivCareEncounters = Context.getEncounterService().getEncounters(encounterSearchCriteria);
 				if(hivCareEncounters.size() > 0) {
 					// We have had a greencard form filled after the last encounter, we can now generate a new score NB: Greencard save should have triggered score generation
-					System.err.println("IIT ML: Greencard has been filled. Generating a new patient IIT score");
+					// System.err.println("IIT ML: Greencard has been filled. Generating a new patient IIT score");
 					patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatientRealTime(patient);
 				} else {
-					System.err.println("IIT ML: No greencard filled yet. Fetching stored patient IIT score");
+					// System.err.println("IIT ML: No greencard filled yet. Fetching stored patient IIT score");
 					patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient);
 				}
 			} else {
-				System.err.println("IIT ML: No stored IIT score. We create a new one");
+				// System.err.println("IIT ML: No stored IIT score. We create a new one");
 				patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient, false);
 			}
 		} else {
 			Date checkScore = Context.getService(MLinKenyaEMRService.class).getPatientLatestRiskEvaluationDate(patient);
 			if(checkScore == null) {
-				System.err.println("IIT ML: fetching stored patient IIT score. Generate if missing");
+				// System.err.println("IIT ML: fetching stored patient IIT score. Generate if missing");
 				patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient, false);
 			} else {
-				System.err.println("IIT ML: Fetching stored patient IIT score");
+				// System.err.println("IIT ML: Fetching stored patient IIT score");
 				patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient);
 			}
 		}
+
+		Date evaluationDate = null;
+		Double riskScore = null;
+		String description = null;
+		String riskFactors = null;
 		
-		Date evaluationDate = patientRiskScore.getEvaluationDate();
-		Double riskScore = patientRiskScore.getRiskScore();
-		String description = patientRiskScore.getDescription();
-		String riskFactors = patientRiskScore.getRiskFactors();
+		if(patientRiskScore != null) {
+			evaluationDate = patientRiskScore.getEvaluationDate();
+			riskScore = patientRiskScore.getRiskScore();
+			description = patientRiskScore.getDescription();
+			riskFactors = patientRiskScore.getRiskFactors();
+		}
 
 		ret.put("riskScore", riskScore > 0.00 ? (int) Math.rint((riskScore * 100)) + " %" : "-");
 		ret.put("evaluationDate", evaluationDate != null ? kenyaUi.formatDate(evaluationDate) : "-");

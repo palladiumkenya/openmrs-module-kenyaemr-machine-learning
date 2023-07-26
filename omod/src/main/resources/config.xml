@@ -130,6 +130,14 @@
 	</globalProperty>
 
 	<globalProperty>
+		<property>kenyaemrml.iitml.feature.enabled</property>
+		<defaultValue>false</defaultValue>
+		<description>
+			Defines whether the IIT ml prediction is enabled
+		</description>
+	</globalProperty>
+
+	<globalProperty>
 		<property>kenyaemrml.palantir.high.iit.risk.threshold</property>
 		<defaultValue>0.40</defaultValue>
 		<description>

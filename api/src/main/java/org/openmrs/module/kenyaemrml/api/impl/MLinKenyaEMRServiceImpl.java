@@ -14,8 +14,10 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.time.DateUtils;
+import org.openmrs.GlobalProperty;
 import org.openmrs.Patient;
 import org.openmrs.api.UserService;
+import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.api.db.hibernate.HibernateMLinKenyaEMRDao;
@@ -75,21 +77,37 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 		if((lastScore != null && DateUtils.isSameDay(lastScore, dateToday)) || reporting) {
 			return mLinKenyaEMRDao.getLatestPatientRiskScoreByPatient(patient);
 		} else {
-			// System.out.println("IIT ML Score: Generating a new risk score || and saving to DB");
-			PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
-			// Save/Update to DB (for reports) -- Incase a record for current date doesnt exist
-			saveOrUpdateRiskScore(patientRiskScore);
-			return(patientRiskScore);
+			// Check if IIT is enabled
+			String iitFeatureEnabled = "kenyaemrml.iitml.feature.enabled";
+			GlobalProperty gpIITFeatureEnabled = Context.getAdministrationService().getGlobalPropertyObject(iitFeatureEnabled);
+
+			if(gpIITFeatureEnabled != null && gpIITFeatureEnabled.getPropertyValue().trim().equalsIgnoreCase("true")) {
+				// System.out.println("IIT ML Score: Generating a new risk score || and saving to DB");
+				PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
+				// Save/Update to DB (for reports) -- Incase a record for current date doesnt exist
+				saveOrUpdateRiskScore(patientRiskScore);
+				return(patientRiskScore);
+			} else {
+				return mLinKenyaEMRDao.getLatestPatientRiskScoreByPatient(patient);
+			}
 		}
 	}
 
 	@Override
 	public PatientRiskScore getLatestPatientRiskScoreByPatientRealTime(Patient patient) {
-		// System.out.println("IIT ML Score: Generating a new risk score || and saving to DB");
-		PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
-		// Save/Update to DB (for reports) -- Incase a record for current date doesnt exist
-		saveOrUpdateRiskScore(patientRiskScore);
-		return(patientRiskScore);
+		// Check if IIT is enabled
+        String iitFeatureEnabled = "kenyaemrml.iitml.feature.enabled";
+        GlobalProperty gpIITFeatureEnabled = Context.getAdministrationService().getGlobalPropertyObject(iitFeatureEnabled);
+
+        if(gpIITFeatureEnabled != null && gpIITFeatureEnabled.getPropertyValue().trim().equalsIgnoreCase("true")) {
+			// System.out.println("IIT ML Score: Generating a new risk score || and saving to DB");
+			PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
+			// Save/Update to DB (for reports) -- Incase a record for current date doesnt exist
+			saveOrUpdateRiskScore(patientRiskScore);
+			return(patientRiskScore);
+		} else {
+			return mLinKenyaEMRDao.getLatestPatientRiskScoreByPatient(patient);
+		}
 	}
 	
 	@Override
