@@ -227,7 +227,7 @@ public class IitRiskScoreGeneratorFragmentController {
 			riskFactors = patientRiskScore.getRiskFactors();
 		}
 
-		ret.put("riskScore", riskScore > 0.00 ? (int) Math.rint((riskScore * 100)) + " %" : "-");
+		ret.put("riskScore", (riskScore != null && riskScore > 0.00) ? (int) Math.rint((riskScore * 100)) + " %" : "-");
 		ret.put("evaluationDate", evaluationDate != null ? kenyaUi.formatDate(evaluationDate) : "-");
 		ret.put("description", description != null ? description : "-");
 		ret.put("riskFactors", riskFactors != null ? riskFactors : "-");
