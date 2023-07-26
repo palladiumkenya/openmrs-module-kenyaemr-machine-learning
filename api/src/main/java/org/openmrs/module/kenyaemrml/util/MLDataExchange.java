@@ -650,27 +650,32 @@ public class MLDataExchange {
 	public Boolean generateAndSave(HashSet<Patient> patientsGroup) {
 		Boolean ret = false;
 
-		ModelService modelService = new ModelService();
-		long totalRemote = patientsGroup.size();
-		long totalPages = patientsGroup.size();
-		long currentPage = 1;
-		for (Patient patient : patientsGroup) {
-			if (!getContinueGeneratingIITScores()) {
-				return (false);
-			}
-			System.out.println("IIT ML Score: Generating a new risk score || and saving to DB");
+		// Check if IIT is enabled
+        String iitFeatureEnabled = "kenyaemrml.iitml.feature.enabled";
+        GlobalProperty gpIITFeatureEnabled = Context.getAdministrationService().getGlobalPropertyObject(iitFeatureEnabled);
 
-			try {
-				PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
-				// Save/Update to DB (for reports) -- Incase a record for current date doesn't exist
-				mLinKenyaEMRService.saveOrUpdateRiskScore(patientRiskScore);
-			} catch(Exception ex) {
-				System.err.println("IIT ML Score: ERROR: Failed to generate patient score: " + ex.getMessage());
-				ex.printStackTrace();
-			}
+        if(gpIITFeatureEnabled != null && gpIITFeatureEnabled.getPropertyValue().trim().equalsIgnoreCase("true")) {
+			ModelService modelService = new ModelService();
+			long totalRemote = patientsGroup.size();
+			long totalPages = patientsGroup.size();
+			long currentPage = 1;
+			for (Patient patient : patientsGroup) {
+				if (!getContinueGeneratingIITScores()) {
+					return (false);
+				}
+				System.out.println("IIT ML Score: Generating a new risk score || and saving to DB");
 
-			setScoreGenerationStatus((long)Math.floor(((currentPage * 1.00 / totalPages * 1.00) * totalRemote)), totalRemote);
-			currentPage++;
+				try {
+					PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
+					// Save/Update to DB (for reports) -- Incase a record for current date doesn't exist
+					mLinKenyaEMRService.saveOrUpdateRiskScore(patientRiskScore);
+				} catch(Exception ex) {
+					System.err.println("IIT ML Score: ERROR: Failed to generate patient score: " + ex.getMessage());
+					ex.printStackTrace();	
+				}
+				setScoreGenerationStatus((long)Math.floor(((currentPage * 1.00 / totalPages * 1.00) * totalRemote)), totalRemote);
+				currentPage++;
+			}
 		}
 
 		return(ret);
