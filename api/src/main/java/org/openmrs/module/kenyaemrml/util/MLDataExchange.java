@@ -4,7 +4,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
+import org.openmrs.Encounter;
+import org.openmrs.Form;
 import org.openmrs.GlobalProperty;
+import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.User;
 import org.openmrs.api.PatientService;
@@ -24,6 +27,7 @@ import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Locale;
@@ -44,6 +48,8 @@ import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
 import org.openmrs.module.kenyaemr.metadata.HivMetadata;
 import org.openmrs.module.kenyaemr.nupi.UpiUtilsDataExchange;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
+import org.openmrs.parameter.EncounterSearchCriteria;
+import org.openmrs.parameter.EncounterSearchCriteriaBuilder;
 import org.openmrs.scheduler.tasks.AbstractTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -606,8 +612,8 @@ public class MLDataExchange {
 				if (programs.size() > 0) {
 					if(patient.getDead() == false) {
 						Date lastScore = mLinKenyaEMRService.getPatientLatestRiskEvaluationDate(patient);
-						Date dateToday = new Date();
-						if((lastScore == null || !DateUtils.isSameDay(lastScore, dateToday))) {
+						// check if a greencard has been filled since the last score
+						if((lastScore == null || greenCardFilledSinceLastScore(patient, lastScore))) {
 							patientsGroup.add(patient);
 						}
 					}
@@ -642,8 +648,38 @@ public class MLDataExchange {
 		}
 	}
 
+
 	/**
-	 * Generates and saves the IIT risk scores
+	 * Checks if a greencard has been filled since the last IIT ML score
+	 * @param patient - the patient
+	 * @param lastscore - the last score
+	 * @return true if a greencard has been filled or false otherwise
+	 */
+	public Boolean greenCardFilledSinceLastScore(Patient patient, Date lastscore) {
+		Boolean ret = false;
+		//check if a green card has been filled since the last score
+		Form hivGreenCardForm = MetadataUtils.existing(Form.class, HivMetadata._Form.HIV_GREEN_CARD);
+		List<Form> hivCareForms = Arrays.asList(hivGreenCardForm);
+		Location defaultLocation = Context.getService(KenyaEmrService.class).getDefaultLocation();
+		EncounterSearchCriteria encounterSearchCriteria = new EncounterSearchCriteriaBuilder()
+					.setIncludeVoided(false)
+					.setFromDate(lastscore)
+					// .setToDate(new Date())
+					.setPatient(patient)
+					.setEnteredViaForms(hivCareForms)
+					.setLocation(defaultLocation)
+					.createEncounterSearchCriteria();
+		List<Encounter> hivCareEncounters = Context.getEncounterService().getEncounters(encounterSearchCriteria);
+		if(hivCareEncounters.size() > 0) {
+			ret = true;
+		} else {
+			ret = false;
+		}
+		return(ret);
+	}
+
+	/**
+	 * Generates and saves the IIT risk scores on demand (press of the generate button)
 	 * @param patientsGroup
 	 * @return true when successfull and false on failure
 	 */
@@ -667,7 +703,7 @@ public class MLDataExchange {
 
 				try {
 					PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
-					// Save/Update to DB (for reports) -- Incase a record for current date doesn't exist
+					// Save/Update to DB (for reports)
 					mLinKenyaEMRService.saveOrUpdateRiskScore(patientRiskScore);
 				} catch(Exception ex) {
 					System.err.println("IIT ML Score: ERROR: Failed to generate patient score: " + ex.getMessage());
@@ -679,6 +715,64 @@ public class MLDataExchange {
 		}
 
 		return(ret);
+	}
+
+	/**
+	 * Fetches IIT ML scores (Scheduled Task Based)
+	 * 
+	 * @return true when successfull and false on failure
+	 */
+	public void generateIITScoresTask() {
+
+		PatientService patientService = Context.getPatientService();
+
+		// Get all patients
+		List<Patient> allPatients = patientService.getAllPatients();
+
+		// Get patients on HIV program
+		Program hivProgram = MetadataUtils.existing(Program.class, HivMetadata._Program.HIV);
+
+		// loop checking for patients without current IIT scores
+		HashSet<Patient> patientsGroup = new HashSet<Patient>();
+		for (Patient patient : allPatients) {
+			try {
+				if (patient != null) {
+					ProgramWorkflowService pwfservice = Context.getProgramWorkflowService();
+					List<PatientProgram> programs = pwfservice.getPatientPrograms(patient, hivProgram, null, null, null,null, false);
+					if (programs.size() > 0) {
+						if(patient.getDead() == false) {
+							Date lastScore = mLinKenyaEMRService.getPatientLatestRiskEvaluationDate(patient);
+							// check if a greencard has been filled since the last score
+							if((lastScore == null || greenCardFilledSinceLastScore(patient, lastScore))) {
+								patientsGroup.add(patient);
+							}
+						}
+					}
+				}
+			} catch(Exception ex) {}
+		}
+		System.out.println("IIT ML Task: Patients to be scored: " + patientsGroup.size());
+		generateMLScoresFetch(patientsGroup);
+	}
+
+	/**
+	 * Generates IIT ML risk scores as a scheduled task given the list of patients
+	 * @param patientsGroup - the given list of patients
+	 */
+	public void generateMLScoresFetch(HashSet<Patient> patientsGroup) {
+
+		ModelService modelService = new ModelService();
+		for (Patient patient : patientsGroup) {
+			try {
+				System.out.println("IIT ML Score: Scoring patient: " + patient.getId());
+				PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
+				// Save/Update to DB (for reports)
+				mLinKenyaEMRService.saveOrUpdateRiskScore(patientRiskScore);
+			} catch(Exception ex) {
+				System.err.println("IIT ML Score: ERROR: Failed to generate patient score: " + ex.getMessage());
+				ex.printStackTrace();	
+			}
+		}
 	}
 	
 }

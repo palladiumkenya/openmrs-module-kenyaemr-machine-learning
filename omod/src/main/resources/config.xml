@@ -133,7 +133,7 @@
 		<property>kenyaemrml.iitml.feature.enabled</property>
 		<defaultValue>false</defaultValue>
 		<description>
-			Defines whether the IIT ml prediction is enabled
+			Defines whether the IIT ml prediction is enabled. (true = Enabled) and (false = Disabled)
 		</description>
 	</globalProperty>
 

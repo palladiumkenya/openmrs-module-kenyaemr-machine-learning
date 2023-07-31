@@ -95,15 +95,12 @@ public class IITHighRiskScoreFlagCalculation extends AbstractPatientCalculation 
 								List<Encounter> hivCareEncounters = Context.getEncounterService().getEncounters(encounterSearchCriteria);
 								if(hivCareEncounters.size() > 0) {
 									// We have had a greencard form filled after the last encounter, we can now generate a new score. NB: Greencard save should have triggered score generation
-									// System.err.println("IIT ML: Greencard has been filled. Generating a new patient IIT score");
 									latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatientRealTime(currentPatient);
 								} else {
-									// System.err.println("IIT ML: No greencard filled yet. fetching stored patient IIT score");
 									latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(currentPatient);
 								}
 							}
 						} else {
-							// System.err.println("IIT ML: fetching stored patient IIT score");
 							latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(currentPatient);
 						}
 						if (latestRiskScore != null) {
