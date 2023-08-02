@@ -931,6 +931,8 @@ public class ModelService extends BaseOpenmrsService {
 	 * Gets the latest patient IIT score
 	 */
 	public PatientRiskScore generatePatientRiskScore(Patient patient) {
+		long startTime = System.currentTimeMillis();
+
 		PatientRiskScore patientRiskScore = new PatientRiskScore();
 		SimpleObject modelConfigs = new SimpleObject();
 		SimpleObject patientPredictionVariables = new SimpleObject();
