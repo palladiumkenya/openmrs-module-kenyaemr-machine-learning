@@ -1,23 +1,5 @@
 package org.openmrs.module.kenyaemrml.api.service;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -63,6 +45,24 @@ import org.openmrs.module.reporting.common.Age;
 import org.openmrs.parameter.EncounterSearchCriteria;
 import org.openmrs.parameter.EncounterSearchCriteriaBuilder;
 import org.openmrs.ui.framework.SimpleObject;
+
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Service class used to prepare and score models
@@ -486,9 +486,14 @@ public class ModelService extends BaseOpenmrsService {
 		Integer missedByFiveLastFive = 0;
 		Integer missedByThirtyLastFive = 0;
 		PatientWrapper patientWrapper = new PatientWrapper(patient);
-		
-		Form hivGreenCardForm = MetadataUtils.existing(Form.class, HivMetadata._Form.HIV_GREEN_CARD);
-		List<Encounter> hivClinicalEncounters = patientWrapper.allEncounters(hivGreenCardForm);
+
+		// Forms collecting HIV consultation HIV Grencard + MOH257 Visit summary forms
+		List<Form> formsCollectingHivConsultation = Arrays.asList(
+				Context.getFormService().getFormByUuid("22c68f86-bbf0-49ba-b2d1-23fa7ccf0259"),
+				Context.getFormService().getFormByUuid("23b4ebbd-29ad-455e-be0e-04aa6bc30798")
+		);
+
+		List<Encounter> hivClinicalEncounters = Context.getEncounterService().getEncounters(patient, null, null, null, formsCollectingHivConsultation, null, null, null, null,false);
 		Collections.reverse(hivClinicalEncounters); // Sort Descending
 		
 		// get hiv greencard list of observations
