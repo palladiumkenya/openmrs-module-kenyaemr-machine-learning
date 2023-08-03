@@ -461,10 +461,14 @@ public class ModelService extends BaseOpenmrsService {
 	 */
 	public Integer getTotalAppointments(Patient patient) {
 		Integer ret = 0;
-		PatientWrapper patientWrapper = new PatientWrapper(patient);
-		
-		Form hivGreenCardForm = MetadataUtils.existing(Form.class, HivMetadata._Form.HIV_GREEN_CARD);
-		List<Encounter> hivClinicalEncounters = patientWrapper.allEncounters(hivGreenCardForm);
+
+		// Forms collecting HIV consultation HIV Grencard + MOH257 Visit summary forms
+		List<Form> formsCollectingHivConsultation = Arrays.asList(
+				Context.getFormService().getFormByUuid("22c68f86-bbf0-49ba-b2d1-23fa7ccf0259"),
+				Context.getFormService().getFormByUuid("23b4ebbd-29ad-455e-be0e-04aa6bc30798")
+		);
+
+		List<Encounter> hivClinicalEncounters = Context.getEncounterService().getEncounters(patient, null, null, null, formsCollectingHivConsultation, null, null, null, null,false);
 		
 		// get hiv greencard list of observations
 		if (hivClinicalEncounters != null) {
