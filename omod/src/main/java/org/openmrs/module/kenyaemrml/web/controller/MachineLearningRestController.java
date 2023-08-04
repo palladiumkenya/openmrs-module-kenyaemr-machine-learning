@@ -6,7 +6,7 @@ import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.node.ObjectNode;
 import org.json.simple.JSONObject;
 import org.openmrs.module.kenyaemrml.api.MLUtils;
-import org.openmrs.module.kenyaemrml.api.service.ModelService;
+import org.openmrs.module.kenyaemrml.api.ModelService;
 import org.openmrs.module.kenyaemrml.domain.ModelInputFields;
 import org.openmrs.module.kenyaemrml.domain.ScoringResult;
 import org.openmrs.module.webservices.rest.SimpleObject;
@@ -220,7 +220,7 @@ public class MachineLearningRestController extends BaseRestController {
 	@RequestMapping(method = RequestMethod.POST, value = "/casefindingscore")
 	@ResponseBody
 	public Object processHTSModel(HttpServletRequest request) {
-		ModelService modelService = new ModelService();
+		ModelService modelService = Context.getService(ModelService.class);
 		String requestBody = null;
 		try {
 			requestBody = MLUtils.fetchRequestBody(request.getReader());
@@ -381,7 +381,7 @@ public class MachineLearningRestController extends BaseRestController {
 	@RequestMapping(method = RequestMethod.POST, value = "/iitscore")
 	@ResponseBody
 	public Object processIITModel(HttpServletRequest request) {
-		ModelService modelService = new ModelService();
+		ModelService modelService = Context.getService(ModelService.class);
 		String requestBody = null;
 		try {
 			requestBody = MLUtils.fetchRequestBody(request.getReader());
