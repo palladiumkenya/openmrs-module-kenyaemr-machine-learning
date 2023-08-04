@@ -56,7 +56,6 @@ import org.openmrs.module.kenyaemr.wrapper.PatientWrapper;
 import org.openmrs.module.kenyaemrml.api.IITMLService;
 import org.openmrs.module.kenyaemrml.api.MLUtils;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
-import org.openmrs.module.kenyaemrml.api.db.hibernate.HibernateMLinKenyaEMRDao;
 import org.openmrs.module.kenyaemrml.domain.ModelInputFields;
 import org.openmrs.module.kenyaemrml.domain.ScoringResult;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
@@ -132,45 +131,17 @@ public class ModelService extends BaseOpenmrsService {
 		return(null);
 	}
 
-	public ScoringResult iitscore(String modelId, String facilityName, String encounterDate, ModelInputFields inputFields, boolean debug) {
-		
+	public ScoringResult iitscore(String modelId, String facilityName, String encounterDate, ModelInputFields inputFields, boolean debug) {	
 		try {
-			// //Model zip file
-			// String fullModelZipFileName = modelId.concat(".pmml.zip");
-			// fullModelZipFileName = "iit/" + fullModelZipFileName;
-			// InputStream stream = ModelService.class.getClassLoader().getResourceAsStream(fullModelZipFileName);
-			// BufferedInputStream bistream = new BufferedInputStream(stream);
-			// // Model name
-			// String fullModelFileName = modelId.concat(".pmml");
-			// ZipInputStream zis = new ZipInputStream(bistream);
-			// ZipEntry ze = null;
-
-            // while ((ze = zis.getNextEntry()) != null) {
-			// 	if(ze.getName().trim().equalsIgnoreCase(fullModelFileName)) {
-			// 		// Building a model evaluator from a PMML file
-			// 		Evaluator evaluator = new LoadingModelEvaluatorBuilder().load(zis).build();
-			// 		evaluator.verify();
-			// 		ScoringResult scoringResult = new ScoringResult(score(evaluator, inputFields, debug));
-			// 		// System.out.println("Received the scoring result");
-			// 		return scoringResult;
-			// 	}
-			// }
-
 			Evaluator evaluator;
 			if(iITMLService != null) {
-				System.err.println("IIT ML: Getting default evaluator");
 				evaluator = iITMLService.getEvaluator();
-			// if(evaluator == null) {
 			} else {
-				System.err.println("IIT ML: Falling to fallback evaluator");
 				IITMLService iITMLService2 = Context.getService(IITMLService.class);
 				evaluator = iITMLService2.getEvaluator();
 			}
-			System.err.println("IIT ML: Doing evaluation");
 			evaluator.verify();
-			System.err.println("IIT ML: Scoring");
 			ScoringResult scoringResult = new ScoringResult(score(evaluator, inputFields, debug));
-			System.err.println("IIT ML: Received the scoring result");
 			return scoringResult;
 		}
 		catch (Exception e) {
@@ -179,11 +150,6 @@ public class ModelService extends BaseOpenmrsService {
 			e.printStackTrace();
 			return(null);
 		}
-
-		// // Upon Failure
-		// System.err.println("IIT ML: Exception during scoring of IIT model: unzip failed");
-		// return(null);
-		
 	}
 	
 	/**
