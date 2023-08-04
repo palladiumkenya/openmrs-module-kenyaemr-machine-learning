@@ -35,6 +35,7 @@ import org.openmrs.module.kenyaemr.metadata.HivMetadata;
 import org.openmrs.module.kenyaemr.metadata.MchMetadata;
 import org.openmrs.module.kenyaemr.util.EncounterBasedRegimenUtils;
 import org.openmrs.module.kenyaemr.wrapper.PatientWrapper;
+import org.openmrs.module.kenyaemrml.api.IITMLService;
 import org.openmrs.module.kenyaemrml.api.MLUtils;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.domain.ModelInputFields;
@@ -84,6 +85,16 @@ public class ModelService extends BaseOpenmrsService {
 	private Session getSession() {
 		return sessionFactory.getCurrentSession();
 	}
+
+	private IITMLService iITMLService;
+	
+	/**
+	 * Injected in moduleApplicationContext.xml
+	 */
+	public void setIITMLService(IITMLService iITMLService) {
+		System.err.println("IIT ML: Init IIT ML Service");
+		this.iITMLService = iITMLService;
+	}
 	
 	public ScoringResult htsscore(String modelId, String facilityName, String encounterDate, ModelInputFields inputFields, boolean debug) {
 		
@@ -94,11 +105,6 @@ public class ModelService extends BaseOpenmrsService {
 			BufferedInputStream bistream = new BufferedInputStream(stream);
 			// Model name
 			String fullModelFileName = modelId.concat(".pmml");
-
-			// System.out.println("model zip file: " + fullModelZipFileName);
-			// System.out.println("model xml text file: " + fullModelFileName);
-			// Get ZipEntry
-			// // ZipInputStream zis = new ZipInputStream(bistream, Charset.forName("UTF-8"));
 			ZipInputStream zis = new ZipInputStream(bistream);
 			ZipEntry ze = null;
 
@@ -125,46 +131,25 @@ public class ModelService extends BaseOpenmrsService {
 		return(null);
 	}
 
-	public ScoringResult iitscore(String modelId, String facilityName, String encounterDate, ModelInputFields inputFields, boolean debug) {
-		
+	public ScoringResult iitscore(String modelId, String facilityName, String encounterDate, ModelInputFields inputFields, boolean debug) {	
 		try {
-			//Model zip file
-			String fullModelZipFileName = modelId.concat(".pmml.zip");
-			fullModelZipFileName = "iit/" + fullModelZipFileName;
-			InputStream stream = ModelService.class.getClassLoader().getResourceAsStream(fullModelZipFileName);
-			BufferedInputStream bistream = new BufferedInputStream(stream);
-			// Model name
-			String fullModelFileName = modelId.concat(".pmml");
-
-			// System.out.println("model zip file: " + fullModelZipFileName);
-			// System.out.println("model xml text file: " + fullModelFileName);
-			// Get ZipEntry
-			// // ZipInputStream zis = new ZipInputStream(bistream, Charset.forName("UTF-8"));
-			ZipInputStream zis = new ZipInputStream(bistream);
-			ZipEntry ze = null;
-
-            while ((ze = zis.getNextEntry()) != null) {
-				if(ze.getName().trim().equalsIgnoreCase(fullModelFileName)) {
-					// Building a model evaluator from a PMML file
-					Evaluator evaluator = new LoadingModelEvaluatorBuilder().load(zis).build();
-					evaluator.verify();
-					ScoringResult scoringResult = new ScoringResult(score(evaluator, inputFields, debug));
-					// System.out.println("Received the scoring result");
-					return scoringResult;
-				}
+			Evaluator evaluator;
+			if(iITMLService != null) {
+				evaluator = iITMLService.getEvaluator();
+			} else {
+				IITMLService iITMLService2 = Context.getService(IITMLService.class);
+				evaluator = iITMLService2.getEvaluator();
 			}
+			evaluator.verify();
+			ScoringResult scoringResult = new ScoringResult(score(evaluator, inputFields, debug));
+			return scoringResult;
 		}
 		catch (Exception e) {
-			log.error("Exception during preparation of input parameters or scoring of values for IIT model: " + e.getMessage());
-			System.err.println("Exception during preparation of input parameters or scoring of values for IIT model: " + e.getMessage());
+			log.error("IIT ML: Exception during preparation of input parameters or scoring of values for IIT model: " + e.getMessage());
+			System.err.println("IIT ML: Exception during preparation of input parameters or scoring of values for IIT model: " + e.getMessage());
 			e.printStackTrace();
 			return(null);
 		}
-
-		// Upon Failure
-		System.err.println("Exception during scoring of IIT model: unzip failed");
-		return(null);
-		
 	}
 	
 	/**
@@ -940,6 +925,11 @@ public class ModelService extends BaseOpenmrsService {
 	 * Gets the latest patient IIT score
 	 */
 	public PatientRiskScore generatePatientRiskScore(Patient patient) {
+		long startTime = System.currentTimeMillis();
+		long stopTime = 0L;
+		long startMemory = getMemoryConsumption();
+		long stopMemory = 0L;
+
 		PatientRiskScore patientRiskScore = new PatientRiskScore();
 		SimpleObject modelConfigs = new SimpleObject();
 		SimpleObject patientPredictionVariables = new SimpleObject();
@@ -1650,6 +1640,15 @@ public class ModelService extends BaseOpenmrsService {
 						
 						System.out.println("IIT ML: PatientRiskScore is: " + patientRiskScore.toString());
 
+						stopTime = System.currentTimeMillis();
+						long elapsedTime = stopTime - startTime;
+						System.out.println("Time taken: " + elapsedTime);
+						System.out.println("Time taken sec: " + elapsedTime / 1000);
+
+						stopMemory = getMemoryConsumption();
+						long usedMemory = stopMemory - startMemory;
+						System.out.println("Memory used: " + usedMemory);
+
 						return(patientRiskScore);
 					} else {
 						System.err.println("IIT ML: Error: Unable to get ML score");
@@ -1672,6 +1671,39 @@ public class ModelService extends BaseOpenmrsService {
 		patientRiskScore.setPatient(patient);
 		patientRiskScore.setDescription("Unknown Risk");
 		patientRiskScore.setEvaluationDate(new Date());
+
+		stopTime = System.currentTimeMillis();
+		long elapsedTime = stopTime - startTime;
+		System.out.println("Time taken: " + elapsedTime);
+		System.out.println("Time taken sec: " + elapsedTime / 1000);
+
+		stopMemory = getMemoryConsumption();
+		long usedMemory = stopMemory - startMemory;
+		System.out.println("Memory used: " + usedMemory);
+
 		return(patientRiskScore);
+	}
+
+	/**
+	 * Get the current memory consumption in MB
+	 * @return long - the RAM usage in MB
+	 */
+	public long getMemoryConsumption() {
+		long ret = 0L;
+		final long MEGABYTE = 1024L * 1024L;
+
+		// Get the Java runtime
+        Runtime runtime = Runtime.getRuntime();
+        // Run the garbage collector
+        runtime.gc();
+        // Calculate the used memory
+        long memory = runtime.totalMemory() - runtime.freeMemory();
+        System.out.println("Used memory is bytes: " + memory);
+
+		// get the MB
+		ret = memory / MEGABYTE;
+        System.out.println("Used memory is megabytes: " + ret);
+
+		return(ret);
 	}
 }
