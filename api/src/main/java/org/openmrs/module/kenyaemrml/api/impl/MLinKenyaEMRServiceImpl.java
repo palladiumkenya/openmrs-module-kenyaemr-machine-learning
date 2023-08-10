@@ -20,8 +20,8 @@ import org.openmrs.api.UserService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
+import org.openmrs.module.kenyaemrml.api.ModelService;
 import org.openmrs.module.kenyaemrml.api.db.hibernate.HibernateMLinKenyaEMRDao;
-import org.openmrs.module.kenyaemrml.api.service.ModelService;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
 import org.openmrs.ui.framework.SimpleObject;
 
@@ -30,8 +30,6 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 	HibernateMLinKenyaEMRDao mLinKenyaEMRDao;
 	
 	UserService userService;
-
-	ModelService modelService;
 	
 	/**
 	 * Injected in moduleApplicationContext.xml
@@ -45,13 +43,6 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 	 */
 	public void setUserService(UserService userService) {
 		this.userService = userService;
-	}
-
-	/**
-	 * Injected in moduleApplicationContext.xml
-	 */
-	public void setModelService(ModelService modelService) {
-		this.modelService = modelService;
 	}
 	
 	@Override
@@ -83,6 +74,7 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 
 			if(gpIITFeatureEnabled != null && gpIITFeatureEnabled.getPropertyValue().trim().equalsIgnoreCase("true")) {
 				// System.out.println("IIT ML Score: Generating a new risk score || and saving to DB");
+				ModelService modelService = Context.getService(ModelService.class);
 				PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
 				// Save/Update to DB (for reports) -- Incase a record for current date doesnt exist
 				saveOrUpdateRiskScore(patientRiskScore);
@@ -101,6 +93,7 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 
         if(gpIITFeatureEnabled != null && gpIITFeatureEnabled.getPropertyValue().trim().equalsIgnoreCase("true")) {
 			// System.out.println("IIT ML Score: Generating a new risk score || and saving to DB");
+			ModelService modelService = Context.getService(ModelService.class);
 			PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
 			// Save/Update to DB (for reports) -- Incase a record for current date doesnt exist
 			saveOrUpdateRiskScore(patientRiskScore);

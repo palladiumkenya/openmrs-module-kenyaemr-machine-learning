@@ -19,19 +19,19 @@ import org.hibernate.SessionFactory;
 import org.jpmml.evaluator.Evaluator;
 import org.jpmml.evaluator.LoadingModelEvaluatorBuilder;
 import org.openmrs.api.impl.BaseOpenmrsService;
-import org.openmrs.module.kenyaemrml.api.IITMLService;
+import org.openmrs.module.kenyaemrml.api.HTSMLService;
 
-public class IITMLServiceImpl extends BaseOpenmrsService implements IITMLService {
+public class HTSMLServiceImpl extends BaseOpenmrsService implements HTSMLService {
 	
 	private SessionFactory sessionFactory;
 	private Evaluator evaluator = null;
 
 	private void init() {
 		try {
-			System.out.println("IIT ML: Model NOT loaded. Now loading");
-			String modelId = "XGB_IIT_02232023";
+			System.out.println("HTS ML: Model NOT loaded. Now loading");
+			String modelId = "hts_xgb_1211_jan_2023";
 			String fullModelZipFileName = modelId.concat(".pmml.zip");
-			fullModelZipFileName = "iit/" + fullModelZipFileName;
+			fullModelZipFileName = "hts/" + fullModelZipFileName;
 			InputStream stream = IITMLServiceImpl.class.getClassLoader().getResourceAsStream(fullModelZipFileName);
 			BufferedInputStream bistream = new BufferedInputStream(stream);
 			// Model name
@@ -40,18 +40,18 @@ public class IITMLServiceImpl extends BaseOpenmrsService implements IITMLService
 			ZipEntry ze = null;
 
 			while ((ze = zis.getNextEntry()) != null) {
-				System.out.println("IIT ML: Got entry: " + ze);
+				System.out.println("HTS ML: Got entry: " + ze);
 				if(ze.getName().trim().equalsIgnoreCase(fullModelFileName)) {
 					// Building a model evaluator from a PMML file
 					evaluator = new LoadingModelEvaluatorBuilder().load(zis).build();
 					evaluator.verify();
-					System.out.println("IIT ML: Created the IIT ML Evaluator. Should do this only once in a lifetime");
+					System.out.println("HTS ML: Created the HTS ML Evaluator. Should do this only once in a lifetime");
 					break;
 				}
 			}
 		}
 		catch (Exception e) {
-			System.err.println("IIT ML. Init model error: " + e.getMessage());
+			System.err.println("HTS ML. Init model error: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}

@@ -3,10 +3,6 @@ package org.openmrs.module.kenyaemrml.api;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -23,14 +19,11 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.openmrs.GlobalProperty;
 import org.openmrs.Location;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemr.api.KenyaEmrService;
-import org.openmrs.module.kenyaemrml.api.service.ModelService;
 import org.openmrs.module.kenyaemrml.domain.ModelInputFields;
 import org.openmrs.module.kenyaemrml.domain.ScoringResult;
-import org.openmrs.ui.framework.WebConstants;
 
 
 public class MLUtils {
@@ -399,7 +392,7 @@ public class MLUtils {
 	public static String generateIITMLScore(String payload) {
 		String mlScore = "";
 		try {
-			ModelService modelService = new ModelService();
+			ModelService modelService = Context.getService(ModelService.class);
 			String requestBody = payload;
 			ObjectNode modelConfigs = MLUtils.getModelConfig(requestBody);
 			String facilityMflCode = modelConfigs.get(MLUtils.FACILITY_ID_REQUEST_VARIABLE).asText();
