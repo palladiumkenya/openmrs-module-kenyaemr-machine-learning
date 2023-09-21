@@ -32,7 +32,7 @@ public class HTSMLServiceImpl extends BaseOpenmrsService implements HTSMLService
 			String modelId = "hts_xgb_1211_jan_2023";
 			String fullModelZipFileName = modelId.concat(".pmml.zip");
 			fullModelZipFileName = "hts/" + fullModelZipFileName;
-			InputStream stream = IITMLServiceImpl.class.getClassLoader().getResourceAsStream(fullModelZipFileName);
+			InputStream stream = HTSMLServiceImpl.class.getClassLoader().getResourceAsStream(fullModelZipFileName);
 			BufferedInputStream bistream = new BufferedInputStream(stream);
 			// Model name
 			String fullModelFileName = modelId.concat(".pmml");

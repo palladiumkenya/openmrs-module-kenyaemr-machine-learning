@@ -244,7 +244,7 @@ public class MachineLearningRestController extends BaseRestController {
 			
 			if (profile == null) {
 				return new ResponseEntity<Object>(
-				        "The facility provided currently doesn't have an HTS cut-off profile. Provide an appropriate facility",
+				        "Your facility currently does not support ML. Kindly contact SUPPORT to include your facility code ( "+ facilityMflCode +" ) in the ML Matrix.",
 				        new HttpHeaders(), HttpStatus.BAD_REQUEST);
 			}
 			ModelInputFields inputFields = MLUtils.extractHTSCaseFindingVariablesFromRequestBody(requestBody, facilityMflCode,
@@ -403,7 +403,7 @@ public class MachineLearningRestController extends BaseRestController {
 			JSONObject profile = MLUtils.getHTSFacilityProfile("FacilityCode", facilityMflCode, MLUtils.getIITFacilityCutOffs());
 			
 			if (profile == null) {
-				return new ResponseEntity<Object>("The facility provided currently doesn't have an HTS cut-off profile. Provide an appropriate facility", new HttpHeaders(), HttpStatus.BAD_REQUEST);
+				return new ResponseEntity<Object>("Your facility currently does not support ML. Kindly contact SUPPORT to include your facility code ( " + facilityMflCode + " ) in the ML Matrix.", new HttpHeaders(), HttpStatus.BAD_REQUEST);
 			}
 
 			ModelInputFields inputFields = MLUtils.extractIITVariablesFromRequestBody(requestBody, facilityMflCode, encounterDate);
