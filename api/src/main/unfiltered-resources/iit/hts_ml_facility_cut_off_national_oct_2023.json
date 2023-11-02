@@ -76314,7 +76314,7 @@
 		"fb": 8.22898564324693
 	},
 	{
-        "Facility Code": "18543",
+        "FacilityCode": "18543",
         "Longitude": 36.8715,
         "Latitude": -1.314,
         "births": 7866.68510055542,
@@ -76337,7 +76337,7 @@
         "fb": 33.6148712190403
     },
     {
-        "Facility Code": "28880",
+        "FacilityCode": "28880",
         "Longitude": 36.7453,
         "Latitude": -1.2862,
         "births": 10976.3461358547,
