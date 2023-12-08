@@ -30,64 +30,6 @@ public interface ModelService extends OpenmrsService {
 	
 	Map<FieldName, FieldValue> prepareEvaluationArgs(Evaluator evaluator, ModelInputFields inputFields);
 
-	Obs getLatestObs(Patient patient, String conceptIdentifier);
-
-	Integer getNumberOfObs(Patient patient, String conceptIdentifier);
-
-	Integer getHighViralLoadCount(Patient patient);
-
-	Double getLatestViralLoadCount(Patient patient);
-
-	Double getLatestHighViralLoadCount(Patient patient);
-
-	Double getLatestLowViralLoadCount(Patient patient);
-
-	Double getLatestSuppressedViralLoadCount(Patient patient);
-
-	Integer getAllViralLoadCountLastThreeYears(Patient patient);
-
-	Integer getHighViralLoadCountLastThreeYears(Patient patient);
-
-	Integer getLowViralLoadCount(Patient patient);
-
-	Integer getSuppressedViralLoadCount(Patient patient);
-
-	Integer getTotalAppointments(Patient patient);
-
-	SimpleObject getMissedAppointments(Patient patient);
-
-	Integer getHonouredAppointments(Patient patient);
-
-	SimpleObject getEncDetails(Set<Obs> obsList, Encounter e, List<Encounter> allClinicalEncounters);
-
-	boolean hasVisitOnDate(Date appointmentDate, Patient patient, List<Encounter> allEncounters);
-
-	boolean wasScheduledVisit(Encounter encounter);
-
-	Integer getTotalUnscheduledVisits(Patient patient);
-	
-	Integer getLatestARTAdherence(Patient patient);
-
-	Integer getLatestCTXAdherence(Patient patient);
-
-	Integer getTotalPoorARTAdherence(Patient patient);
-
-	Integer getTotalFairARTAdherence(Patient patient);
-
-	Integer getTotalPoorCTXAdherence(Patient patient);
-
-	Integer getTotalFairCTXAdherence(Patient patient);
-
-	Integer getTotalARTAdherence(Patient patient);
-
-	Integer getTotalCTXAdherence(Patient patient);
-
-	Double getChangeInWeightInTheLastSixMonths(Patient patient);
-
-	Double getChangeInBMIInTheLastSixMonths(Patient patient);
-
-	Obs getObsByConceptPatientAndDate(Patient patient, Concept concept, Date date);
-
 	PatientRiskScore generatePatientRiskScore(Patient patient);
 
 	long getMemoryConsumption();
