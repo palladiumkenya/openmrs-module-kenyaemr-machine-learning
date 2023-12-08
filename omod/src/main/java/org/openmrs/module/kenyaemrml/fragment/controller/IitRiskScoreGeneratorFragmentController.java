@@ -95,8 +95,10 @@ public class IitRiskScoreGeneratorFragmentController {
 	 */
 	@AppAction("kenyaemrml.predictions")
 	public void stopScoreGen(@SpringBean KenyaUiUtils kenyaUi, UiUtils ui) {
+		System.err.println("IIT ML: Stopping score generation");
 		User user = Context.getUserContext().getAuthenticatedUser();
 		if(user != null) {
+			System.err.println("IIT ML: Stopping score generation: setting stop vars");
 			user.setUserProperty("stopIITMLGen", "1");
 			user.setUserProperty("IITMLGenRunning", "0");
 		}

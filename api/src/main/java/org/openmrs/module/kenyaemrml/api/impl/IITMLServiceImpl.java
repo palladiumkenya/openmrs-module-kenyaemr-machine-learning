@@ -29,7 +29,7 @@ public class IITMLServiceImpl extends BaseOpenmrsService implements IITMLService
 	private void init() {
 		try {
 			System.out.println("IIT ML: Model NOT loaded. Now loading");
-			String modelId = "XGB_IIT_02232023";
+			String modelId = "XGB_IIT_01042024";
 			String fullModelZipFileName = modelId.concat(".pmml.zip");
 			fullModelZipFileName = "iit/" + fullModelZipFileName;
 			InputStream stream = IITMLServiceImpl.class.getClassLoader().getResourceAsStream(fullModelZipFileName);

@@ -41,7 +41,37 @@ public class MLUtils {
 	public static String MODEL_CONFIG_OBJECT_KEY = "modelConfigs";
 
 	public static String[] FACILITY_PROFILE_VARIABLES = { "births", "pregnancies", "literacy", "poverty", "anc", "pnc", "sba", "hiv_prev", "hiv_count", "condom", "intercourse", "in_union", "circumcision", "partner_away", "partner_men", "partner_women", "sti", "fb" };
-	
+
+	public static String[] IIT_FACILITY_PROFILE_VARIABLES = {
+			"SumTXCurr",
+			"births",
+			"pregnancies",
+			"literacy",
+			"poverty",
+			"anc",
+			"pnc",
+			"sba",
+			"hiv_prev",
+			"hiv_count",
+			"condom",
+			"intercourse",
+			"in_union",
+			"circumcision",
+			"partner_away",
+			"partner_men",
+			"partner_women",
+			"sti",
+			"pop",
+			"keph_level_nameLevel.2",
+			"keph_level_nameLevel.3",
+			"keph_level_nameLevel.4",
+			"keph_level_nameLevel.5",
+			"keph_level_nameLevel.6",
+			"owner_typeFaith",
+			"owner_typeNGO",
+			"owner_typePrivate",
+			"owner_typePublic" };
+
 	public static String fetchRequestBody(BufferedReader reader) {
 		String requestBodyJsonStr = "";
 		try {
@@ -168,8 +198,8 @@ public class MLUtils {
 		
 		JSONObject profile = getHTSFacilityProfile("FacilityCode", facilityMflCode, getIITFacilityCutOffs());
 		
-		for (int i = 0; i < FACILITY_PROFILE_VARIABLES.length; i++) {
-			modelParams.put(FACILITY_PROFILE_VARIABLES[i], profile.get(FACILITY_PROFILE_VARIABLES[i]));
+		for (int i = 0; i < IIT_FACILITY_PROFILE_VARIABLES.length; i++) {
+			modelParams.put(IIT_FACILITY_PROFILE_VARIABLES[i], profile.get(IIT_FACILITY_PROFILE_VARIABLES[i]));
 		}
 		
 		ModelInputFields inputFields = new ModelInputFields();
@@ -295,7 +325,7 @@ public class MLUtils {
 	 * @return
 	 */
 	public static String readBundledIITCasefindingFacilityProfileFile() {
-		InputStream stream = MLUtils.class.getClassLoader().getResourceAsStream("iit/iit_ml_facility_cut_off_national_oct_2023.json");
+		InputStream stream = MLUtils.class.getClassLoader().getResourceAsStream("iit/iit_ml_facility_cut_off_national_dec_2023.json");
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			ArrayNode result = mapper.readValue(stream, ArrayNode.class);
