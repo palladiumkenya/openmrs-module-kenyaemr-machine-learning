@@ -41,8 +41,8 @@
 		<reportingVersion>1.22.0</reportingVersion>
 		<serializationxstreamVersion>0.2.14</serializationxstreamVersion>
 		<uiframeworkVersion>3.15.0</uiframeworkVersion>
-		<kenyaemrVersion>18.5.1</kenyaemrVersion>
-		<kenyacoreVersion>3.0.0</kenyacoreVersion>
+		<kenyaemrVersion>18.7.0</kenyaemrVersion>
+		<kenyacoreVersion>3.0.1</kenyacoreVersion>
 		<kenyauiVersion>2.0.4</kenyauiVersion>
 		<webservicesRestVersion>2.26.0</webservicesRestVersion>
 		<jodaTimeVersion>2.9.1</jodaTimeVersion>
