@@ -41,8 +41,8 @@
 		<reportingVersion>1.22.0</reportingVersion>
 		<serializationxstreamVersion>0.2.14</serializationxstreamVersion>
 		<uiframeworkVersion>3.15.0</uiframeworkVersion>
-		<kenyaemrVersion>18.5.1</kenyaemrVersion>
-		<kenyacoreVersion>3.0.0</kenyacoreVersion>
+		<kenyaemrVersion>18.7.0</kenyaemrVersion>
+		<kenyacoreVersion>3.0.1</kenyacoreVersion>
 		<kenyauiVersion>2.0.4</kenyauiVersion>
 		<webservicesRestVersion>2.26.0</webservicesRestVersion>
 		<jodaTimeVersion>2.9.1</jodaTimeVersion>
@@ -326,7 +326,7 @@
 			<id>central</id>
 			<name>Maven Repository Switchboard</name>
 			<layout>default</layout>
-			<url>http://repo1.maven.org/maven2</url>
+			<url>https://repo1.maven.org/maven2</url>
 		</repository>
 	</repositories>
 	<pluginRepositories>
@@ -342,14 +342,14 @@
 
 	<distributionManagement>
 		<repository>
-			<id>mks-nexus</id>
-			<name>Mekom Nexus Releases</name>
-			<url>https://nexus.mekomsolutions.net/releases</url>
+			<id>mks-repo</id>
+			<name>Mekom Solutions Nexus Releases</name>
+			<url>https://nexus.mekomsolutions.net/repository/maven-releases</url>
 		</repository>
 		<snapshotRepository>
-			<id>mks-nexus</id>
-			<name>Mekom Nexus Snapshots</name>
-			<url>https://nexus.mekomsolutions.net/snapshots</url>
+			<id>mks-repo-snapshots</id>
+			<name>Mekom Solutions Nexus Snapshots</name>
+			<url>https://nexus.mekomsolutions.net/repository/maven-snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 	
