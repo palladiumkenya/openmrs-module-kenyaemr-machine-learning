@@ -3,7 +3,7 @@
 <databaseChangeLog 
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
  
     <!--
     	See http://wiki.openmrs.org/display/docs/Module+liquibase+File for 
@@ -180,6 +180,504 @@
             <column name="started" value="0" />
             <column name="uuid" value="ace6779c-d330-4a73-8724-ae3b0c496a54" />
         </insert>
+    </changeSet>
+
+    <!-- Add payload field to the IIT ML table -->
+    <changeSet author="pwaweru" id="kenyaemr-ML-payload-field-20231106-123630"> 
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_ml_patient_risk_score"/>
+            <not>
+                <columnExists columnName="payload" tableName="kenyaemr_ml_patient_risk_score"/>
+            </not>
+        </preConditions>
+        <comment>Adding payload column</comment>
+        <addColumn tableName="kenyaemr_ml_patient_risk_score" >
+            <column name="payload"  
+                type="varchar(3072)" >  
+                <constraints nullable="true" />  
+            </column>  
+        </addColumn>  
+    </changeSet>
+
+    <!-- Add mfl and ccc fields to the IIT ML table -->
+    <changeSet author="pwaweru" id="kenyaemr-ML-ccc-mfl-fields-20231107-143630">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_ml_patient_risk_score"/>
+            <not>
+                <columnExists columnName="mflCode" tableName="kenyaemr_ml_patient_risk_score"/>
+            </not>
+            <not>
+                <columnExists columnName="cccNumber" tableName="kenyaemr_ml_patient_risk_score"/>
+            </not>
+        </preConditions>
+        <comment>Adding mfl and ccc columns</comment>
+        <addColumn tableName="kenyaemr_ml_patient_risk_score" >
+            <column name="mflCode"
+                type="varchar(128)" >
+                <constraints nullable="true" />
+            </column> 
+            <column name="cccNumber"
+                type="varchar(128)" >
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- Add IIT ML Debug fields to the IIT ML table -->
+    <changeSet author="pwaweru" id="kenyaemr-ML-debug-fields-20231106-193630">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_ml_patient_risk_score"/>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="Age"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="AHDNo"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="AHDYes"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="average_tca_last5"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="averagelateness"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="averagelateness_last10"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="averagelateness_last3"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="averagelateness_last5"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="BMI"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="Breastfeedingno"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="BreastfeedingNR"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="Breastfeedingyes"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="DayFri"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="DayMon"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="DaySat"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="DaySun"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="DayThu"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="DayTue"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="DayWed"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="DifferentiatedCarecommunityartdistributionhcwled"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="DifferentiatedCarecommunityartdistributionpeerled"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="DifferentiatedCareexpress"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="DifferentiatedCarefacilityartdistributiongroup"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="DifferentiatedCarefasttrack"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="DifferentiatedCarestandardcare"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="GenderFemale"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="GenderMale"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="late"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="late_last10"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="late_last3"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="late_last5"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="late_rate"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="late28"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="late28_rate"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="MaritalStatusDivorced"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="MaritalStatusMarried"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="MaritalStatusMinor"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="MaritalStatusOther"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="MaritalStatusPolygamous"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="MaritalStatusSingle"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="MaritalStatusWidow"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="MonthApr"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="MonthAug"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="MonthDec"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="MonthFeb"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="MonthJan"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="MonthJul"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="MonthJun"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="MonthMar"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="MonthMay"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="MonthNov"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="MonthOct"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="MonthSep"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="most_recent_art_adherencefair"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="most_recent_art_adherencegood"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="most_recent_art_adherencepoor"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="most_recent_vlsuppressed"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="most_recent_vlunsuppressed"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="n_appts"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="n_hvl_threeyears"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="n_lvl_threeyears"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="n_tests_threeyears"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="NextAppointmentDate"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="num_hiv_regimens"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="OptimizedHIVRegimenNo"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="OptimizedHIVRegimenYes"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="PatientSourceOPD"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="PatientSourceOther"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="PatientSourceVCT"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="PopulationTypeGP"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="PopulationTypeKP"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="Pregnantno"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="PregnantNR"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="Pregnantyes"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="recent_hvl_rate"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="StabilityAssessmentStable"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="StabilityAssessmentUnstable"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="timeOnArt"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="unscheduled_rate"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="visit_1"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="visit_2"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="visit_3"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="visit_4"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="visit_5"/>
+            </not>
+            <not>
+                <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="Weight"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="kenyaemr_ml_patient_risk_score">
+            <column name="Age" type="varchar(128)"/>
+            <column name="AHDNo" type="varchar(128)"/>
+            <column name="AHDYes" type="varchar(128)"/>
+            <column name="average_tca_last5" type="varchar(128)"/>
+            <column name="averagelateness" type="varchar(128)"/>
+            <column name="averagelateness_last10" type="varchar(128)"/>
+            <column name="averagelateness_last3" type="varchar(128)"/>
+            <column name="averagelateness_last5" type="varchar(128)"/>
+            <column name="BMI" type="varchar(128)"/>
+            <column name="Breastfeedingno" type="varchar(128)"/>
+            <column name="BreastfeedingNR" type="varchar(128)"/>
+            <column name="Breastfeedingyes" type="varchar(128)"/>
+            <column name="DayFri" type="varchar(128)"/>
+            <column name="DayMon" type="varchar(128)"/>
+            <column name="DaySat" type="varchar(128)"/>
+            <column name="DaySun" type="varchar(128)"/>
+            <column name="DayThu" type="varchar(128)"/>
+            <column name="DayTue" type="varchar(128)"/>
+            <column name="DayWed" type="varchar(128)"/>
+            <column name="DifferentiatedCarecommunityartdistributionhcwled" type="varchar(128)"/>
+            <column name="DifferentiatedCarecommunityartdistributionpeerled" type="varchar(128)"/>
+            <column name="DifferentiatedCareexpress" type="varchar(128)"/>
+            <column name="DifferentiatedCarefacilityartdistributiongroup" type="varchar(128)"/>
+            <column name="DifferentiatedCarefasttrack" type="varchar(128)"/>
+            <column name="DifferentiatedCarestandardcare" type="varchar(128)"/>
+            <column name="GenderFemale" type="varchar(128)"/>
+            <column name="GenderMale" type="varchar(128)"/>
+            <column name="late" type="varchar(128)"/>
+            <column name="late_last10" type="varchar(128)"/>
+            <column name="late_last3" type="varchar(128)"/>
+            <column name="late_last5" type="varchar(128)"/>
+            <column name="late_rate" type="varchar(128)"/>
+            <column name="late28" type="varchar(128)"/>
+            <column name="late28_rate" type="varchar(128)"/>
+            <column name="MaritalStatusDivorced" type="varchar(128)"/>
+            <column name="MaritalStatusMarried" type="varchar(128)"/>
+            <column name="MaritalStatusMinor" type="varchar(128)"/>
+            <column name="MaritalStatusOther" type="varchar(128)"/>
+            <column name="MaritalStatusPolygamous" type="varchar(128)"/>
+            <column name="MaritalStatusSingle" type="varchar(128)"/>
+            <column name="MaritalStatusWidow" type="varchar(128)"/>
+            <column name="MonthApr" type="varchar(128)"/>
+            <column name="MonthAug" type="varchar(128)"/>
+            <column name="MonthDec" type="varchar(128)"/>
+            <column name="MonthFeb" type="varchar(128)"/>
+            <column name="MonthJan" type="varchar(128)"/>
+            <column name="MonthJul" type="varchar(128)"/>
+            <column name="MonthJun" type="varchar(128)"/>
+            <column name="MonthMar" type="varchar(128)"/>
+            <column name="MonthMay" type="varchar(128)"/>
+            <column name="MonthNov" type="varchar(128)"/>
+            <column name="MonthOct" type="varchar(128)"/>
+            <column name="MonthSep" type="varchar(128)"/>
+            <column name="most_recent_art_adherencefair" type="varchar(128)"/>
+            <column name="most_recent_art_adherencegood" type="varchar(128)"/>
+            <column name="most_recent_art_adherencepoor" type="varchar(128)"/>
+            <column name="most_recent_vlsuppressed" type="varchar(128)"/>
+            <column name="most_recent_vlunsuppressed" type="varchar(128)"/>
+            <column name="n_appts" type="varchar(128)"/>
+            <column name="n_hvl_threeyears" type="varchar(128)"/>
+            <column name="n_lvl_threeyears" type="varchar(128)"/>
+            <column name="n_tests_threeyears" type="varchar(128)"/>
+            <column name="NextAppointmentDate" type="varchar(128)"/>
+            <column name="num_hiv_regimens" type="varchar(128)"/>
+            <column name="OptimizedHIVRegimenNo" type="varchar(128)"/>
+            <column name="OptimizedHIVRegimenYes" type="varchar(128)"/>
+            <column name="PatientSourceOPD" type="varchar(128)"/>
+            <column name="PatientSourceOther" type="varchar(128)"/>
+            <column name="PatientSourceVCT" type="varchar(128)"/>
+            <column name="PopulationTypeGP" type="varchar(128)"/>
+            <column name="PopulationTypeKP" type="varchar(128)"/>
+            <column name="Pregnantno" type="varchar(128)"/>
+            <column name="PregnantNR" type="varchar(128)"/>
+            <column name="Pregnantyes" type="varchar(128)"/>
+            <column name="recent_hvl_rate" type="varchar(128)"/>
+            <column name="StabilityAssessmentStable" type="varchar(128)"/>
+            <column name="StabilityAssessmentUnstable" type="varchar(128)"/>
+            <column name="timeOnArt" type="varchar(128)"/>
+            <column name="unscheduled_rate" type="varchar(128)"/>
+            <column name="visit_1" type="varchar(128)"/>
+            <column name="visit_2" type="varchar(128)"/>
+            <column name="visit_3" type="varchar(128)"/>
+            <column name="visit_4" type="varchar(128)"/>
+            <column name="visit_5" type="varchar(128)"/>
+            <column name="Weight" type="varchar(128)"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- Add IIT ML stored procedures - patient visits to the IIT ML table -->
+    <changeSet author="pwaweru" id="kenyaemr-ML-sp-patient-visits-20231218-153630" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM information_schema.routines
+                WHERE routine_name = 'sp_iitml_get_visits'
+                AND routine_type = 'PROCEDURE'
+            </sqlCheck>
+        </preConditions>
+        <sqlFile path="sql/sp_iitml_get_visits.sql" splitStatements="true" endDelimiter="\$\$" stripComments="true"/>
+    </changeSet>
+
+    <!-- Add IIT ML stored procedures - pharmacy visits to the IIT ML table -->
+    <changeSet author="pwaweru" id="kenyaemr-ML-sp-pharmacy-visits-20231218-153630" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM information_schema.routines
+                WHERE routine_name = 'sp_iitml_get_pharmacy_visits'
+                AND routine_type = 'PROCEDURE'
+            </sqlCheck>
+        </preConditions>
+        <sqlFile path="sql/sp_iitml_get_pharmacy_visits.sql" splitStatements="true" endDelimiter="\$\$" stripComments="true"/>
+    </changeSet>
+
+    <!-- Add IIT ML stored procedures - patient lab to the IIT ML table -->
+    <changeSet author="pwaweru" id="kenyaemr-ML-sp-patient-lab-20231218-153630" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM information_schema.routines
+                WHERE routine_name = 'sp_iitml_get_patient_lab'
+                AND routine_type = 'PROCEDURE'
+            </sqlCheck>
+        </preConditions>
+        <sqlFile path="sql/sp_iitml_get_patient_lab.sql" splitStatements="true" endDelimiter="\$\$" stripComments="true"/>
+    </changeSet>
+
+    <!-- Add IIT ML stored procedures - patient demographics to the IIT ML table -->
+    <changeSet author="pwaweru" id="kenyaemr-ML-sp-patient-demographics-20231218-153630" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM information_schema.routines
+                WHERE routine_name = 'sp_iitml_get_patient_demographics'
+                AND routine_type = 'PROCEDURE'
+            </sqlCheck>
+        </preConditions>
+        <sqlFile path="sql/sp_iitml_get_patient_demographics.sql" splitStatements="true" endDelimiter="\$\$" stripComments="true"/>
+    </changeSet>
+
+    <!-- Add IIT ML stored procedures - patient ART to the IIT ML table -->
+    <changeSet author="pwaweru" id="kenyaemr-ML-sp-patient-ART-20231218-153630" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM information_schema.routines
+                WHERE routine_name = 'sp_iitml_get_patient_ART'
+                AND routine_type = 'PROCEDURE'
+            </sqlCheck>
+        </preConditions>
+        <sqlFile path="sql/sp_iitml_get_patient_ART.sql" splitStatements="true" endDelimiter="\$\$" stripComments="true"/>
+    </changeSet>
+
+    <!-- Add IIT ML stored procedures - Last DWAPI ETL Update Date to the IIT ML table -->
+    <changeSet author="pwaweru" id="kenyaemr-ML-sp-dwapi-etl-update-20231219-144630" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM information_schema.routines
+                WHERE routine_name = 'sp_iitml_get_last_dwapi_etl_update'
+                AND routine_type = 'PROCEDURE'
+            </sqlCheck>
+        </preConditions>
+        <sqlFile path="sql/sp_iitml_get_last_dwapi_etl_update.sql" splitStatements="true" endDelimiter="\$\$" stripComments="true"/>
+    </changeSet>
+
+    <!-- Add last_dwapi_etl_update field to the ML table -->
+    <changeSet author="pwaweru" id="kenyaemr-ML-last_dwapi_etl_update-field-20231219-123630">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_ml_patient_risk_score"/>
+            <not>
+                <columnExists columnName="last_dwapi_etl_update" tableName="kenyaemr_ml_patient_risk_score"/>
+            </not>
+        </preConditions>
+        <comment>Adding last_dwapi_etl_update column</comment>
+        <addColumn tableName="kenyaemr_ml_patient_risk_score" >
+            <column name="last_dwapi_etl_update"
+                    type="varchar(128)" >
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- Add IIT ML stored procedures - patient CD4 count to the IIT ML table -->
+    <changeSet author="pwaweru" id="kenyaemr-ML-sp-patient-cd4-count-20231220-114630" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM information_schema.routines
+                WHERE routine_name = 'sp_iitml_get_patient_CD4count'
+                AND routine_type = 'PROCEDURE'
+            </sqlCheck>
+        </preConditions>
+        <sqlFile path="sql/sp_iitml_get_patient_CD4count.sql" splitStatements="true" endDelimiter="\$\$" stripComments="true"/>
     </changeSet>
  
 </databaseChangeLog>

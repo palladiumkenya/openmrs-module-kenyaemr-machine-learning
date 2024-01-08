@@ -16,6 +16,98 @@
 		<property name="evaluationDate" type = "java.util.Date" column ="evaluation_date"/>
 		<property name="description" type = "java.lang.String" column ="description"/>
 		<property name="riskFactors" type = "java.lang.String" column ="risk_factors"/>
+		<property name="payload" type = "java.lang.String" column ="payload"/>
+
+		<property name="mflCode" type="java.lang.String" column="mflCode"/>
+		<property name="cccNumber" type="java.lang.String" column="cccNumber"/>
+		<property name="lastDwapiEtlUpdate" type="java.lang.String" column="last_dwapi_etl_update"/>
+
+		<property name="Age" type="java.lang.String" column="Age"/>
+		<property name="AHDNo" type="java.lang.String" column="AHDNo"/>
+		<property name="AHDYes" type="java.lang.String" column="AHDYes"/>
+		<property name="average_tca_last5" type="java.lang.String" column="average_tca_last5"/>
+		<property name="averagelateness" type="java.lang.String" column="averagelateness"/>
+		<property name="averagelateness_last10" type="java.lang.String" column="averagelateness_last10"/>
+		<property name="averagelateness_last3" type="java.lang.String" column="averagelateness_last3"/>
+		<property name="averagelateness_last5" type="java.lang.String" column="averagelateness_last5"/>
+		<property name="BMI" type="java.lang.String" column="BMI"/>
+		<property name="Breastfeedingno" type="java.lang.String" column="Breastfeedingno"/>
+		<property name="BreastfeedingNR" type="java.lang.String" column="BreastfeedingNR"/>
+		<property name="Breastfeedingyes" type="java.lang.String" column="Breastfeedingyes"/>
+		<property name="DayFri" type="java.lang.String" column="DayFri"/>
+		<property name="DayMon" type="java.lang.String" column="DayMon"/>
+		<property name="DaySat" type="java.lang.String" column="DaySat"/>
+		<property name="DaySun" type="java.lang.String" column="DaySun"/>
+		<property name="DayThu" type="java.lang.String" column="DayThu"/>
+		<property name="DayTue" type="java.lang.String" column="DayTue"/>
+		<property name="DayWed" type="java.lang.String" column="DayWed"/>
+		<property name="DifferentiatedCarecommunityartdistributionhcwled" type="java.lang.String" column="DifferentiatedCarecommunityartdistributionhcwled"/>
+		<property name="DifferentiatedCarecommunityartdistributionpeerled" type="java.lang.String" column="DifferentiatedCarecommunityartdistributionpeerled"/>
+		<property name="DifferentiatedCareexpress" type="java.lang.String" column="DifferentiatedCareexpress"/>
+		<property name="DifferentiatedCarefacilityartdistributiongroup" type="java.lang.String" column="DifferentiatedCarefacilityartdistributiongroup"/>
+		<property name="DifferentiatedCarefasttrack" type="java.lang.String" column="DifferentiatedCarefasttrack"/>
+		<property name="DifferentiatedCarestandardcare" type="java.lang.String" column="DifferentiatedCarestandardcare"/>
+		<property name="GenderFemale" type="java.lang.String" column="GenderFemale"/>
+		<property name="GenderMale" type="java.lang.String" column="GenderMale"/>
+		<property name="late" type="java.lang.String" column="late"/>
+		<property name="late_last10" type="java.lang.String" column="late_last10"/>
+		<property name="late_last3" type="java.lang.String" column="late_last3"/>
+		<property name="late_last5" type="java.lang.String" column="late_last5"/>
+		<property name="late_rate" type="java.lang.String" column="late_rate"/>
+		<property name="late28" type="java.lang.String" column="late28"/>
+		<property name="late28_rate" type="java.lang.String" column="late28_rate"/>
+		<property name="MaritalStatusDivorced" type="java.lang.String" column="MaritalStatusDivorced"/>
+		<property name="MaritalStatusMarried" type="java.lang.String" column="MaritalStatusMarried"/>
+		<property name="MaritalStatusMinor" type="java.lang.String" column="MaritalStatusMinor"/>
+		<property name="MaritalStatusOther" type="java.lang.String" column="MaritalStatusOther"/>
+		<property name="MaritalStatusPolygamous" type="java.lang.String" column="MaritalStatusPolygamous"/>
+		<property name="MaritalStatusSingle" type="java.lang.String" column="MaritalStatusSingle"/>
+		<property name="MaritalStatusWidow" type="java.lang.String" column="MaritalStatusWidow"/>
+		<property name="MonthApr" type="java.lang.String" column="MonthApr"/>
+		<property name="MonthAug" type="java.lang.String" column="MonthAug"/>
+		<property name="MonthDec" type="java.lang.String" column="MonthDec"/>
+		<property name="MonthFeb" type="java.lang.String" column="MonthFeb"/>
+		<property name="MonthJan" type="java.lang.String" column="MonthJan"/>
+		<property name="MonthJul" type="java.lang.String" column="MonthJul"/>
+		<property name="MonthJun" type="java.lang.String" column="MonthJun"/>
+		<property name="MonthMar" type="java.lang.String" column="MonthMar"/>
+		<property name="MonthMay" type="java.lang.String" column="MonthMay"/>
+		<property name="MonthNov" type="java.lang.String" column="MonthNov"/>
+		<property name="MonthOct" type="java.lang.String" column="MonthOct"/>
+		<property name="MonthSep" type="java.lang.String" column="MonthSep"/>
+		<property name="most_recent_art_adherencefair" type="java.lang.String" column="most_recent_art_adherencefair"/>
+		<property name="most_recent_art_adherencegood" type="java.lang.String" column="most_recent_art_adherencegood"/>
+		<property name="most_recent_art_adherencepoor" type="java.lang.String" column="most_recent_art_adherencepoor"/>
+		<property name="most_recent_vlsuppressed" type="java.lang.String" column="most_recent_vlsuppressed"/>
+		<property name="most_recent_vlunsuppressed" type="java.lang.String" column="most_recent_vlunsuppressed"/>
+		<property name="n_appts" type="java.lang.String" column="n_appts"/>
+		<property name="n_hvl_threeyears" type="java.lang.String" column="n_hvl_threeyears"/>
+		<property name="n_lvl_threeyears" type="java.lang.String" column="n_lvl_threeyears"/>
+		<property name="n_tests_threeyears" type="java.lang.String" column="n_tests_threeyears"/>
+		<property name="NextAppointmentDate" type="java.lang.String" column="NextAppointmentDate"/>
+		<property name="num_hiv_regimens" type="java.lang.String" column="num_hiv_regimens"/>
+		<property name="OptimizedHIVRegimenNo" type="java.lang.String" column="OptimizedHIVRegimenNo"/>
+		<property name="OptimizedHIVRegimenYes" type="java.lang.String" column="OptimizedHIVRegimenYes"/>
+		<property name="PatientSourceOPD" type="java.lang.String" column="PatientSourceOPD"/>
+		<property name="PatientSourceOther" type="java.lang.String" column="PatientSourceOther"/>
+		<property name="PatientSourceVCT" type="java.lang.String" column="PatientSourceVCT"/>
+		<property name="PopulationTypeGP" type="java.lang.String" column="PopulationTypeGP"/>
+		<property name="PopulationTypeKP" type="java.lang.String" column="PopulationTypeKP"/>
+		<property name="Pregnantno" type="java.lang.String" column="Pregnantno"/>
+		<property name="PregnantNR" type="java.lang.String" column="PregnantNR"/>
+		<property name="Pregnantyes" type="java.lang.String" column="Pregnantyes"/>
+		<property name="recent_hvl_rate" type="java.lang.String" column="recent_hvl_rate"/>
+		<property name="StabilityAssessmentStable" type="java.lang.String" column="StabilityAssessmentStable"/>
+		<property name="StabilityAssessmentUnstable" type="java.lang.String" column="StabilityAssessmentUnstable"/>
+		<property name="timeOnArt" type="java.lang.String" column="timeOnArt"/>
+		<property name="unscheduled_rate" type="java.lang.String" column="unscheduled_rate"/>
+		<property name="visit_1" type="java.lang.String" column="visit_1"/>
+		<property name="visit_2" type="java.lang.String" column="visit_2"/>
+		<property name="visit_3" type="java.lang.String" column="visit_3"/>
+		<property name="visit_4" type="java.lang.String" column="visit_4"/>
+		<property name="visit_5" type="java.lang.String" column="visit_5"/>
+		<property name="Weight" type="java.lang.String" column="Weight"/>
+
 		<many-to-one name="creator" class="org.openmrs.User" not-null="true">
 			<column name="creator"/>
 		</many-to-one>
