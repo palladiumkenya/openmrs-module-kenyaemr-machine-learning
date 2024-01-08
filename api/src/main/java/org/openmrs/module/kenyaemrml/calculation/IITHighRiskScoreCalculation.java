@@ -17,10 +17,13 @@ import org.openmrs.Patient;
 import org.openmrs.Program;
 import org.openmrs.api.context.Context;
 import org.openmrs.calculation.patient.PatientCalculationContext;
+import org.openmrs.calculation.result.CalculationResult;
 import org.openmrs.calculation.result.CalculationResultMap;
 import org.openmrs.module.kenyacore.calculation.AbstractPatientCalculation;
 import org.openmrs.module.kenyacore.calculation.BooleanResult;
 import org.openmrs.module.kenyacore.calculation.Filters;
+import org.openmrs.module.kenyaemr.calculation.EmrCalculationUtils;
+import org.openmrs.module.kenyaemr.calculation.library.hiv.art.OnArtCalculation;
 import org.openmrs.module.kenyaemr.metadata.HivMetadata;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
@@ -50,24 +53,39 @@ public class IITHighRiskScoreCalculation extends AbstractPatientCalculation {
 			for (Integer ptId : inHivProgram) {
 				try {
 					Patient currentPatient = Context.getPatientService().getPatient(ptId);
-					PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(currentPatient, true);
-					if (latestRiskScore != null) {
-						String riskGroup = latestRiskScore.getDescription();
-						if (riskGroup.trim().equalsIgnoreCase("High Risk")) {
-							ret.put(ptId, new BooleanResult(true, this, context));
-						}				
+					if(currentInArt(currentPatient)) {
+						PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
+								.getLatestPatientRiskScoreByPatient(currentPatient, true);
+						if (latestRiskScore != null) {
+							String riskGroup = latestRiskScore.getDescription();
+							if (riskGroup.trim().equalsIgnoreCase("High Risk")) {
+								ret.put(ptId, new BooleanResult(true, this, context));
+							}
+						}
 					}
 				} catch(Exception em) {
-					System.err.println("IIT ML: " + em.getMessage());
+					System.err.println("IIT ML High Risk reporting: " + em.getMessage());
 					em.printStackTrace();
 				}
 			}
 		} catch(Exception ex) {
-			System.err.println("IIT ML: " + ex.getMessage());
+			System.err.println("IIT ML High Risk reporting: " + ex.getMessage());
 			ex.printStackTrace();
 		}
 		
 		return ret;
+	}
+
+	/**
+	 * Checks whether the patient is current on ART
+	 * @return true if patient is current on ART
+	 *
+	 * */
+
+	public Boolean currentInArt(Patient patient) {
+		CalculationResult patientCurrentInART = EmrCalculationUtils.evaluateForPatient(OnArtCalculation.class, null, patient);
+		return (patientCurrentInART != null ? (Boolean) patientCurrentInART.getValue() : false);
+
 	}
 	
 }
