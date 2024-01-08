@@ -607,7 +607,7 @@ public class MLDataExchange {
 							if(debugMode) System.err.println("IIT ML: Analyzing patient: " + patient.getId());
 							ProgramWorkflowService pwfservice = Context.getProgramWorkflowService();
 							List<PatientProgram> programs = pwfservice.getPatientPrograms(patient, hivProgram, null, null, null,null, false);
-							if (programs.size() > 0) {
+							if (programs.size() > 0 && isActiveOnProgram(programs)) {
 								if(patient.getDead() == false) {
 									Date lastScore = mLinKenyaEMRService.getPatientLatestRiskEvaluationDate(patient);
 									// check if a greencard has been filled since the last score
@@ -643,6 +643,22 @@ public class MLDataExchange {
 			setStatusOfIITGenScoresTask(false);
 		}
 
+		return(ret);
+	}
+
+	/**
+	 * Checks if the patient is currently active on the given set of programs
+	 * @return
+	 */
+	private boolean isActiveOnProgram(List<PatientProgram> programs) {
+		boolean ret = false;
+		if(programs != null) {
+			for(PatientProgram program: programs) {
+				if(program.getActive()) {
+					return(true);
+				}
+			}
+		}
 		return(ret);
 	}
 
