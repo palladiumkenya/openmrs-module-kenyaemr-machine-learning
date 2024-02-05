@@ -129,7 +129,8 @@ public class MLUtils {
 		while (it.hasNext()) {
 			Map.Entry<String, JsonNode> field = it.next();
 			String keyId = field.getKey();
-			int keyValue = field.getValue().getIntValue();
+			JsonNode keyValueNode = field.getValue();
+			Object keyValue = mapper.convertValue(keyValueNode, Object.class);
 			modelParams.put(keyId, keyValue);
 		}
 		
@@ -189,7 +190,8 @@ public class MLUtils {
 		while (it.hasNext()) {
 			Map.Entry<String, JsonNode> field = it.next();
 			String keyId = field.getKey();
-			int keyValue = field.getValue().getIntValue();
+			JsonNode keyValueNode = field.getValue();
+			Object keyValue = mapper.convertValue(keyValueNode, Object.class);
 			modelParams.put(keyId, keyValue);
 		}
 		
@@ -336,7 +338,7 @@ public class MLUtils {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Helper method for getting a facility profile by facility name
 	 * 
@@ -345,6 +347,26 @@ public class MLUtils {
 	 * @return
 	 */
 	public static JSONObject getHTSFacilityProfile(String propertyName, String propertyValue, JSONArray facilityCutOffArray) {
+		
+		if (facilityCutOffArray != null) {
+			for (int i = 0; i < facilityCutOffArray.size(); i++) {
+				JSONObject o = (JSONObject) facilityCutOffArray.get(i);
+				if (o.get(propertyName).toString().equals(propertyValue)) {
+					return o;
+				}
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Helper method for getting a facility profile by facility name
+	 * 
+	 * @param propertyValue
+	 * @param propertyName
+	 * @return
+	 */
+	public static JSONObject getIITFacilityProfile(String propertyName, String propertyValue, JSONArray facilityCutOffArray) {
 		
 		if (facilityCutOffArray != null) {
 			for (int i = 0; i < facilityCutOffArray.size(); i++) {

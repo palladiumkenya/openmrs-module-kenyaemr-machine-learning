@@ -679,5 +679,51 @@
         </preConditions>
         <sqlFile path="sql/sp_iitml_get_patient_CD4count.sql" splitStatements="true" endDelimiter="\$\$" stripComments="true"/>
     </changeSet>
+
+    <!-- Remove fields from the IIT ML table -->
+    <changeSet author="pwaweru" id="kenyaemr-ML-remove-fields-20240205-143630">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kenyaemr_ml_patient_risk_score"/>
+            <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="AHDNo"/>
+            <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="AHDYes"/>
+            <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="BMI"/>
+            <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="most_recent_vlsuppressed"/>
+            <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="most_recent_vlunsuppressed"/>
+            <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="n_hvl_threeyears"/>
+            <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="n_lvl_threeyears"/>
+            <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="n_tests_threeyears"/>
+            <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="PatientSourceOPD"/>
+            <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="PatientSourceOther"/>
+            <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="PatientSourceVCT"/>
+            <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="PopulationTypeGP"/>
+            <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="PopulationTypeKP"/>
+            <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="recent_hvl_rate"/>
+            <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="visit_2"/>
+            <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="visit_3"/>
+            <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="visit_4"/>
+            <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="visit_5"/>
+            <columnExists tableName="kenyaemr_ml_patient_risk_score" columnName="Weight"/>
+        </preConditions>
+        <comment>Removing the discarded columns</comment>
+        <dropColumn columnName="AHDNo" tableName="kenyaemr_ml_patient_risk_score" />
+        <dropColumn columnName="AHDYes" tableName="kenyaemr_ml_patient_risk_score" />
+        <dropColumn columnName="BMI" tableName="kenyaemr_ml_patient_risk_score" />
+        <dropColumn columnName="most_recent_vlsuppressed" tableName="kenyaemr_ml_patient_risk_score" />
+        <dropColumn columnName="most_recent_vlunsuppressed" tableName="kenyaemr_ml_patient_risk_score" />
+        <dropColumn columnName="n_hvl_threeyears" tableName="kenyaemr_ml_patient_risk_score" />
+        <dropColumn columnName="n_lvl_threeyears" tableName="kenyaemr_ml_patient_risk_score" />
+        <dropColumn columnName="n_tests_threeyears" tableName="kenyaemr_ml_patient_risk_score" />
+        <dropColumn columnName="PatientSourceOPD" tableName="kenyaemr_ml_patient_risk_score" />
+        <dropColumn columnName="PatientSourceOther" tableName="kenyaemr_ml_patient_risk_score" />
+        <dropColumn columnName="PatientSourceVCT" tableName="kenyaemr_ml_patient_risk_score" />
+        <dropColumn columnName="PopulationTypeGP" tableName="kenyaemr_ml_patient_risk_score" />
+        <dropColumn columnName="PopulationTypeKP" tableName="kenyaemr_ml_patient_risk_score" />
+        <dropColumn columnName="recent_hvl_rate" tableName="kenyaemr_ml_patient_risk_score" />
+        <dropColumn columnName="visit_2" tableName="kenyaemr_ml_patient_risk_score" />
+        <dropColumn columnName="visit_3" tableName="kenyaemr_ml_patient_risk_score" />
+        <dropColumn columnName="visit_4" tableName="kenyaemr_ml_patient_risk_score" />
+        <dropColumn columnName="visit_5" tableName="kenyaemr_ml_patient_risk_score" />
+        <dropColumn columnName="Weight" tableName="kenyaemr_ml_patient_risk_score" />
+    </changeSet>
  
 </databaseChangeLog>
