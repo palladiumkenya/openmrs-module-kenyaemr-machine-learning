@@ -66,7 +66,7 @@ public class MachineLearningRestController extends BaseRestController {
 	 * ### Sample Input Payload
 		{
 			"modelConfigs": {
-				"modelId": "hts_xgb_1211_jan_2023",
+				"modelId": "hts_xgb_021524_feb_2024",
 				"encounterDate": "2023-03-03",
 				"facilityId": "14607",
 				"debug": "true"
