@@ -48,14 +48,11 @@ public class PatientRiskScore extends BaseOpenmrsData implements Serializable {
 	private String payload;
 
 	private String Age;
-	private String AHDNo;
-	private String AHDYes;
 	private String average_tca_last5;
 	private String averagelateness;
 	private String averagelateness_last10;
 	private String averagelateness_last3;
 	private String averagelateness_last5;
-	private String BMI;
 	private String Breastfeedingno;
 	private String BreastfeedingNR;
 	private String Breastfeedingyes;
@@ -103,35 +100,19 @@ public class PatientRiskScore extends BaseOpenmrsData implements Serializable {
 	private String most_recent_art_adherencefair;
 	private String most_recent_art_adherencegood;
 	private String most_recent_art_adherencepoor;
-	private String most_recent_vlsuppressed;
-	private String most_recent_vlunsuppressed;
 	private String n_appts;
-	private String n_hvl_threeyears;
-	private String n_lvl_threeyears;
-	private String n_tests_threeyears;
 	private String NextAppointmentDate;
 	private String num_hiv_regimens;
 	private String OptimizedHIVRegimenNo;
 	private String OptimizedHIVRegimenYes;
-	private String PatientSourceOPD;
-	private String PatientSourceOther;
-	private String PatientSourceVCT;
-	private String PopulationTypeGP;
-	private String PopulationTypeKP;
 	private String Pregnantno;
 	private String PregnantNR;
 	private String Pregnantyes;
-	private String recent_hvl_rate;
 	private String StabilityAssessmentStable;
 	private String StabilityAssessmentUnstable;
 	private String timeOnArt;
 	private String unscheduled_rate;
 	private String visit_1;
-	private String visit_2;
-	private String visit_3;
-	private String visit_4;
-	private String visit_5;
-	private String Weight;
 
 	private String mflCode;
 	private String cccNumber;
@@ -227,22 +208,6 @@ public class PatientRiskScore extends BaseOpenmrsData implements Serializable {
 		Age = age;
 	}
 
-	public String getAHDNo() {
-		return AHDNo;
-	}
-
-	public void setAHDNo(String AHDNo) {
-		this.AHDNo = AHDNo;
-	}
-
-	public String getAHDYes() {
-		return AHDYes;
-	}
-
-	public void setAHDYes(String AHDYes) {
-		this.AHDYes = AHDYes;
-	}
-
 	public String getAverage_tca_last5() {
 		return average_tca_last5;
 	}
@@ -281,14 +246,6 @@ public class PatientRiskScore extends BaseOpenmrsData implements Serializable {
 
 	public void setAveragelateness_last5(String averagelateness_last5) {
 		this.averagelateness_last5 = averagelateness_last5;
-	}
-
-	public String getBMI() {
-		return BMI;
-	}
-
-	public void setBMI(String BMI) {
-		this.BMI = BMI;
 	}
 
 	public String getBreastfeedingno() {
@@ -669,52 +626,12 @@ public class PatientRiskScore extends BaseOpenmrsData implements Serializable {
 		this.most_recent_art_adherencepoor = most_recent_art_adherencepoor;
 	}
 
-	public String getMost_recent_vlsuppressed() {
-		return most_recent_vlsuppressed;
-	}
-
-	public void setMost_recent_vlsuppressed(String most_recent_vlsuppressed) {
-		this.most_recent_vlsuppressed = most_recent_vlsuppressed;
-	}
-
-	public String getMost_recent_vlunsuppressed() {
-		return most_recent_vlunsuppressed;
-	}
-
-	public void setMost_recent_vlunsuppressed(String most_recent_vlunsuppressed) {
-		this.most_recent_vlunsuppressed = most_recent_vlunsuppressed;
-	}
-
 	public String getN_appts() {
 		return n_appts;
 	}
 
 	public void setN_appts(String n_appts) {
 		this.n_appts = n_appts;
-	}
-
-	public String getN_hvl_threeyears() {
-		return n_hvl_threeyears;
-	}
-
-	public void setN_hvl_threeyears(String n_hvl_threeyears) {
-		this.n_hvl_threeyears = n_hvl_threeyears;
-	}
-
-	public String getN_lvl_threeyears() {
-		return n_lvl_threeyears;
-	}
-
-	public void setN_lvl_threeyears(String n_lvl_threeyears) {
-		this.n_lvl_threeyears = n_lvl_threeyears;
-	}
-
-	public String getN_tests_threeyears() {
-		return n_tests_threeyears;
-	}
-
-	public void setN_tests_threeyears(String n_tests_threeyears) {
-		this.n_tests_threeyears = n_tests_threeyears;
 	}
 
 	public String getNextAppointmentDate() {
@@ -749,46 +666,6 @@ public class PatientRiskScore extends BaseOpenmrsData implements Serializable {
 		OptimizedHIVRegimenYes = optimizedHIVRegimenYes;
 	}
 
-	public String getPatientSourceOPD() {
-		return PatientSourceOPD;
-	}
-
-	public void setPatientSourceOPD(String patientSourceOPD) {
-		PatientSourceOPD = patientSourceOPD;
-	}
-
-	public String getPatientSourceOther() {
-		return PatientSourceOther;
-	}
-
-	public void setPatientSourceOther(String patientSourceOther) {
-		PatientSourceOther = patientSourceOther;
-	}
-
-	public String getPatientSourceVCT() {
-		return PatientSourceVCT;
-	}
-
-	public void setPatientSourceVCT(String patientSourceVCT) {
-		PatientSourceVCT = patientSourceVCT;
-	}
-
-	public String getPopulationTypeGP() {
-		return PopulationTypeGP;
-	}
-
-	public void setPopulationTypeGP(String populationTypeGP) {
-		PopulationTypeGP = populationTypeGP;
-	}
-
-	public String getPopulationTypeKP() {
-		return PopulationTypeKP;
-	}
-
-	public void setPopulationTypeKP(String populationTypeKP) {
-		PopulationTypeKP = populationTypeKP;
-	}
-
 	public String getPregnantno() {
 		return Pregnantno;
 	}
@@ -811,14 +688,6 @@ public class PatientRiskScore extends BaseOpenmrsData implements Serializable {
 
 	public void setPregnantyes(String pregnantyes) {
 		Pregnantyes = pregnantyes;
-	}
-
-	public String getRecent_hvl_rate() {
-		return recent_hvl_rate;
-	}
-
-	public void setRecent_hvl_rate(String recent_hvl_rate) {
-		this.recent_hvl_rate = recent_hvl_rate;
 	}
 
 	public String getStabilityAssessmentStable() {
@@ -859,46 +728,6 @@ public class PatientRiskScore extends BaseOpenmrsData implements Serializable {
 
 	public void setVisit_1(String visit_1) {
 		this.visit_1 = visit_1;
-	}
-
-	public String getVisit_2() {
-		return visit_2;
-	}
-
-	public void setVisit_2(String visit_2) {
-		this.visit_2 = visit_2;
-	}
-
-	public String getVisit_3() {
-		return visit_3;
-	}
-
-	public void setVisit_3(String visit_3) {
-		this.visit_3 = visit_3;
-	}
-
-	public String getVisit_4() {
-		return visit_4;
-	}
-
-	public void setVisit_4(String visit_4) {
-		this.visit_4 = visit_4;
-	}
-
-	public String getVisit_5() {
-		return visit_5;
-	}
-
-	public void setVisit_5(String visit_5) {
-		this.visit_5 = visit_5;
-	}
-
-	public String getWeight() {
-		return Weight;
-	}
-
-	public void setWeight(String weight) {
-		Weight = weight;
 	}
 
 	public String getLastDwapiEtlUpdate() {

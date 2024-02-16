@@ -51,7 +51,7 @@ import org.openmrs.parameter.EncounterSearchCriteriaBuilder;
 public class MLDataExchange {
 
 	// Enable/Disable debug mode
-	private final boolean debugMode = false;
+	private final boolean debugMode = true;
 	
 	public static final String DESCRIPTION = "Description";
 	

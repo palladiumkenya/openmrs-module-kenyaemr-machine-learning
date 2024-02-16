@@ -23,14 +23,11 @@
 		<property name="lastDwapiEtlUpdate" type="java.lang.String" column="last_dwapi_etl_update"/>
 
 		<property name="Age" type="java.lang.String" column="Age"/>
-		<property name="AHDNo" type="java.lang.String" column="AHDNo"/>
-		<property name="AHDYes" type="java.lang.String" column="AHDYes"/>
 		<property name="average_tca_last5" type="java.lang.String" column="average_tca_last5"/>
 		<property name="averagelateness" type="java.lang.String" column="averagelateness"/>
 		<property name="averagelateness_last10" type="java.lang.String" column="averagelateness_last10"/>
 		<property name="averagelateness_last3" type="java.lang.String" column="averagelateness_last3"/>
 		<property name="averagelateness_last5" type="java.lang.String" column="averagelateness_last5"/>
-		<property name="BMI" type="java.lang.String" column="BMI"/>
 		<property name="Breastfeedingno" type="java.lang.String" column="Breastfeedingno"/>
 		<property name="BreastfeedingNR" type="java.lang.String" column="BreastfeedingNR"/>
 		<property name="Breastfeedingyes" type="java.lang.String" column="Breastfeedingyes"/>
@@ -78,35 +75,19 @@
 		<property name="most_recent_art_adherencefair" type="java.lang.String" column="most_recent_art_adherencefair"/>
 		<property name="most_recent_art_adherencegood" type="java.lang.String" column="most_recent_art_adherencegood"/>
 		<property name="most_recent_art_adherencepoor" type="java.lang.String" column="most_recent_art_adherencepoor"/>
-		<property name="most_recent_vlsuppressed" type="java.lang.String" column="most_recent_vlsuppressed"/>
-		<property name="most_recent_vlunsuppressed" type="java.lang.String" column="most_recent_vlunsuppressed"/>
 		<property name="n_appts" type="java.lang.String" column="n_appts"/>
-		<property name="n_hvl_threeyears" type="java.lang.String" column="n_hvl_threeyears"/>
-		<property name="n_lvl_threeyears" type="java.lang.String" column="n_lvl_threeyears"/>
-		<property name="n_tests_threeyears" type="java.lang.String" column="n_tests_threeyears"/>
 		<property name="NextAppointmentDate" type="java.lang.String" column="NextAppointmentDate"/>
 		<property name="num_hiv_regimens" type="java.lang.String" column="num_hiv_regimens"/>
 		<property name="OptimizedHIVRegimenNo" type="java.lang.String" column="OptimizedHIVRegimenNo"/>
 		<property name="OptimizedHIVRegimenYes" type="java.lang.String" column="OptimizedHIVRegimenYes"/>
-		<property name="PatientSourceOPD" type="java.lang.String" column="PatientSourceOPD"/>
-		<property name="PatientSourceOther" type="java.lang.String" column="PatientSourceOther"/>
-		<property name="PatientSourceVCT" type="java.lang.String" column="PatientSourceVCT"/>
-		<property name="PopulationTypeGP" type="java.lang.String" column="PopulationTypeGP"/>
-		<property name="PopulationTypeKP" type="java.lang.String" column="PopulationTypeKP"/>
 		<property name="Pregnantno" type="java.lang.String" column="Pregnantno"/>
 		<property name="PregnantNR" type="java.lang.String" column="PregnantNR"/>
 		<property name="Pregnantyes" type="java.lang.String" column="Pregnantyes"/>
-		<property name="recent_hvl_rate" type="java.lang.String" column="recent_hvl_rate"/>
 		<property name="StabilityAssessmentStable" type="java.lang.String" column="StabilityAssessmentStable"/>
 		<property name="StabilityAssessmentUnstable" type="java.lang.String" column="StabilityAssessmentUnstable"/>
 		<property name="timeOnArt" type="java.lang.String" column="timeOnArt"/>
 		<property name="unscheduled_rate" type="java.lang.String" column="unscheduled_rate"/>
 		<property name="visit_1" type="java.lang.String" column="visit_1"/>
-		<property name="visit_2" type="java.lang.String" column="visit_2"/>
-		<property name="visit_3" type="java.lang.String" column="visit_3"/>
-		<property name="visit_4" type="java.lang.String" column="visit_4"/>
-		<property name="visit_5" type="java.lang.String" column="visit_5"/>
-		<property name="Weight" type="java.lang.String" column="Weight"/>
 
 		<many-to-one name="creator" class="org.openmrs.User" not-null="true">
 			<column name="creator"/>
