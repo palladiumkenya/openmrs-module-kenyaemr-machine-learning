@@ -9,7 +9,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -61,7 +60,7 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 	private Log log = LogFactory.getLog(this.getClass());
 
 	// Enable/Disable debug mode -- Saves all prediction variables and payload into the DB for debugging
-	private final boolean debugMode = false;
+	private final boolean debugMode = true;
 
 	private SessionFactory sessionFactory;
 	
@@ -210,7 +209,7 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			String strIITHighRiskThreshold = globalIITHighRiskThreshold.getPropertyValue();
 			Double decIITHighRiskThreshold = Double.valueOf(strIITHighRiskThreshold);
 			// Model Configuration
-			modelConfigs.put("modelId", "XGB_IIT_01042024");
+			modelConfigs.put("modelId", "XGB_IIT_02052024");
 			String today = (new SimpleDateFormat("yyyy-MM-dd")).format(new Date());
 			modelConfigs.put("encounterDate", today);
 			modelConfigs.put("facilityId", "");
@@ -451,7 +450,7 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 							+ missed30Last5);
 
 			/**
-			 * New Model 13/12/2023
+			 * New Model 05/02/2024
 			 * Based on the Visits table only
 			 * late
 			 * late28
@@ -459,10 +458,10 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			 * late_rate
 			 * late28_rate
 			 * visit_1
-			 * visit_2
-			 * visit_3
-			 * visit_4
-			 * visit_5
+			 * visit_2 -- removed
+			 * visit_3 -- removed
+			 * visit_4 -- removed
+			 * visit_5 -- removed
 			 * late_last10
 			 * NextAppointmentDate
 			 * late_last3
@@ -496,22 +495,6 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			// New model (visit_1)
 			Integer visit_1 = getVisit1(missedRecord);
 			if(debugMode) System.err.println("IIT ML: new model (visit_1): " + visit_1);
-
-			// New model (visit_2)
-			Integer visit_2 = getVisit2(missedRecord);
-			if(debugMode) System.err.println("IIT ML: new model (visit_2): " + visit_2);
-
-			// New model (visit_3)
-			Integer visit_3 = getVisit3(missedRecord);
-			if(debugMode) System.err.println("IIT ML: new model (visit_3): " + visit_3);
-
-			// New model (visit_4)
-			Integer visit_4 = getVisit4(missedRecord);
-			if(debugMode) System.err.println("IIT ML: new model (visit_4): " + visit_4);
-
-			// New model (visit_5)
-			Integer visit_5 = getVisit5(missedRecord);
-			if(debugMode) System.err.println("IIT ML: new model (visit_5): " + visit_5);
 
 			// New model (late_last10)
 			Integer late_last10 = getLateLast10(missedRecord);
@@ -632,19 +615,6 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 
 			// End new model
 
-			// (Weight)
-			Double weight = getWeight(visits);
-			if(debugMode) System.err.println("IIT ML: (Weight): " + weight);
-
-			// (Height)
-			Double height = getHeight(visits);
-			if(debugMode) System.err.println("IIT ML: (Height): " + height);
-
-			// (BMI) -- NB: If zero, return NA
-			Double BMI = getBMI(height, weight);
-			if(debugMode) System.err.println("IIT ML: (BMI): " + BMI);
-
-			// Gender (Male == 1 and Female == 2)
 			Integer patientGender = 0;
 			Integer female = getGenderFemale(demographics);
 			Integer male = getGenderMale(demographics);
@@ -662,18 +632,6 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			// (GenderMale)
 			Integer GenderMale = male;
 			if(debugMode) System.err.println("IIT ML: (GenderMale): " + male);
-
-			// (PatientSourceOPD)
-			Integer PatientSourceOPD = getPatientSourceOPD(demographics);
-			if(debugMode) System.err.println("IIT ML: (PatientSourceOPD): " + PatientSourceOPD);
-
-			// (PatientSourceOther)
-			Integer PatientSourceOther = getPatientSourceOther(demographics);
-			if(debugMode) System.err.println("IIT ML: (PatientSourceOther): " + PatientSourceOther);
-
-			// (PatientSourceVCT)
-			Integer PatientSourceVCT = getPatientSourceVCT(demographics);
-			if(debugMode) System.err.println("IIT ML: (PatientSourceVCT): " + PatientSourceVCT);
 
 			// (Age)
 			Long Age = getAgeYears(demographics);
@@ -776,22 +734,6 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			SimpleObject Breastfeedingyes = getBreastFeedingYes(visits, patientGender, Age);
 			if(debugMode) System.err.println("IIT ML: (Breastfeedingyes): " + Breastfeedingyes.get("result"));
 
-			// (PopulationTypeGP)
-			Integer PopulationTypeGP = getPopulationTypeGP(demographics);
-			if(debugMode) System.err.println("IIT ML: (PopulationTypeGP): " + PopulationTypeGP);
-
-			// (PopulationTypeKP)
-			Integer PopulationTypeKP = getPopulationTypeKP(demographics);
-			if(debugMode) System.err.println("IIT ML: (PopulationTypeKP): " + PopulationTypeKP);
-
-			// (AHDNo)
-			SimpleObject AHDNo = getAHDNo(visits, cd4Counter, Age);
-			if(debugMode) System.err.println("IIT ML: (AHDNo): " + AHDNo.get("result"));
-
-			// (AHDYes)
-			SimpleObject AHDYes = getAHDYes(visits, cd4Counter, Age);
-			if(debugMode) System.err.println("IIT ML: (AHDYes): " + AHDYes.get("result"));
-
 			// (OptimizedHIVRegimenNo)
 			SimpleObject OptimizedHIVRegimenNo = getOptimizedHIVRegimenNo(pharmacy);
 			if(debugMode) System.err.println("IIT ML: (OptimizedHIVRegimenNo): " + OptimizedHIVRegimenNo.get("result"));
@@ -799,31 +741,6 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			// (OptimizedHIVRegimenYes)
 			SimpleObject OptimizedHIVRegimenYes = getOptimizedHIVRegimenYes(pharmacy);
 			if(debugMode) System.err.println("IIT ML: (OptimizedHIVRegimenYes): " + OptimizedHIVRegimenYes.get("result"));
-
-			// NB: Any number equal or above 200 is considered High Viral Load (HVL). Any below is LDL or suppressed or Low Viral Load (LVL)
-			// (most_recent_vlsuppressed)
-			Integer most_recent_vlsuppressed = getMostRecentVLsuppressed(lab);
-			if(debugMode) System.err.println("IIT ML: (most_recent_vlsuppressed): " + most_recent_vlsuppressed);
-
-			// (most_recent_vlunsuppressed)
-			Integer most_recent_vlunsuppressed = getMostRecentVLunsuppressed(lab);
-			if(debugMode) System.err.println("IIT ML: (most_recent_vlunsuppressed): " + most_recent_vlunsuppressed);
-
-			// (n_tests_threeyears)
-			Integer n_tests_threeyears = getNtestsThreeYears(lab);
-			if(debugMode) System.err.println("IIT ML: (n_tests_threeyears): " + n_tests_threeyears);
-
-			// (n_hvl_threeyears)
-			Integer n_hvl_threeyears = getNHVLThreeYears(lab);
-			if(debugMode) System.err.println("IIT ML: (n_hvl_threeyears): " + n_hvl_threeyears);
-
-			// (n_lvl_threeyears)
-			Integer n_lvl_threeyears = getNLVLThreeYears(lab);
-			if(debugMode) System.err.println("IIT ML: (n_lvl_threeyears): " + n_lvl_threeyears);
-
-			// (recent_hvl_rate)
-			Double recent_hvl_rate = getRecentHvlRate(n_hvl_threeyears, n_tests_threeyears);
-			if(debugMode) System.err.println("IIT ML: (recent_hvl_rate): " + recent_hvl_rate);
 
 			// (timeOnArt)
 			Long timeOnArt = getTimeOnArt(art);
@@ -860,14 +777,11 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 
 			// Start Pulled Variables
 			patientPredictionVariables.put("Age", Age);
-			patientPredictionVariables.put("AHDNo", AHDNo.get("result"));
-			patientPredictionVariables.put("AHDYes", AHDYes.get("result"));
 			patientPredictionVariables.put("average_tca_last5", average_tca_last5);
 			patientPredictionVariables.put("averagelateness", averagelateness);
 			patientPredictionVariables.put("averagelateness_last10", averagelateness_last10);
 			patientPredictionVariables.put("averagelateness_last3", averagelateness_last3);
 			patientPredictionVariables.put("averagelateness_last5", averagelateness_last5);
-			patientPredictionVariables.put("BMI", BMI);
 			patientPredictionVariables.put("Breastfeedingno", Breastfeedingno.get("result"));
 			patientPredictionVariables.put("BreastfeedingNR", BreastfeedingNR);
 			patientPredictionVariables.put("Breastfeedingyes", Breastfeedingyes.get("result"));
@@ -915,35 +829,19 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			patientPredictionVariables.put("most_recent_art_adherencefair", most_recent_art_adherencefair);
 			patientPredictionVariables.put("most_recent_art_adherencegood", most_recent_art_adherencegood);
 			patientPredictionVariables.put("most_recent_art_adherencepoor", most_recent_art_adherencepoor);
-			patientPredictionVariables.put("most_recent_vlsuppressed", most_recent_vlsuppressed);
-			patientPredictionVariables.put("most_recent_vlunsuppressed", most_recent_vlunsuppressed);
 			patientPredictionVariables.put("n_appts", n_appts);
-			patientPredictionVariables.put("n_hvl_threeyears", n_hvl_threeyears);
-			patientPredictionVariables.put("n_lvl_threeyears", n_lvl_threeyears);
-			patientPredictionVariables.put("n_tests_threeyears", n_tests_threeyears);
 			patientPredictionVariables.put("NextAppointmentDate", NextAppointmentDate);
 			patientPredictionVariables.put("num_hiv_regimens", num_hiv_regimens.get("result"));
 			patientPredictionVariables.put("OptimizedHIVRegimenNo", OptimizedHIVRegimenNo.get("result"));
 			patientPredictionVariables.put("OptimizedHIVRegimenYes", OptimizedHIVRegimenYes.get("result"));
-			patientPredictionVariables.put("PatientSourceOPD", PatientSourceOPD);
-			patientPredictionVariables.put("PatientSourceOther", PatientSourceOther);
-			patientPredictionVariables.put("PatientSourceVCT", PatientSourceVCT);
-			patientPredictionVariables.put("PopulationTypeGP", PopulationTypeGP);
-			patientPredictionVariables.put("PopulationTypeKP", PopulationTypeKP);
 			patientPredictionVariables.put("Pregnantno", Pregnantno.get("result"));
 			patientPredictionVariables.put("PregnantNR", PregnantNR);
 			patientPredictionVariables.put("Pregnantyes", Pregnantyes.get("result"));
-			patientPredictionVariables.put("recent_hvl_rate", recent_hvl_rate);
 			patientPredictionVariables.put("StabilityAssessmentStable", StabilityAssessmentStable);
 			patientPredictionVariables.put("StabilityAssessmentUnstable", StabilityAssessmentUnstable);
 			patientPredictionVariables.put("timeOnArt", timeOnArt);
 			patientPredictionVariables.put("unscheduled_rate", unscheduled_rate);
 			patientPredictionVariables.put("visit_1", visit_1);
-			patientPredictionVariables.put("visit_2", visit_2);
-			patientPredictionVariables.put("visit_3", visit_3);
-			patientPredictionVariables.put("visit_4", visit_4);
-			patientPredictionVariables.put("visit_5", visit_5);
-			patientPredictionVariables.put("Weight", weight);
 			// End Pulled Variables
 
 			// Load model configs and variables
@@ -965,8 +863,6 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 					if (jsonNode != null) {
 						if(debugMode) System.err.println("IIT ML: Got ML Score Payload as: " + mlScoreResponse);
 						Double riskScore = 0.00;
-						// Double riskScore = jsonNode.get("result").get("predictions").get("Probability_1").getDoubleValue();
-						// Double riskScore = jsonNode.get("result").get("predictions").get("probability(1)").getDoubleValue();
 						JsonNode result = jsonNode.get("result");
 						if(result != null) {
 							JsonNode predictions = result.get("predictions");
@@ -1085,14 +981,11 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 
 		try {
 			prs.setAge(convertToString(load.get("Age")));
-			prs.setAHDNo(convertToString(load.get("AHDNo")));
-			prs.setAHDYes(convertToString(load.get("AHDYes")));
 			prs.setAverage_tca_last5(convertToString(load.get("average_tca_last5")));
 			prs.setAveragelateness(convertToString(load.get("averagelateness")));
 			prs.setAveragelateness_last10(convertToString(load.get("averagelateness_last10")));
 			prs.setAveragelateness_last3(convertToString(load.get("averagelateness_last3")));
 			prs.setAveragelateness_last5(convertToString(load.get("averagelateness_last5")));
-			prs.setBMI(convertToString(load.get("BMI")));
 			prs.setBreastfeedingno(convertToString(load.get("Breastfeedingno")));
 			prs.setBreastfeedingNR(convertToString(load.get("BreastfeedingNR")));
 			prs.setBreastfeedingyes(convertToString(load.get("Breastfeedingyes")));
@@ -1140,35 +1033,19 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			prs.setMost_recent_art_adherencefair(convertToString(load.get("most_recent_art_adherencefair")));
 			prs.setMost_recent_art_adherencegood(convertToString(load.get("most_recent_art_adherencegood")));
 			prs.setMost_recent_art_adherencepoor(convertToString(load.get("most_recent_art_adherencepoor")));
-			prs.setMost_recent_vlsuppressed(convertToString(load.get("most_recent_vlsuppressed")));
-			prs.setMost_recent_vlunsuppressed(convertToString(load.get("most_recent_vlunsuppressed")));
 			prs.setN_appts(convertToString(load.get("n_appts")));
-			prs.setN_hvl_threeyears(convertToString(load.get("n_hvl_threeyears")));
-			prs.setN_lvl_threeyears(convertToString(load.get("n_lvl_threeyears")));
-			prs.setN_tests_threeyears(convertToString(load.get("n_tests_threeyears")));
 			prs.setNextAppointmentDate(convertToString(load.get("NextAppointmentDate")));
 			prs.setNum_hiv_regimens(convertToString(load.get("num_hiv_regimens")));
 			prs.setOptimizedHIVRegimenNo(convertToString(load.get("OptimizedHIVRegimenNo")));
 			prs.setOptimizedHIVRegimenYes(convertToString(load.get("OptimizedHIVRegimenYes")));
-			prs.setPatientSourceOPD(convertToString(load.get("PatientSourceOPD")));
-			prs.setPatientSourceOther(convertToString(load.get("PatientSourceOther")));
-			prs.setPatientSourceVCT(convertToString(load.get("PatientSourceVCT")));
-			prs.setPopulationTypeGP(convertToString(load.get("PopulationTypeGP")));
-			prs.setPopulationTypeKP(convertToString(load.get("PopulationTypeKP")));
 			prs.setPregnantno(convertToString(load.get("Pregnantno")));
 			prs.setPregnantNR(convertToString(load.get("PregnantNR")));
 			prs.setPregnantyes(convertToString(load.get("Pregnantyes")));
-			prs.setRecent_hvl_rate(convertToString(load.get("recent_hvl_rate")));
 			prs.setStabilityAssessmentStable(convertToString(load.get("StabilityAssessmentStable")));
 			prs.setStabilityAssessmentUnstable(convertToString(load.get("StabilityAssessmentUnstable")));
 			prs.setTimeOnArt(convertToString(load.get("timeOnArt")));
 			prs.setUnscheduled_rate(convertToString(load.get("unscheduled_rate")));
 			prs.setVisit_1(convertToString(load.get("visit_1")));
-			prs.setVisit_2(convertToString(load.get("visit_2")));
-			prs.setVisit_3(convertToString(load.get("visit_3")));
-			prs.setVisit_4(convertToString(load.get("visit_4")));
-			prs.setVisit_5(convertToString(load.get("visit_5")));
-			prs.setWeight(convertToString(load.get("Weight")));
 
 		} catch(Exception ex) {
 			System.err.println("IIT ML: Got error extracting payload variables for debug: " + ex.getMessage());
@@ -1244,82 +1121,6 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 		return(ret);
 	}
 
-	private SimpleObject getAHDNo(List<List<Object>> visits, List<List<Object>> cd4count, Long Age) {
-		SimpleObject ret = SimpleObject.create("result", -10000);
-
-		if(visits != null && cd4count != null) {
-			// Get the last visit
-			if (visits.size() > 0 && cd4count.size() > 0) {
-				List<Object> visitObject = visits.get(visits.size() - 1);
-				List<Object> cd4Object = cd4count.get(cd4count.size() - 1);
-				// If WHO Stage in (1,2) or CD4 COUNT is greater than 200  and Age six and above, then 1,
-				// if Age five or below or WHO stage in (3,4) or CD4 COUNT is less than or equal to 200, then 0, if Age over 6 and WHO Stage is NULL, then NA
-				if (visitObject.get(10) != null && cd4Object.get(1) != null) {
-					String whoStage = (String) visitObject.get(10);
-					String patientCD4st = (String) cd4Object.get(1);
-					patientCD4st = patientCD4st.trim().toLowerCase();
-					whoStage = whoStage.trim().toLowerCase();
-					Integer whoStageInt = getIntegerValue(whoStage);
-					Integer patientCD4 = getIntegerValue(patientCD4st);
-					if((((whoStageInt == 1 || whoStageInt == 2)) || patientCD4 > 200)  && Age >= 6) {
-						ret.put("result", 1);
-						return(ret);
-					}
-					if((((whoStageInt == 3 || whoStageInt == 4)) || patientCD4 <= 200) && Age <= 5) {
-						ret.put("result", 0);
-						return(ret);
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private SimpleObject getAHDYes(List<List<Object>> visits, List<List<Object>> cd4count, Long Age) {
-		SimpleObject ret = SimpleObject.create("result", -10000);
-
-		if(visits != null && cd4count != null) {
-			// Get the last visit
-			if (visits.size() > 0 && cd4count.size() > 0) {
-				List<Object> visitObject = visits.get(visits.size() - 1);
-				List<Object> cd4Object = cd4count.get(cd4count.size() - 1);
-				// If WHO Stage in (3,4) or Age five or below or CD4 Count is less than or equal to 200, then 1,
-				// if Age is six or over and WHO stage in (1,2) or CD4count is greater than 200, then 0, if Age 6 or over and WHO Stage is NULL, then NA
-				if (visitObject.get(10) != null && cd4Object.get(1) != null) {
-					String whoStage = (String) visitObject.get(10);
-					String patientCD4st = (String) cd4Object.get(1);
-					patientCD4st = patientCD4st.trim().toLowerCase();
-					whoStage = whoStage.trim().toLowerCase();
-					Integer whoStageInt = getIntegerValue(whoStage);
-					Integer patientCD4 = getIntegerValue(patientCD4st);
-					if((((whoStageInt == 3 || whoStageInt == 4)) || patientCD4 <= 200) && Age <= 5) {
-						ret.put("result", 1);
-						return(ret);
-					}
-					if((((whoStageInt == 1 || whoStageInt == 2)) || patientCD4 > 200) && Age >= 6) {
-						ret.put("result", 0);
-						return(ret);
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Double getRecentHvlRate(Integer n_hvl_threeyears,Integer n_test_threeyears) {
-		Double ret = 0.00;
-
-		try {
-			if (n_test_threeyears != 0) {
-				ret = (n_hvl_threeyears * 1.00) / (n_test_threeyears * 1.00);
-			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-
-		return(ret);
-	}
-
 	private SimpleObject getOptimizedHIVRegimenNo(List<List<Object>> pharmacy) {
 		SimpleObject ret = SimpleObject.create("result", -10000);
 
@@ -1392,142 +1193,6 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 		return(ret);
 	}
 
-	private Integer getMostRecentVLsuppressed(List<List<Object>> lab) {
-		Integer ret = 0;
-		if(lab != null) {
-			if (lab.size() > 0) {
-				// The last record
-				List<Object> labObject = lab.get(lab.size() - 1);
-				if (labObject.get(2) != null) {
-					String result = (String) labObject.get(2);
-					if(getIntegerValue(result.trim()) < 200 || result.trim().equalsIgnoreCase("LDL")) {
-						ret = 1;
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getMostRecentVLunsuppressed(List<List<Object>> lab) {
-		Integer ret = 0;
-		if(lab != null) {
-			if (lab.size() > 0) {
-				// The last record
-				List<Object> labObject = lab.get(lab.size() - 1);
-				if (labObject.get(2) != null) {
-					String result = (String) labObject.get(2);
-					if(getIntegerValue(result.trim()) >= 200) {
-						ret = 1;
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getNtestsThreeYears(List<List<Object>> lab) {
-		Integer ret = 0;
-		if(lab != null) {
-			// Get for the last 3 years
-			if (lab.size() > 0) {
-				// Reverse the list to loop from the first
-				List<List<Object>> labRev = new ArrayList<>(lab);
-				Collections.reverse(labRev);
-				// Count number of tests for the last 3 years
-				Date now = new Date();
-				LocalDate nowLocal = dateToLocalDate(now);
-				// A unique test is given by unique order date
-				Set<Date> uniqueTests = new HashSet<>();
-				for(List<Object> labObject: labRev) {
-					if (labObject.get(1) != null && labObject.get(3) != null && labObject.get(4) != null) {
-						Date orderDate = (Date) labObject.get(4);
-						Date resultDate = (Date) labObject.get(1);
-						String testName = (String) labObject.get(3);
-						if(!uniqueTests.contains(orderDate) && testName.trim().equalsIgnoreCase("hiv viral load")) {
-							LocalDate resultLocal = dateToLocalDate(resultDate);
-							long months = Math.abs(ChronoUnit.MONTHS.between(nowLocal, resultLocal));
-							if (months <= 36) {
-								ret++;
-							}
-						}
-						uniqueTests.add(orderDate);
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getNHVLThreeYears(List<List<Object>> lab) {
-		Integer ret = 0;
-		if(lab != null) {
-			// Get for the last 3 years
-			if (lab.size() > 0) {
-				// Reverse the list to loop from the first
-				List<List<Object>> labRev = new ArrayList<>(lab);
-				Collections.reverse(labRev);
-				// Count number of tests for the last 3 years
-				Date now = new Date();
-				LocalDate nowLocal = dateToLocalDate(now);
-				// A unique test is given by unique order date
-				Set<Date> uniqueTests = new HashSet<>();
-				for(List<Object> labObject: labRev) {
-					if (labObject.get(1) != null && labObject.get(2) != null && labObject.get(3) != null && labObject.get(4) != null) {
-						Date orderDate = (Date) labObject.get(4);
-						Date resultDate = (Date) labObject.get(1);
-						String testName = (String) labObject.get(3);
-						if(!uniqueTests.contains(orderDate) && testName.trim().equalsIgnoreCase("hiv viral load")) {
-							LocalDate resultLocal = dateToLocalDate(resultDate);
-							long months = Math.abs(ChronoUnit.MONTHS.between(nowLocal, resultLocal));
-							String result = (String) labObject.get(2);
-							if (months <= 36 && getIntegerValue(result.trim()) >= 200) {
-								ret++;
-							}
-						}
-						uniqueTests.add(orderDate);
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getNLVLThreeYears(List<List<Object>> lab) {
-		Integer ret = 0;
-		if(lab != null) {
-			// Get for the last 3 years
-			if (lab.size() > 0) {
-				// Reverse the list to loop from the first
-				List<List<Object>> labRev = new ArrayList<>(lab);
-				Collections.reverse(labRev);
-				// Count number of tests for the last 3 years
-				Date now = new Date();
-				LocalDate nowLocal = dateToLocalDate(now);
-				// A unique test is given by unique order date
-				Set<Date> uniqueTests = new HashSet<>();
-				for(List<Object> labObject: labRev) {
-					if (labObject.get(1) != null && labObject.get(2) != null && labObject.get(3) != null && labObject.get(4) != null) {
-						Date orderDate = (Date) labObject.get(4);
-						Date resultDate = (Date) labObject.get(1);
-						String testName = (String) labObject.get(3);
-						if(!uniqueTests.contains(orderDate) && testName.trim().equalsIgnoreCase("hiv viral load")) {
-							LocalDate resultLocal = dateToLocalDate(resultDate);
-							long months = Math.abs(ChronoUnit.MONTHS.between(nowLocal, resultLocal));
-							String result = (String) labObject.get(2);
-							if (months <= 36 && (getIntegerValue(result.trim()) < 200 || result.trim()
-									.equalsIgnoreCase("LDL"))) {
-								ret++;
-							}
-						}
-						uniqueTests.add(orderDate);
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
 	/**
 	 * Gets the integer value of a string, otherwise returns zero
 	 * @param val
@@ -1551,40 +1216,6 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 		try {
 			ret = (long) Math.ceil(Double.parseDouble(val));
 		} catch(Exception ex) {}
-		return(ret);
-	}
-
-	private Integer getPopulationTypeKP(List<List<Object>> demographics) {
-		Integer ret = 0;
-		if(demographics != null) {
-			// Get the last visit
-			if (demographics.size() > 0) {
-				List<Object> visitObject = demographics.get(demographics.size() - 1);
-				if (visitObject.get(6) != null) {
-					String differentiatedCare = (String) visitObject.get(6);
-					if(differentiatedCare.trim().equalsIgnoreCase("Key Population")) {
-						ret = 1;
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getPopulationTypeGP(List<List<Object>> demographics) {
-		Integer ret = 0;
-		if(demographics != null) {
-			// Get the last visit
-			if (demographics.size() > 0) {
-				List<Object> visitObject = demographics.get(demographics.size() - 1);
-				if (visitObject.get(6) != null) {
-					String differentiatedCare = (String) visitObject.get(6);
-					if(differentiatedCare.trim().equalsIgnoreCase("General Population")) {
-						ret = 1;
-					}
-				}
-			}
-		}
 		return(ret);
 	}
 
@@ -2159,11 +1790,6 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 				if(maritalObject.get(2) != null) {
 					Date DOB = (Date) maritalObject.get(2);
 					Date now = new Date();
-					// Instant dobInstant = DOB.toInstant();
-					// Instant nowInstant = now.toInstant();
-					// Get the age in years
-					// Duration duration = Duration.between(nowInstant, dobInstant);
-					// long years = duration.toDays() / 365;
 					java.time.LocalDate dobLocal = dateToLocalDate(DOB);
 					java.time.LocalDate nowLocal = dateToLocalDate(now);
 					long years = Math.abs(ChronoUnit.YEARS.between(nowLocal, dobLocal));
@@ -2178,62 +1804,6 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 		return Instant.ofEpochMilli(dateToConvert.getTime())
 				.atZone(ZoneId.systemDefault())
 				.toLocalDate();
-	}
-
-	private Integer getPatientSourceVCT(List<List<Object>> demographics) {
-		Integer ret = 0;
-		if(demographics != null) {
-			// Get the last appointment
-			if (demographics.size() > 0) {
-				List<Object> sourceObject = demographics.get(demographics.size() - 1);
-				if(sourceObject.get(3) != null) {
-					String source = (String) sourceObject.get(3);
-					if(debugMode) System.err.println("IIT ML: Raw Patient source is: " + source);
-					if (source.trim().equalsIgnoreCase("vct")) {
-						ret = 1;
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getPatientSourceOther(List<List<Object>> demographics) {
-		Integer ret = 0;
-		if(demographics != null) {
-			// Get the last appointment
-			if (demographics.size() > 0) {
-				List<Object> sourceObject = demographics.get(demographics.size() - 1);
-				if(sourceObject.get(3) != null) {
-					String source = (String) sourceObject.get(3);
-					if(debugMode) System.err.println("IIT ML: Raw Patient source is: " + source);
-					if (!source.trim().equalsIgnoreCase("opd") && !source.trim().equalsIgnoreCase("vct")) {
-						ret = 1;
-					}
-				} else {
-					ret = 1;
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getPatientSourceOPD(List<List<Object>> demographics) {
-		Integer ret = 0;
-		if(demographics != null) {
-			// Get the last appointment
-			if (demographics.size() > 0) {
-				List<Object> sourceObject = demographics.get(demographics.size() - 1);
-				if(sourceObject.get(3) != null) {
-					String source = (String) sourceObject.get(3);
-					if(debugMode) System.err.println("IIT ML: Raw Patient source is: " + source);
-					if (source.trim().equalsIgnoreCase("opd")) {
-						ret = 1;
-					}
-				}
-			}
-		}
-		return(ret);
 	}
 
 	private Integer getGenderFemale(List<List<Object>> demographics) {
@@ -2548,48 +2118,6 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 		return calendar.get(Calendar.DAY_OF_WEEK);
 	}
 
-	private Double getBMI(Double height, Double weight) {
-		// BMI is given by (Weight / ((Height/100)^2))
-		Double ret = 0.00;
-		if(height > 0 && weight > 0) {
-			//constraints
-			if(height >= 100 && height <= 250 && weight >= 30 && weight <= 200) {
-				ret = weight / (Math.pow((height / 100), 2));
-			}
-		}
-		return(ret);
-	}
-
-	private Double getWeight(List<List<Object>> visits) {
-		Double ret = 0.00;
-		if(visits != null) {
-			// Flip the list -- the last becomes the first
-			Collections.reverse(visits);
-			for (List<Object> in : visits) {
-				if(in.get(5) != null) {
-					Double weight = (Double) in.get(5);
-					return(weight);
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Double getHeight(List<List<Object>> visits) {
-		Double ret = 0.00;
-		if(visits != null) {
-			// Flip the list -- the last becomes the first
-			Collections.reverse(visits);
-			for (List<Object> in : visits) {
-				if(in.get(4) != null) {
-					Double height = (Double) in.get(4);
-					return(height);
-				}
-			}
-		}
-		return(ret);
-	}
-
 	private Double getUnscheduledRate(List<List<Object>> visits) {
 		Double ret = 0.00;
 		if(visits != null && visits.size() > 0) {
@@ -2844,42 +2372,6 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 		return(ret);
 	}
 
-	private Integer getVisit2(List<Integer> missed) {
-		Integer ret = 0;
-		if(missed != null) {
-			int size = missed.size();
-			ret = size > 1 ? missed.get(size - 2) : 0;
-		}
-		return(ret);
-	}
-
-	private Integer getVisit3(List<Integer> missed) {
-		Integer ret = 0;
-		if(missed != null) {
-			int size = missed.size();
-			ret = size > 2 ? missed.get(size - 3) : 0;
-		}
-		return(ret);
-	}
-
-	private Integer getVisit4(List<Integer> missed) {
-		Integer ret = 0;
-		if(missed != null) {
-			int size = missed.size();
-			ret = size > 3 ? missed.get(size - 4) : 0;
-		}
-		return(ret);
-	}
-
-	private Integer getVisit5(List<Integer> missed) {
-		Integer ret = 0;
-		if(missed != null) {
-			int size = missed.size();
-			ret = size > 4 ? missed.get(size - 5) : 0;
-		}
-		return(ret);
-	}
-
 	private Double getLate28Rate(Integer late28, Integer n_appts) {
 		Double ret = 0.00;
 		if(late28 > 0 && n_appts > 0) {
@@ -3064,7 +2556,8 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 				if (updateData.size() > 0) {
 					List<Object> updateObject = updateData.get(updateData.size() - 1);
 					if (updateObject.get(1) != null) {
-						Date updateDate = (Date) updateObject.get(1);
+						// Date updateDate = (Date) updateObject.get(1);
+						LocalDateTime updateDate = (LocalDateTime) updateObject.get(1);
 						SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 						ret = sdf.format(updateDate);
 					}
