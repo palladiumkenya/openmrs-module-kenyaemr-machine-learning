@@ -1,21 +1,48 @@
 package org.openmrs.module.kenyaemrml.web.controller;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
 import org.jfree.data.time.Month;
 import org.json.simple.JSONObject;
-import org.openmrs.module.kenyaemr.reporting.data.converter.definition.AppointmentDaysMissedDataDefinition;
+import org.openmrs.api.AdministrationService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemrml.api.MLUtils;
+import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.api.ModelService;
 import org.openmrs.module.kenyaemrml.domain.ModelInputFields;
 import org.openmrs.module.kenyaemrml.domain.ScoringResult;
+import org.openmrs.module.kenyaemrml.iit.Appointment;
+import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
 import org.openmrs.module.kenyaemrml.iit.Treatment;
-//import org.openmrs.module.webservices.rest.SimpleObject;
-import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
+import org.openmrs.ui.framework.SimpleObject;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,50 +51,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.openmrs.module.kenyaemrml.iit.Appointment;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.sql.CallableStatement;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.openmrs.Patient;
-import org.openmrs.Visit;
-import org.openmrs.api.AdministrationService;
-import org.openmrs.api.context.Context;
-import org.openmrs.api.db.hibernate.DbSessionFactory;
-import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
-import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
-import org.openmrs.module.kenyaui.KenyaUiUtils;
-import org.openmrs.ui.framework.UiUtils;
-import org.openmrs.ui.framework.page.PageModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import org.codehaus.jackson.map.ObjectMapper;
-import java.time.LocalDateTime;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * The main controller for ML in KenyaEMR
@@ -292,116 +275,110 @@ public class MachineLearningRestController extends BaseRestController {
 	 * The IIT risk score POST request.
 	 * ##### Sample Input Payload:
 
-		{
-			"modelConfigs": {
-				"modelId": "XGB_IIT_01042024",
-				"encounterDate": "2023-12-17",
-				"facilityId": "14607",
-				"debug": "true"
-			},
-			"variableValues": {
-				"Age": 17,
-				"births": 0,
-				"pregnancies": 0,
-				"literacy": 0,
-				"poverty": 0,
-				"anc": 0,
-				"pnc": 0,
-				"sba": 0,
-				"hiv_prev": 0,
-				"hiv_count": 0,
-				"condom": 0,
-				"intercourse": 0,
-				"in_union": 0,
-				"circumcision": 0,
-				"partner_away": 0,
-				"partner_men": 0,
-				"partner_women": 0,
-				"sti": 0,
-				"fb": 0,
-				"n_appts": 0,
-				"missed1": 0,
-				"missed5": 0,
-				"missed30": 0,
-				"missed1_last5": 0,
-				"missed5_last5": 0,
-				"missed30_last5": 0,
-				"num_hiv_regimens": 0,
-				"n_visits_lastfive": 0,
-				"n_unscheduled_lastfive": 0,
-				"BMI": 0,
-				"changeInBMI": 0,
-				"Weight": 0,
-				"changeInWeight": 0,
-				"num_adherence_ART": 0,
-				"num_adherence_CTX": 0,
-				"num_poor_ART": 0,
-				"num_poor_CTX": 0,
-				"num_fair_ART": 0,
-				"num_fair_CTX": 0,
-				"n_tests_all": 0,
-				"n_hvl_all": 0,
-				"n_tests_threeyears": 0,
-				"n_hvl_threeyears": 0,
-				"timeOnArt": 0,
-				"AgeARTStart": 0,
-				"recent_hvl_rate": 0,
-				"total_hvl_rate": 0,
-				"art_poor_adherence_rate": 0,
-				"art_fair_adherence_rate": 0,
-				"ctx_poor_adherence_rate": 0,
-				"ctx_fair_adherence_rate": 0,
-				"unscheduled_rate": 0,
-				"all_late30_rate": 0,
-				"all_late5_rate": 0,
-				"all_late1_rate": 0,
-				"recent_late30_rate": 0,
-				"recent_late5_rate": 0,
-				"recent_late1_rate": 0,
-				"GenderFemale": 0,
-				"GenderMale": 0,
-				"PatientSourceCCC": 0,
-				"PatientSourceIPDAdult": 0,
-				"PatientSourceMCH": 0,
-				"PatientSourceOPD": 0,
-				"PatientSourceOther": 0,
-				"PatientSourceTBClinic": 0,
-				"PatientSourceVCT": 0,
-				"MaritalStatusDivorced": 0,
-				"MaritalStatusMarried": 0,
-				"MaritalStatusOther": 0,
-				"MaritalStatusPolygamous": 0,
-				"MaritalStatusSingle": 0,
-				"MaritalStatusWidow": 0,
-				"PopulationTypeGeneralPopulation": 0,
-				"PopulationTypeKeyPopulation": 0,
-				"TreatmentTypeART": 0,
-				"TreatmentTypePMTCT": 0,
-				"OptimizedHIVRegimenNo": 0,
-				"OptimizedHIVRegimenYes": 0,
-				"Other_RegimenNo": 0,
-				"Other_RegimenYes": 0,
-				"PregnantNo": 0,
-				"PregnantNR": 0,
-				"PregnantYes": 0,
-				"DifferentiatedCareCommunityARTDistributionHCWLed": 0,
-				"DifferentiatedCareCommunityARTDistributionpeerled": 0,
-				"DifferentiatedCareFacilityARTdistributionGroup": 0,
-				"DifferentiatedCareFastTrack": 0,
-				"DifferentiatedCareStandardCare": 0,
-				"most_recent_art_adherencefair": 0,
-				"most_recent_art_adherencegood": 0,
-				"most_recent_art_adherencepoor": 0,
-				"most_recent_ctx_adherencefair": 0,
-				"most_recent_ctx_adherencegood": 0,
-				"most_recent_ctx_adherencepoor": 0,
-				"StabilityAssessmentStable": 0,
-				"StabilityAssessmentUnstable": 0,
-				"most_recent_vlHVL": 0,
-				"most_recent_vlLVL": 0,
-				"most_recent_vlSuppressed": 0
-			}
-		}
+	 {
+		 "modelConfigs": {
+			 "modelId": "XGB_IIT_02052024",
+			 "encounterDate": "2024-02-05",
+			 "facilityId": "15204",
+			 "debug": "true"
+		 },
+		 "variableValues": {
+			 "anc": 0,
+			 "sti": 0,
+			 "SumTXCurr": 0,
+			 "poverty": 0,
+			 "pregnancies": 0,
+			 "pnc": 0,
+			 "pop": 0,
+			 "sba": 0,
+			 "owner_typeFaith": 0,
+			 "owner_typeNGO": 0,
+			 "owner_typePrivate": 0,
+			 "owner_typePublic": 0,
+			 "partner_away": 0,
+			 "partner_men": 0,
+			 "partner_women": 0,
+			 "literacy": 0,
+			 "hiv_count": 0,
+			 "hiv_prev": 0,
+			 "in_union": 0,
+			 "intercourse": 0,
+			 "keph_level_nameLevel.2": 0,
+			 "keph_level_nameLevel.3": 0,
+			 "keph_level_nameLevel.4": 0,
+			 "keph_level_nameLevel.5": 0,
+			 "keph_level_nameLevel.6": 0,
+			 "circumcision": 0,
+			 "condom": 0,
+			 "births": 0,
+			 "Age": 43,
+			 "average_tca_last5": 147,
+			 "averagelateness": 4.6,
+			 "averagelateness_last10": 0.7,
+			 "averagelateness_last3": 0,
+			 "averagelateness_last5": 0,
+			 "Breastfeedingno": 1,
+			 "BreastfeedingNR": 0,
+			 "Breastfeedingyes": 0,
+			 "DayFri": 0,
+			 "DayMon": 1,
+			 "DaySat": 0,
+			 "DaySun": 0,
+			 "DayThu": 0,
+			 "DayTue": 0,
+			 "DayWed": 0,
+			 "DifferentiatedCarecommunityartdistributionhcwled": 0,
+			 "DifferentiatedCarecommunityartdistributionpeerled": 0,
+			 "DifferentiatedCareexpress": 0,
+			 "DifferentiatedCarefacilityartdistributiongroup": 1,
+			 "DifferentiatedCarefasttrack": 0,
+			 "DifferentiatedCarestandardcare": 0,
+			 "GenderFemale": 1,
+			 "GenderMale": 0,
+			 "late": 4,
+			 "late_last10": 1,
+			 "late_last3": 0,
+			 "late_last5": 0,
+			 "late_rate": 0.16,
+			 "late28": 3,
+			 "late28_rate": 0.12,
+			 "MaritalStatusDivorced": 0,
+			 "MaritalStatusMarried": 1,
+			 "MaritalStatusMinor": 0,
+			 "MaritalStatusOther": 0,
+			 "MaritalStatusPolygamous": 0,
+			 "MaritalStatusSingle": 0,
+			 "MaritalStatusWidow": 0,
+			 "MonthApr": 0,
+			 "MonthAug": 0,
+			 "MonthDec": 0,
+			 "MonthFeb": 1,
+			 "MonthJan": 0,
+			 "MonthJul": 0,
+			 "MonthJun": 0,
+			 "MonthMar": 0,
+			 "MonthMay": 0,
+			 "MonthNov": 0,
+			 "MonthOct": 0,
+			 "MonthSep": 0,
+			 "most_recent_art_adherencefair": 0,
+			 "most_recent_art_adherencegood": 1,
+			 "most_recent_art_adherencepoor": 0,
+			 "n_appts": 25,
+			 "NextAppointmentDate": 182,
+			 "num_hiv_regimens": 1,
+			 "OptimizedHIVRegimenNo": 0,
+			 "OptimizedHIVRegimenYes": 1,
+			 "Pregnantno": 1,
+			 "PregnantNR": 0,
+			 "Pregnantyes": 0,
+			 "StabilityAssessmentStable": 1,
+			 "StabilityAssessmentUnstable": 0,
+			 "timeOnArt": 146,
+			 "unscheduled_rate": 0.09090909090909091,
+			 "visit_1": 0
+		 }
+	 }
 	 * @param request
 	 * @return
 	 */
@@ -412,6 +389,7 @@ public class MachineLearningRestController extends BaseRestController {
 		String requestBody = null;
 		try {
 			requestBody = MLUtils.fetchRequestBody(request.getReader());
+			System.err.println("Found Request: " + requestBody);
 			ObjectNode modelConfigs = MLUtils.getModelConfig(requestBody);
 			String facilityMflCode = modelConfigs.get(MLUtils.FACILITY_ID_REQUEST_VARIABLE).asText();
 			boolean isDebugMode = modelConfigs.has("debug") && modelConfigs.get("debug").asText().equals("true") ? true : false;
@@ -427,7 +405,7 @@ public class MachineLearningRestController extends BaseRestController {
 				return new ResponseEntity<Object>("The service requires model, date, and facility information", new HttpHeaders(), HttpStatus.BAD_REQUEST);
 			}
 
-			JSONObject profile = MLUtils.getHTSFacilityProfile("FacilityCode", facilityMflCode, MLUtils.getIITFacilityCutOffs());
+			JSONObject profile = MLUtils.getIITFacilityProfile("FacilityCode", facilityMflCode, MLUtils.getIITFacilityCutOffs());
 			
 			if (profile == null) {
 				return new ResponseEntity<Object>("Your facility currently does not support ML. Kindly contact SUPPORT to include your facility code ( " + facilityMflCode + " ) in the ML Matrix.", new HttpHeaders(), HttpStatus.BAD_REQUEST);
