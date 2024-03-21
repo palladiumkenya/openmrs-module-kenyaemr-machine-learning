@@ -86,8 +86,8 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			return scoringResult;
 		}
 		catch (Exception e) {
-			log.error("IIT ML: Exception during preparation of input parameters or scoring of values for IIT model: " + e.getMessage());
-			System.err.println("IIT ML: Exception during preparation of input parameters or scoring of values for IIT model: " + e.getMessage());
+			log.error("HTS ML: Exception during preparation of input parameters or scoring of values for HTS model: " + e.getMessage());
+			System.err.println("HTS ML: Exception during preparation of input parameters or scoring of values for HTS model: " + e.getMessage());
 			e.printStackTrace();
 			return(null);
 		}
@@ -170,7 +170,8 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			Object inputValue = inputFields.getFields().get(evaluatorFieldNameValue);
 			
 			if (inputValue == null) {
-				log.warn("Model value not found for the following field: " + evaluatorFieldNameValue);
+				System.err.println("ML: Model value not found for the following field: " + evaluatorFieldNameValue);
+				log.warn("ML: Model value not found for the following field: " + evaluatorFieldNameValue);
 			}
 			
 			arguments.put(evaluatorFieldName, evaluatorField.prepare(inputValue));
