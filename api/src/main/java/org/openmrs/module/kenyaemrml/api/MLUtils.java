@@ -40,7 +40,26 @@ public class MLUtils {
 	
 	public static String MODEL_CONFIG_OBJECT_KEY = "modelConfigs";
 
-	public static String[] FACILITY_PROFILE_VARIABLES = { "births", "pregnancies", "literacy", "poverty", "anc", "pnc", "sba", "hiv_prev", "hiv_count", "condom", "intercourse", "in_union", "circumcision", "partner_away", "partner_men", "partner_women", "sti", "fb" };
+	public static String[] HTS_FACILITY_PROFILE_VARIABLES = {
+			"births",
+			"pregnancies",
+			"literacy",
+			"poverty",
+			"anc",
+			"pnc",
+			"sba",
+			"hiv_prev",
+			"hiv_count",
+			"condom",
+			"intercourse",
+			"in_union",
+			"circumcision",
+			"partner_away",
+			"partner_men",
+			"partner_women",
+			"sti",
+			"pop"
+	};
 
 	public static String[] IIT_FACILITY_PROFILE_VARIABLES = {
 			"SumTXCurr",
@@ -139,8 +158,8 @@ public class MLUtils {
 		
 		JSONObject profile = getHTSFacilityProfile("FacilityCode", facilityMflCode, getHTSFacilityCutOffs());
 		
-		for (int i = 0; i < FACILITY_PROFILE_VARIABLES.length; i++) {
-			modelParams.put(FACILITY_PROFILE_VARIABLES[i], profile.get(FACILITY_PROFILE_VARIABLES[i]));
+		for (int i = 0; i < HTS_FACILITY_PROFILE_VARIABLES.length; i++) {
+			modelParams.put(HTS_FACILITY_PROFILE_VARIABLES[i], profile.get(HTS_FACILITY_PROFILE_VARIABLES[i]));
 		}
 		
 		ModelInputFields inputFields = new ModelInputFields();
@@ -309,7 +328,7 @@ public class MLUtils {
 	 * @return
 	 */
 	public static String readBundledHtsCasefindingFacilityProfileFile() {
-		InputStream stream = MLUtils.class.getClassLoader().getResourceAsStream("hts/hts_ml_facility_cut_off_national_feb_2024.json");
+		InputStream stream = MLUtils.class.getClassLoader().getResourceAsStream("hts/hts_ml_facility_cut_off_national_march_2024.json");
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			ArrayNode result = mapper.readValue(stream, ArrayNode.class);
