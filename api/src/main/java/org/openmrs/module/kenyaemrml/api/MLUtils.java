@@ -328,7 +328,7 @@ public class MLUtils {
 	 * @return
 	 */
 	public static String readBundledHtsCasefindingFacilityProfileFile() {
-		InputStream stream = MLUtils.class.getClassLoader().getResourceAsStream("hts/hts_ml_facility_cut_off_national_march_2024.json");
+		InputStream stream = MLUtils.class.getClassLoader().getResourceAsStream("hts/hts_ml_facility_cut_off_national_april_2024.json");
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			ArrayNode result = mapper.readValue(stream, ArrayNode.class);
@@ -409,12 +409,12 @@ public class MLUtils {
 		try {
 			//Read JSON file
 			Object obj = jsonParser.parse(readBundledHtsCasefindingFacilityProfileFile());
-			JSONArray drugsMap = (JSONArray) obj;
+			JSONArray facilitiesMap = (JSONArray) obj;
 			
-			return drugsMap;
-			
+			return facilitiesMap;			
 		}
-		catch (ParseException e) {
+		catch (Exception e) {
+			System.err.println("HTS ML ERROR: Failed to parse the facility matrix file: " + e.getMessage());
 			e.printStackTrace();
 		}
 		
@@ -432,12 +432,12 @@ public class MLUtils {
 		try {
 			//Read JSON file
 			Object obj = jsonParser.parse(readBundledIITCasefindingFacilityProfileFile());
-			JSONArray drugsMap = (JSONArray) obj;
+			JSONArray facilitiesMap = (JSONArray) obj;
 			
-			return drugsMap;
-			
+			return facilitiesMap;
 		}
-		catch (ParseException e) {
+		catch (Exception e) {
+			System.err.println("IIT ML ERROR: Failed to parse the facility matrix file: " + e.getMessage());
 			e.printStackTrace();
 		}
 		
