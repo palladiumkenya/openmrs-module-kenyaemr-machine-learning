@@ -82,7 +82,12 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			HTSMLService hTSMLService = Context.getService(HTSMLService.class);
 			evaluator = hTSMLService.getEvaluator();
 			// evaluator.verify();
-			ScoringResult scoringResult = new ScoringResult(score(evaluator, inputFields, debug));
+			// ScoringResult scoringResult = new ScoringResult(score(evaluator, inputFields, debug));
+			// Get the results
+			Map<String, Object> results = score(evaluator, inputFields, debug);
+			// Add the thresholds
+			results.put("thresholds", MLUtils.getHTSThresholds());
+			ScoringResult scoringResult = new ScoringResult(results);
 			return scoringResult;
 		}
 		catch (Exception e) {
@@ -99,7 +104,12 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			IITMLService iITMLService = Context.getService(IITMLService.class);
 			evaluator = iITMLService.getEvaluator();
 			// evaluator.verify();
-			ScoringResult scoringResult = new ScoringResult(score(evaluator, inputFields, debug));
+			// ScoringResult scoringResult = new ScoringResult(score(evaluator, inputFields, debug));
+			// Get the results
+			Map<String, Object> results = score(evaluator, inputFields, debug);
+			// Add the thresholds
+			results.put("thresholds", MLUtils.getIITThresholds());
+			ScoringResult scoringResult = new ScoringResult(results);
 			return scoringResult;
 		}
 		catch (Exception e) {
@@ -147,7 +157,9 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			
 			return combinedResult;
 		} else {
-			return result;
+			Map<String, Object> predictions = new HashMap<String, Object>();
+			predictions.put("predictions", result);
+			return predictions;
 		}
 	}
 	
