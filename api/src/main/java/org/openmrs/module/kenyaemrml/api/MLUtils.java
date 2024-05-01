@@ -19,11 +19,13 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.openmrs.GlobalProperty;
 import org.openmrs.Location;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemr.api.KenyaEmrService;
 import org.openmrs.module.kenyaemrml.domain.ModelInputFields;
 import org.openmrs.module.kenyaemrml.domain.ScoringResult;
+import org.openmrs.ui.framework.SimpleObject;
 
 
 public class MLUtils {
@@ -356,6 +358,163 @@ public class MLUtils {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+
+	/**
+	 * Get the current HTS thresholds for this facility from the matrix file
+	 * @return SimpleObject - The thresholds
+	 */
+	public static SimpleObject getHTSThresholds() {
+		SimpleObject ret = SimpleObject.create("Very_High", 0.00, "High", 0.00, "Medium", 0.00);
+		// Fetch from global properties incase the matrix has no thresholds
+
+		// Low Risk
+		String lowRiskThreshold = "kenyaemrml.hts.lowRiskThreshold";
+		GlobalProperty gpLowRiskThreshold = Context.getAdministrationService().getGlobalPropertyObject(lowRiskThreshold);
+
+		if(gpLowRiskThreshold != null) {
+			String stLowRiskThreshold = gpLowRiskThreshold.getPropertyValue();
+			if(stLowRiskThreshold != null) {
+				try {
+					Double numLowRiskThreshold = Double.valueOf(stLowRiskThreshold.trim());
+					ret.put("Medium", numLowRiskThreshold);
+				} catch(Exception e) {}
+			}
+		}
+
+		// Medium Risk
+		String mediumRiskThreshold = "kenyaemrml.hts.mediumRiskThreshold";
+		GlobalProperty gpMediumRiskThreshold = Context.getAdministrationService().getGlobalPropertyObject(mediumRiskThreshold);
+
+		if(gpMediumRiskThreshold != null) {
+			String stMediumRiskThreshold = gpMediumRiskThreshold.getPropertyValue();
+			if(stMediumRiskThreshold != null) {
+				try {
+					Double numMediumRiskThreshold = Double.valueOf(stMediumRiskThreshold.trim());
+					ret.put("High", numMediumRiskThreshold);
+				} catch(Exception e) {}
+			}
+		}
+
+		// High Risk
+		String highRiskThreshold = "kenyaemrml.hts.highRiskThreshold";
+		GlobalProperty gpHighRiskThreshold = Context.getAdministrationService().getGlobalPropertyObject(highRiskThreshold);
+
+		if(gpHighRiskThreshold != null) {
+			String stHighRiskThreshold = gpHighRiskThreshold.getPropertyValue();
+			if(stHighRiskThreshold != null) {
+				try {
+					Double numHighRiskThreshold = Double.valueOf(stHighRiskThreshold.trim());
+					ret.put("Very_High", numHighRiskThreshold);
+				} catch(Exception e) {}
+			}
+		}
+
+		// Check if the matrix has the thresholds
+		String facilityMflCode = getDefaultMflCode();
+		InputStream stream = MLUtils.class.getClassLoader().getResourceAsStream("hts/hts_ml_facility_cut_off_national_april_2024.json");
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			JsonNode rootNode = mapper.readTree(stream);
+			for (JsonNode node : rootNode) {
+				if (node.get("FacilityCode").asText().trim().equalsIgnoreCase(facilityMflCode)) {
+					// Extract values for Very_High, High, and Medium
+					double veryHigh = node.get("Very_High").asDouble();
+					double high = node.get("High").asDouble();
+					double medium = node.get("Medium").asDouble();
+	
+					// Create object containing the values
+					return SimpleObject.create(
+							"Very_High", veryHigh,
+							"High", high,
+							"Medium", medium
+					);
+				}
+			}
+		} catch (Exception e) {
+			System.err.println("HTS ML Error: failed to get matrix stream: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return (ret);
+	}
+
+	/**
+	 * Get the current IIT thresholds for this facility from the matrix file
+	 * @return SimpleObject - The thresholds
+	 */
+	public static SimpleObject getIITThresholds() {
+		SimpleObject ret = SimpleObject.create("Very_High", 0.00, "High", 0.00, "Medium", 0.00);
+		// Fetch from global properties incase the matrix has no thresholds
+
+		// Low Risk
+		String lowRiskThreshold = "kenyaemrml.iit.lowRiskThreshold";
+		GlobalProperty gpLowRiskThreshold = Context.getAdministrationService().getGlobalPropertyObject(lowRiskThreshold);
+
+		if(gpLowRiskThreshold != null) {
+			String stLowRiskThreshold = gpLowRiskThreshold.getPropertyValue();
+			if(stLowRiskThreshold != null) {
+				try {
+					Double numLowRiskThreshold = Double.valueOf(stLowRiskThreshold.trim());
+					ret.put("Medium", numLowRiskThreshold);
+				} catch(Exception e) {}
+			}
+		}
+
+		// Medium Risk
+		String mediumRiskThreshold = "kenyaemrml.iit.mediumRiskThreshold";
+		GlobalProperty gpMediumRiskThreshold = Context.getAdministrationService().getGlobalPropertyObject(mediumRiskThreshold);
+
+		if(gpMediumRiskThreshold != null) {
+			String stMediumRiskThreshold = gpMediumRiskThreshold.getPropertyValue();
+			if(stMediumRiskThreshold != null) {
+				try {
+					Double numMediumRiskThreshold = Double.valueOf(stMediumRiskThreshold.trim());
+					ret.put("High", numMediumRiskThreshold);
+				} catch(Exception e) {}
+			}
+		}
+
+		// High Risk
+		String highRiskThreshold = "kenyaemrml.iit.highRiskThreshold";
+		GlobalProperty gpHighRiskThreshold = Context.getAdministrationService().getGlobalPropertyObject(highRiskThreshold);
+
+		if(gpHighRiskThreshold != null) {
+			String stHighRiskThreshold = gpHighRiskThreshold.getPropertyValue();
+			if(stHighRiskThreshold != null) {
+				try {
+					Double numHighRiskThreshold = Double.valueOf(stHighRiskThreshold.trim());
+					ret.put("Very_High", numHighRiskThreshold);
+				} catch(Exception e) {}
+			}
+		}
+
+		// Check if the matrix has the thresholds
+		String facilityMflCode = getDefaultMflCode();
+		InputStream stream = MLUtils.class.getClassLoader().getResourceAsStream("iit/iit_ml_facility_cut_off_national_dec_2023.json");
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			JsonNode rootNode = mapper.readTree(stream);
+			for (JsonNode node : rootNode) {
+				if (node.get("FacilityCode").asText().trim().equalsIgnoreCase(facilityMflCode)) {
+					// Extract values for Very_High, High, and Medium
+					double veryHigh = node.get("Very_High").asDouble();
+					double high = node.get("High").asDouble();
+					double medium = node.get("Medium").asDouble();
+	
+					// Create object containing the values
+					return SimpleObject.create(
+							"Very_High", veryHigh,
+							"High", high,
+							"Medium", medium
+					);
+				}
+			}
+		} catch (Exception e) {
+			System.err.println("IIT ML Error: failed to get matrix stream: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return (ret);
 	}
 
 	/**
