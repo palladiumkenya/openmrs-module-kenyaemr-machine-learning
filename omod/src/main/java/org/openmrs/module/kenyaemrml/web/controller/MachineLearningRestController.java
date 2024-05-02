@@ -66,17 +66,16 @@ public class MachineLearningRestController extends BaseRestController {
 	 * ### Sample Input Payload
 	 {
 		 "modelConfigs": {
-			 "modelId": "hts_xgb_06032024_march_2024",
+			 "modelId": "hts_xgb_01052024_may_2024",
 			 "encounterDate": "2024-03-06",
 			 "facilityId": "13258",
 			 "debug": "true"
 		 },
 		 "variableValues": {
 			 "Age":0,
-			 "TbScreeningNo.Signs":0,
-			 "TbScreeningNot.Done":0,
-			 "TbScreeningOn.TB.Treatment":0,
-			 "TbScreeningPresumed.TB":0,
+			 "ScreenedTBDECLINE":0,
+			 "ScreenedTBNO":0,
+			 "ScreenedTBYES":0,
 			 "HTSStrategyHB":0,
 			 "HTSStrategyHP":0,
 			 "HTSStrategyINDEX":0,
