@@ -49,6 +49,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+// import org.springframework.web.bind.annotation.CrossOrigin;
 
 /**
  * The main controller for ML in KenyaEMR
@@ -196,6 +197,8 @@ public class MachineLearningRestController extends BaseRestController {
 	 * @param request
 	 * @return
 	 */
+	// @CrossOrigin(origins = "*", methods = {RequestMethod.POST, RequestMethod.OPTIONS})
+	@EnableCors(origins = "*", methods = "*", headers = "Origin, Content-Type, Accept, Authorization, *")
 	@RequestMapping(method = RequestMethod.POST, value = "/casefindingscore")
 	@ResponseBody
 	public Object processHTSModel(HttpServletRequest request) {
@@ -352,6 +355,8 @@ public class MachineLearningRestController extends BaseRestController {
 	 * @param request
 	 * @return
 	 */
+	// @CrossOrigin(origins = "*", methods = {RequestMethod.POST, RequestMethod.OPTIONS})
+	@EnableCors(origins = "*", methods = "*", headers = "Origin, Content-Type, Accept, Authorization, *")
 	@RequestMapping(method = RequestMethod.POST, value = "/iitscore")
 	@ResponseBody
 	public Object processIITModel(HttpServletRequest request) {
