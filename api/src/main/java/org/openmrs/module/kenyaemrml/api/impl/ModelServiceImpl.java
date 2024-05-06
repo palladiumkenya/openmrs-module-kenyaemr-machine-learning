@@ -82,12 +82,17 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			HTSMLService hTSMLService = Context.getService(HTSMLService.class);
 			evaluator = hTSMLService.getEvaluator();
 			// evaluator.verify();
-			ScoringResult scoringResult = new ScoringResult(score(evaluator, inputFields, debug));
+			// ScoringResult scoringResult = new ScoringResult(score(evaluator, inputFields, debug));
+			// Get the results
+			Map<String, Object> results = score(evaluator, inputFields, debug);
+			// Add the thresholds
+			results.put("thresholds", MLUtils.getHTSThresholds());
+			ScoringResult scoringResult = new ScoringResult(results);
 			return scoringResult;
 		}
 		catch (Exception e) {
-			log.error("IIT ML: Exception during preparation of input parameters or scoring of values for IIT model: " + e.getMessage());
-			System.err.println("IIT ML: Exception during preparation of input parameters or scoring of values for IIT model: " + e.getMessage());
+			log.error("HTS ML: Exception during preparation of input parameters or scoring of values for HTS model: " + e.getMessage());
+			System.err.println("HTS ML: Exception during preparation of input parameters or scoring of values for HTS model: " + e.getMessage());
 			e.printStackTrace();
 			return(null);
 		}
@@ -99,7 +104,12 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			IITMLService iITMLService = Context.getService(IITMLService.class);
 			evaluator = iITMLService.getEvaluator();
 			// evaluator.verify();
-			ScoringResult scoringResult = new ScoringResult(score(evaluator, inputFields, debug));
+			// ScoringResult scoringResult = new ScoringResult(score(evaluator, inputFields, debug));
+			// Get the results
+			Map<String, Object> results = score(evaluator, inputFields, debug);
+			// Add the thresholds
+			results.put("thresholds", MLUtils.getIITThresholds());
+			ScoringResult scoringResult = new ScoringResult(results);
 			return scoringResult;
 		}
 		catch (Exception e) {
@@ -147,7 +157,9 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			
 			return combinedResult;
 		} else {
-			return result;
+			Map<String, Object> predictions = new HashMap<String, Object>();
+			predictions.put("predictions", result);
+			return predictions;
 		}
 	}
 	
@@ -170,7 +182,8 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			Object inputValue = inputFields.getFields().get(evaluatorFieldNameValue);
 			
 			if (inputValue == null) {
-				log.warn("Model value not found for the following field: " + evaluatorFieldNameValue);
+				System.err.println("ML: Model value not found for the following field: " + evaluatorFieldNameValue);
+				log.warn("ML: Model value not found for the following field: " + evaluatorFieldNameValue);
 			}
 			
 			arguments.put(evaluatorFieldName, evaluatorField.prepare(inputValue));
