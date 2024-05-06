@@ -29,7 +29,7 @@ public class HTSMLServiceImpl extends BaseOpenmrsService implements HTSMLService
 	private void init() {
 		try {
 			System.out.println("HTS ML: Model NOT loaded. Now loading");
-			String modelId = "hts_xgb_1211_jan_2023";
+			String modelId = "hts_xgb_01052024_may_2024";
 			String fullModelZipFileName = modelId.concat(".pmml.zip");
 			fullModelZipFileName = "hts/" + fullModelZipFileName;
 			InputStream stream = HTSMLServiceImpl.class.getClassLoader().getResourceAsStream(fullModelZipFileName);

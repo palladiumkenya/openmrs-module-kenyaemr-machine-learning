@@ -51,6 +51,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.openmrs.module.kenyaemrml.iit.Appointment;
+// import org.springframework.web.bind.annotation.CrossOrigin;
 
 /**
  * The main controller for ML in KenyaEMR
@@ -64,169 +65,142 @@ public class MachineLearningRestController extends BaseRestController {
 	/**
 	 * The HTS case finding POST request.
 	 * ### Sample Input Payload
-		{
-			"modelConfigs": {
-				"modelId": "hts_xgb_1211_jan_2023",
-				"encounterDate": "2023-03-03",
-				"facilityId": "14607",
-				"debug": "true"
-			},
-			"variableValues": {
-				"Age": 31,
-				"PopulationTypeGP": 1,
-				"PopulationTypeKP": 0,
-				"PopulationTypePRIORITY": 0,
-				"KeyPopulationFSW": 0,
-				"KeyPopulationMSM": 0,
-				"KeyPopulationNR": 1,
-				"KeyPopulationOther": 0,
-				"KeyPopulationPWID": 0,
-				"PriorityPopulationAGYW": 0,
-				"PriorityPopulationFISHERMEN": 0,
-				"PriorityPopulationNR": 1,
-				"PriorityPopulationOTHER": 0,
-				"DepartmentEMERGENCY": 0,
-				"DepartmentIPD": 0,
-				"DepartmentOPD": 0,
-				"DepartmentPMTCT": 0,
-				"DepartmentVCT": 1,
-				"IsHealthWorkerNO": 1,
-				"IsHealthWorkerNR": 0,
-				"IsHealthWorkerYES": 0,
-				"SexuallyActiveNO": 0,
-				"SexuallyActiveNR": 0,
-				"SexuallyActiveYES": 1,
-				"NewPartnerNO": 0,
-				"NewPartnerNR": 0,
-				"NewPartnerYES": 1,
-				"PartnerHIVStatusNEGATIVE": 0,
-				"PartnerHIVStatusNR": 0,
-				"PartnerHIVStatusPOSITIVE": 0,
-				"PartnerHIVStatusUNKNOWN": 1,
-				"NumberOfPartnersMULTIPLE": 0,
-				"NumberOfPartnersNR": 1,
-				"NumberOfPartnersSINGLE": 0,
-				"AlcoholSexALWAYS": 0,
-				"AlcoholSexNEVER": 0,
-				"AlcoholSexNR": 1,
-				"AlcoholSexSOMETIMES": 0,
-				"MoneySexNO": 1,
-				"MoneySexNR": 0,
-				"MoneySexYES": 0,
-				"CondomBurstNO": 1,
-				"CondomBurstNR": 0,
-				"CondomBurstYES": 0,
-				"UnknownStatusPartnerNO": 1,
-				"UnknownStatusPartnerNR": 0,
-				"UnknownStatusPartnerYES": 0,
-				"KnownStatusPartnerNO": 1,
-				"KnownStatusPartnerNR": 0,
-				"KnownStatusPartnerYES": 0,
-				"PregnantNO": 1,
-				"PregnantNR": 0,
-				"PregnantYES": 0,
-				"BreastfeedingMotherNO": 1,
-				"BreastfeedingMotherNR": 0,
-				"BreastfeedingMotherYES": 0,
-				"ExperiencedGBVNO": 1,
-				"ExperiencedGBVYES": 0,
-				"CurrentlyOnPrepNO": 0,
-				"CurrentlyOnPrepNR": 0,
-				"CurrentlyOnPrepYES": 1,
-				"CurrentlyHasSTINO": 1,
-				"CurrentlyHasSTINR": 0,
-				"CurrentlyHasSTIYES": 0,
-				"SharedNeedleNO": 0,
-				"SharedNeedleNR": 1,
-				"SharedNeedleYES": 0,
-				"NeedleStickInjuriesNO": 0,
-				"NeedleStickInjuriesNR": 1,
-				"NeedleStickInjuriesYES": 0,
-				"TraditionalProceduresNO": 1,
-				"TraditionalProceduresNR": 0,
-				"TraditionalProceduresYES": 0,
-				"MothersStatusNEGATIVE": 0,
-				"MothersStatusNR": 1,
-				"MothersStatusPOSITIVE": 0,
-				"MothersStatusUNKNOWN": 0,
-				"ReferredForTestingNO": 0,
-				"ReferredForTestingYES": 1,
-				"GenderFEMALE": 1,
-				"GenderMALE": 0,
-				"MaritalStatusDIVORCED": 0,
-				"MaritalStatusMARRIED": 0,
-				"MaritalStatusMINOR": 0,
-				"MaritalStatusPOLYGAMOUS": 0,
-				"MaritalStatusSINGLE": 0,
-				"EverTestedForHivNO": 0,
-				"EverTestedForHivYES": 0,
-				"MonthsSinceLastTestLASTSIXMONTHS": 0,
-				"MonthsSinceLastTestMORETHANTWOYEARS": 1,
-				"MonthsSinceLastTestNR": 0,
-				"MonthsSinceLastTestONETOTWOYEARS": 0,
-				"MonthsSinceLastTestSEVENTOTWELVE": 0,
-				"ClientTestedAsCOUPLE": 0,
-				"ClientTestedAsINDIVIDUAL": 0,
-				"EntryPointIPD": 0,
-				"EntryPointOPD": 0,
-				"EntryPointOTHER": 0,
-				"EntryPointPEDIATRIC": 0,
-				"EntryPointPMTCT_ANC": 0,
-				"EntryPointPMTCT_MAT_PNC": 0,
-				"EntryPointTB": 0,
-				"EntryPointVCT": 1,
-				"EntryPointVMMC": 0,
-				"TestStrategyHB": 0,
-				"TestStrategyHP": 0,
-				"TestStrategyINDEX": 0,
-				"TestStrategyMO": 0,
-				"TestStrategyNP": 0,
-				"TestStrategyOTHER": 0,
-				"TestStrategySNS": 0,
-				"TestStrategyVI": 0,
-				"TestStrategyVS": 1,
-				"TbScreeningCONFIRMEDTB": 0,
-				"TbScreeningNOPRESUMEDTB": 0,
-				"TbScreeningPRESUMEDTB": 0,
-				"ClientSelfTestedNO": 0,
-				"ClientSelfTestedYES": 1,
-				"CoupleDiscordantNO": 0,
-				"CoupleDiscordantNR": 0,
-				"CoupleDiscordantYES": 1,
-				"SEXUALNO": 1,
-				"SEXUALYES": 0,
-				"SOCIALNO": 1,
-				"SOCIALYES": 0,
-				"NONENO": 1,
-				"NONEYES": 0,
-				"NEEDLE_SHARINGNO": 0,
-				"NEEDLE_SHARINGYES": 1,
-				"ReceivedPrEPNO": 0,
-				"ReceivedPrEPYES": 1,
-				"ReceivedPEPNO": 0,
-				"ReceivedPEPYES": 1,
-				"ReceivedTBNO": 1,
-				"ReceivedTBYES": 0,
-				"ReceivedSTINO": 0,
-				"ReceivedSTIYES": 1,
-				"GBVSexualNO": 1,
-				"GBVSexualYES": 0,
-				"GBVPhysicalNO": 1,
-				"GBVPhysicalYES": 0,
-				"GBVEmotionalNO": 1,
-				"GBVEmotionalYES": 0,
-				"dayofweekFRIDAY": 1,
-				"dayofweekMONDAY": 0,
-				"dayofweekSATURDAY": 0,
-				"dayofweekSUNDAY": 0,
-				"dayofweekTHURSDAY": 0,
-				"dayofweekTUESDAY": 0,
-				"dayofweekWEDNESDAY": 0
-			}
-		}
+	 {
+		 "modelConfigs": {
+			 "modelId": "hts_xgb_01052024_may_2024",
+			 "encounterDate": "2024-03-06",
+			 "facilityId": "13258",
+			 "debug": "true"
+		 },
+		 "variableValues": {
+			 "Age":0,
+			 "ScreenedTBDECLINE":0,
+			 "ScreenedTBNO":0,
+			 "ScreenedTBYES":0,
+			 "HTSStrategyHB":0,
+			 "HTSStrategyHP":0,
+			 "HTSStrategyINDEX":0,
+			 "HTSStrategyMO":0,
+			 "HTSStrategyNP":0,
+			 "HTSStrategyOTHER":0,
+			 "HTSStrategySNS":0,
+			 "HTSStrategyVI":0,
+			 "HTSStrategyVS":0,
+			 "GenderFEMALE":0,
+			 "GenderMALE":0,
+			 "MaritalStatusDIVORCED":0,
+			 "MaritalStatusMARRIED":0,
+			 "MaritalStatusMINOR":0,
+			 "MaritalStatusOTHER":0,
+			 "MaritalStatusPOLYGAMOUS":0,
+			 "MaritalStatusSINGLE":0,
+			 "HTSEntryPointHOMEBASED":0,
+			 "HTSEntryPointIPD":0,
+			 "HTSEntryPointOPD":0,
+			 "HTSEntryPointOTHER":0,
+			 "HTSEntryPointPEDIATRIC":0,
+			 "HTSEntryPointPMTCT_ANC":0,
+			 "HTSEntryPointPMTCT_MAT_PNC":0,
+			 "HTSEntryPointTB":0,
+			 "HTSEntryPointVCT":0,
+			 "HTSEntryPointVMMC":0,
+			 "CoupleDiscordantNO":0,
+			 "CoupleDiscordantNR":0,
+			 "CoupleDiscordantYES":0,
+			 "KnownStatusPartnerDECLINE":0,
+			 "KnownStatusPartnerNO":0,
+			 "KnownStatusPartnerNR":0,
+			 "KnownStatusPartnerYES":0,
+			 "PregnantDECLINE":0,
+			 "PregnantNO":0,
+			 "PregnantNR":0,
+			 "PregnantYES":0,
+			 "MultiplePartnersNO":0,
+			 "MultiplePartnersNR":0,
+			 "MultiplePartnersYES":0,
+			 "TBStatusNO_TBSIGNS":0,
+			 "TBStatusNR":0,
+			 "TBStatusTBCONFIRMED":0,
+			 "TBStatusTBPRESUMED":0,
+			 "SEXUALNO":0,
+			 "SEXUALNR":0,
+			 "SEXUALYES":0,
+			 "NONENO":0,
+			 "NONEYES":0,
+			 "DepartmentEMERGENCY":0,
+			 "DepartmentIPD":0,
+			 "DepartmentOPD":0,
+			 "DepartmentPMTCT":0,
+			 "DepartmentVCT":0,
+			 "PatientTypeHP":0,
+			 "PatientTypeNon_HP":0,
+			 "PopulationTypeGP":0,
+			 "PopulationTypeKP":0,
+			 "PopulationTypePRIORITY":0,
+			 "FeverNO":0,
+			 "FeverNR":0,
+			 "FeverYES":0,
+			 "MonthsSinceLastTestLASTSIXMONTHS":0,
+			 "MonthsSinceLastTestMORETHANTWOYEARS":0,
+			 "MonthsSinceLastTestNR":0,
+			 "MonthsSinceLastTestONETOTWOYEARS":0,
+			 "MonthsSinceLastTestSEVENTOTWELVE":0,
+			 "NightSweatsNO":0,
+			 "NightSweatsNR":0,
+			 "NightSweatsYES":0,
+			 "CoughNO":0,
+			 "CoughNR":0,
+			 "CoughYES":0,
+			 "PartnerHIVStatusDECLINE":0,
+			 "PartnerHIVStatusNEGATIVE":0,
+			 "PartnerHIVStatusNR":0,
+			 "PartnerHIVStatusPOSITIVE":0,
+			 "PartnerHIVStatusUNKNOWN":0,
+			 "BreastfeedingMotherDECLINE":0,
+			 "BreastfeedingMotherNO":0,
+			 "BreastfeedingMotherNR":0,
+			 "BreastfeedingMotherYES":0,
+			 "UnknownStatusPartnerDECLINE":0,
+			 "UnknownStatusPartnerNO":0,
+			 "UnknownStatusPartnerNR":0,
+			 "UnknownStatusPartnerYES":0,
+			 "PriorityPopulationAGYW":0,
+			 "PriorityPopulationFISHERMEN":0,
+			 "PriorityPopulationNR":0,
+			 "PriorityPopulationOTHER":0,
+			 "MoneySexDECLINE":0,
+			 "MoneySexNO":0,
+			 "MoneySexNR":0,
+			 "MoneySexYES":0,
+			 "AlcoholSexALWAYS":0,
+			 "AlcoholSexNEVER":0,
+			 "AlcoholSexNR":0,
+			 "AlcoholSexSOMETIMES":0,
+			 "NewPartnerDECLINE":0,
+			 "NewPartnerNO":0,
+			 "NewPartnerNR":0,
+			 "NewPartnerYES":0,
+			 "TestedHIVBeforeNo":0,
+			 "TestedHIVBeforeYes":0,
+			 "NumberOfPartnersMULTIPLE":0,
+			 "NumberOfPartnersNR":0,
+			 "NumberOfPartnersSINGLE":0,
+			 "SexuallyActiveDECLINE":0,
+			 "SexuallyActiveNO":0,
+			 "SexuallyActiveNR":0,
+			 "SexuallyActiveYES":0,
+			 "KeyPopulationFSW":0,
+			 "KeyPopulationMSM":0,
+			 "KeyPopulationNR":0,
+			 "KeyPopulationOther":0,
+			 "KeyPopulationPWID":0
+	     }
+	 }
 	 * @param request
 	 * @return
 	 */
+	// @CrossOrigin(origins = "*", methods = {RequestMethod.POST, RequestMethod.OPTIONS})
+	@EnableCors(origins = "*", methods = "*", headers = "Origin, Content-Type, Accept, Authorization, *")
 	@RequestMapping(method = RequestMethod.POST, value = "/casefindingscore")
 	@ResponseBody
 	public Object processHTSModel(HttpServletRequest request) {
@@ -234,6 +208,7 @@ public class MachineLearningRestController extends BaseRestController {
 		String requestBody = null;
 		try {
 			requestBody = MLUtils.fetchRequestBody(request.getReader());
+			System.out.println("HTS ML: REST request: " + requestBody);
 			ObjectNode modelConfigs = MLUtils.getModelConfig(requestBody);
 			String facilityMflCode = modelConfigs.get(MLUtils.FACILITY_ID_REQUEST_VARIABLE).asText();
 			boolean isDebugMode = modelConfigs.has("debug") && modelConfigs.get("debug").asText().equals("true") ? true
@@ -382,6 +357,8 @@ public class MachineLearningRestController extends BaseRestController {
 	 * @param request
 	 * @return
 	 */
+	// @CrossOrigin(origins = "*", methods = {RequestMethod.POST, RequestMethod.OPTIONS})
+	@EnableCors(origins = "*", methods = "*", headers = "Origin, Content-Type, Accept, Authorization, *")
 	@RequestMapping(method = RequestMethod.POST, value = "/iitscore")
 	@ResponseBody
 	public Object processIITModel(HttpServletRequest request) {
@@ -389,7 +366,7 @@ public class MachineLearningRestController extends BaseRestController {
 		String requestBody = null;
 		try {
 			requestBody = MLUtils.fetchRequestBody(request.getReader());
-			System.err.println("Found Request: " + requestBody);
+			System.out.println("IIT ML: REST Request: " + requestBody);
 			ObjectNode modelConfigs = MLUtils.getModelConfig(requestBody);
 			String facilityMflCode = modelConfigs.get(MLUtils.FACILITY_ID_REQUEST_VARIABLE).asText();
 			boolean isDebugMode = modelConfigs.has("debug") && modelConfigs.get("debug").asText().equals("true") ? true : false;
@@ -2870,7 +2847,7 @@ public class MachineLearningRestController extends BaseRestController {
 	 * 		"patientId": 234
 	 * }
 	 * 
-	 * @param patientId - The patient id
+	 * patientId - The patient id
 	 * @return the score JSON {"patientId": 234, "riskScore": 0.12345678, "riskDescription": "High Risk"}
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/updatepatientiitscore")
