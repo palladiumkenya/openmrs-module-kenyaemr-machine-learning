@@ -8,6 +8,7 @@ import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
@@ -20,6 +21,7 @@ import java.util.regex.Pattern;
 import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.formula.functions.T;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
@@ -35,6 +37,7 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.PersonService;
 import org.openmrs.api.ProgramWorkflowService;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.db.hibernate.DbSessionFactory;
 import org.openmrs.calculation.result.CalculationResult;
 import org.openmrs.module.kenyaemr.api.KenyaEmrService;
 import org.openmrs.module.kenyaemr.calculation.EmrCalculationUtils;
@@ -44,9 +47,10 @@ import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.api.ModelService;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
+import org.openmrs.module.reporting.evaluation.querybuilder.SqlQueryBuilder;
 import org.openmrs.parameter.EncounterSearchCriteria;
 import org.openmrs.parameter.EncounterSearchCriteriaBuilder;
-
+import org.openmrs.module.reporting.evaluation.EvaluationContext;
 
 public class MLDataExchange {
 
@@ -571,7 +575,6 @@ public class MLDataExchange {
 	public boolean generateIITScores() {
 		Boolean ret = false;
 
-		PatientService patientService = Context.getPatientService();
 		ModelService modelService = Context.getService(ModelService.class);
 
 		// Check if IIT is enabled
@@ -584,17 +587,14 @@ public class MLDataExchange {
 			setStatusOfIITGenScoresTask(true);
 
 			// Get all patients
-			List<Patient> allPatients = patientService.getAllPatients();
-			if(debugMode) System.err.println("IIT ML Gen For All Task: Got all patients: " + allPatients.size());
-
-			// Get patients on HIV program
-			Program hivProgram = MetadataUtils.existing(Program.class, HivMetadata._Program.HIV);
+			List<Patient> allEligiblePatients = getAllEligiblePatients();
+			if(debugMode) System.err.println("IIT ML Gen For All Task: Got all eligible patients: " + allEligiblePatients.size());
 
 			// loop checking for patients without current IIT scores
-			long totalRemote = allPatients.size();
-			long totalPages = allPatients.size();
+			long totalRemote = allEligiblePatients.size();
+			long totalPages = allEligiblePatients.size();
 			long currentPage = 1;
-			for (Patient patient : allPatients) {
+			for (Patient patient : allEligiblePatients) {
 				if (!getContinueGeneratingIITScores()) {
 					setStatusOfIITGenScoresTask(false);
 					if(debugMode) System.err.println("IIT ML: Gen was manualy stopped");
@@ -602,33 +602,11 @@ public class MLDataExchange {
 				}
 				try {
 					if (patient != null) {
-						// Check if patient is currently on ART
-						if(currentInArt(patient)) {
-							if(debugMode) System.err.println("IIT ML: Analyzing patient: " + patient.getId());
-							ProgramWorkflowService pwfservice = Context.getProgramWorkflowService();
-							List<PatientProgram> programs = pwfservice.getPatientPrograms(patient, hivProgram, null, null, null,null, false);
-							if (programs.size() > 0 && isActiveOnProgram(programs)) {
-								if(patient.getDead() == false) {
-									Date lastScore = mLinKenyaEMRService.getPatientLatestRiskEvaluationDate(patient);
-									// check if a greencard has been filled since the last score
-									if((lastScore == null || greenCardFilledSinceLastScore(patient, lastScore))) {
-										PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
-										// Save/Update to DB (for reports)
-										if(debugMode) System.err.println("IIT ML: Got risk score for patient: " + patient.getId());
-										if(debugMode) System.err.println("IIT ML: Saving to DB: " + patientRiskScore);
-										mLinKenyaEMRService.saveOrUpdateRiskScore(patientRiskScore);
-									} else {
-										if(debugMode) System.err.println("IIT ML: Patient not viable: " + patient.getId());
-									}
-								} else {
-									if(debugMode) System.err.println("IIT ML: Patient not viable: " + patient.getId());
-								}
-							} else {
-								if(debugMode) System.err.println("IIT ML: Patient not viable: " + patient.getId());
-							}
-						} else {
-							if(debugMode) System.err.println("IIT ML: Patient not on ART: " + patient.getId());
-						}
+						PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
+						// Save/Update to DB (for reports)
+						if(debugMode) System.err.println("IIT ML: Got risk score for patient: " + patient.getId());
+						if(debugMode) System.err.println("IIT ML: Saving to DB: " + patientRiskScore);
+						mLinKenyaEMRService.saveOrUpdateRiskScore(patientRiskScore);
 					}
 				} catch(Exception e) {
 					if(debugMode) System.err.println("IIT ML: Error getting score. Patient: " + patient.getId() + " Error: " + e.getMessage());
@@ -644,6 +622,71 @@ public class MLDataExchange {
 		}
 
 		return(ret);
+	}
+
+	/**
+	 * Returns the list of eligible patients for scoring
+	 * @return
+	 */
+	public List<Patient> getAllEligiblePatients() {
+		List<Patient> patientList = new ArrayList<>();
+		PatientService patientService = Context.getPatientService();
+
+		try {
+			EvaluationContext evaluationContext = new EvaluationContext();
+			DbSessionFactory dbSessionFactory = Context.getRegisteredComponents(DbSessionFactory.class).get(0);
+			String qry="select t.patient_id\n" + //
+								"\tfrom(\n" + //
+								"\t    select fup.visit_date,fup.patient_id, max(e.visit_date) as enroll_date,\n" + //
+								"\t           greatest(max(fup.visit_date), ifnull(max(d.visit_date),'0000-00-00')) as latest_vis_date,\n" + //
+								"\t           greatest(mid(max(concat(fup.visit_date,fup.next_appointment_date)),11), ifnull(max(d.visit_date),'0000-00-00')) as latest_tca,\n" + //
+								"\t           d.patient_id as disc_patient,\n" + //
+								"\t           d.effective_disc_date as effective_disc_date,\n" + //
+								"\t           max(d.visit_date) as date_discontinued,\n" + //
+								"\t           de.patient_id as started_on_drugs\n" + //
+								"\t    from kenyaemr_etl.etl_patient_hiv_followup fup\n" + //
+								"\t           join kenyaemr_etl.etl_patient_demographics p on p.patient_id=fup.patient_id\n" + //
+								"\t           join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id=e.patient_id\n" + //
+								"\t           left join kenyaemr_etl.etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(date_started) <= LAST_DAY(CURRENT_DATE - INTERVAL 1 MONTH)\n" + //
+								"\t           left outer JOIN\n" + //
+								"\t             (select patient_id, coalesce(date(effective_discontinuation_date),visit_date) visit_date,max(date(effective_discontinuation_date)) as effective_disc_date from kenyaemr_etl.etl_patient_program_discontinuation\n" + //
+								"\t              where date(visit_date) <= LAST_DAY(CURRENT_DATE - INTERVAL 1 MONTH) and program_name='HIV'\n" + //
+								"\t              group by patient_id\n" + //
+								"\t             ) d on d.patient_id = fup.patient_id\n" + //
+								"\t\t\t   LEFT JOIN (\n" + //
+								"\t\t\t\t\tSELECT patient_id, MAX(date_started) AS latest_date\n" + //
+								"\t\t\t\t\tFROM visit\n" + //
+								"\t\t\t\t\tGROUP BY patient_id\n" + //
+								"\t\t\t\t) AS visits ON fup.patient_id = visits.patient_id\n" + //
+								"                LEFT JOIN kenyaemr_ml_patient_risk_score mlp ON fup.patient_id = mlp.patient_id\n" + //
+								"\t    where fup.visit_date <= LAST_DAY(CURRENT_DATE - INTERVAL 1 MONTH)\n" + //
+								"        and (fup.patient_id NOT IN (SELECT patient_id FROM kenyaemr_ml_patient_risk_score)\n" + //
+								"        or mlp.evaluation_date < visits.latest_date)\n" + //
+								"\t    group by patient_id\n" + //
+								"\t    having (started_on_drugs is not null and started_on_drugs <> '') and (\n" + //
+								"\t        (\n" + //
+								"\t            (timestampdiff(DAY, date(latest_tca), LAST_DAY(CURRENT_DATE - INTERVAL 1 MONTH)) <= 30 and ((date(d.effective_disc_date) > LAST_DAY(CURRENT_DATE - INTERVAL 1 MONTH) or date(enroll_date) > date(d.effective_disc_date)) or d.effective_disc_date is null))\n" + //
+								"\t              and (date(latest_vis_date) >= date(date_discontinued) or date(latest_tca) >= date(date_discontinued) or disc_patient is null)\n" + //
+								"\t            )\n" + //
+								"\t        )\n" + //
+								"\t    ) t;";
+
+			SqlQueryBuilder builder = new SqlQueryBuilder();
+			builder.append(qry);
+			
+			List<Object[]> rawResults = builder.evaluateToList(dbSessionFactory, evaluationContext);
+
+			for (Object[] resultRow : rawResults) {
+				Integer ptId = (Integer)resultRow[0];
+				Patient patient = patientService.getPatient(ptId);
+				patientList.add(patient);
+			}
+		} catch(Exception ex) {
+			System.err.println("IIT ML Error: Failed to get eligible patient list: " + ex.getMessage());
+			ex.printStackTrace();
+		}
+
+		return(patientList);
 	}
 
 	/**
@@ -773,53 +816,20 @@ public class MLDataExchange {
 	 */
 	public void generateIITScoresTask() {
 
-		PatientService patientService = Context.getPatientService();
+		ModelService modelService = Context.getService(ModelService.class);
 
 		// Get all patients
-		List<Patient> allPatients = patientService.getAllPatients();
+		List<Patient> allEligiblePatients = getAllEligiblePatients();
 
-		// Get patients on HIV program
-		Program hivProgram = MetadataUtils.existing(Program.class, HivMetadata._Program.HIV);
-
-		// loop checking for patients without current IIT scores
-		HashSet<Patient> patientsGroup = new HashSet<Patient>();
-		for (Patient patient : allPatients) {
+		for (Patient patient : allEligiblePatients) {
 			try {
 				if (patient != null) {
-					ProgramWorkflowService pwfservice = Context.getProgramWorkflowService();
-					List<PatientProgram> programs = pwfservice.getPatientPrograms(patient, hivProgram, null, null, null,null, false);
-					if (programs.size() > 0) {
-						if(patient.getDead() == false) {
-							Date lastScore = mLinKenyaEMRService.getPatientLatestRiskEvaluationDate(patient);
-							// check if a greencard has been filled since the last score
-							if((lastScore == null || greenCardFilledSinceLastScore(patient, lastScore))) {
-								patientsGroup.add(patient);
-							}
-						}
-					}
+					System.out.println("IIT ML Score: Scoring patient: " + patient.getId());
+					PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
+					// Save/Update to DB (for reports)
+					mLinKenyaEMRService.saveOrUpdateRiskScore(patientRiskScore);
 				}
 			} catch(Exception ex) {}
-		}
-		System.out.println("IIT ML Task: Patients to be scored: " + patientsGroup.size());
-		generateMLScoresFetch(patientsGroup);
-	}
-
-	/**
-	 * Generates IIT ML risk scores as a scheduled task given the list of patients
-	 * @param patientsGroup - the given list of patients
-	 */
-	public void generateMLScoresFetch(HashSet<Patient> patientsGroup) {
-		ModelService modelService = Context.getService(ModelService.class);
-		for (Patient patient : patientsGroup) {
-			try {
-				System.out.println("IIT ML Score: Scoring patient: " + patient.getId());
-				PatientRiskScore patientRiskScore = modelService.generatePatientRiskScore(patient);
-				// Save/Update to DB (for reports)
-				mLinKenyaEMRService.saveOrUpdateRiskScore(patientRiskScore);
-			} catch(Exception ex) {
-				System.err.println("IIT ML Score: ERROR: Failed to generate patient score: " + ex.getMessage());
-				ex.printStackTrace();	
-			}
 		}
 	}
 	

@@ -152,34 +152,6 @@ tr:nth-child(even) {background-color: #f2f2f2;}
     </div>
     <div>
         <fieldset>
-            <legend>Fetch IIT risk scores from Data Warehouse (NDWH)</legend>
-            <br/>
-            <div id="message"><span id="lblText" style="color: Red; top: 50px;">Ready</span></div>
-            <br/>
-            <div class="progress-container">
-                <div class="alignHorizontal">
-                    <div class="bootstrap-iso">
-                        <div class="wait-loading prog-bar">
-                            <div class="progress">
-                                <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
-                                    <span class="prog-percentage"></span>
-                                </div>
-                            </div>
-                            <div class="prog-status"></div>
-                        </div>
-                    </div>
-                    <button id="stopPull">Stop the pull</button>
-                </div>
-            </div>
-            <br/>
-            <div class="alignHorizontal">
-                <button id="updateSummary">Update Summary</button>
-                <button id="fetchRiskScores" disabled>Pull Patient scores</button>
-            </div>
-        </fieldset>
-    </div>
-    <div>
-        <fieldset>
             <legend>Generate IIT Risk Scores</legend>
             <br/>
             <div id="generateMessage"><span id="lblGenScoresText" style="color: Red; top: 50px;">Ready</span></div>
