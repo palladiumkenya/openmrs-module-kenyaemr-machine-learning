@@ -10,6 +10,7 @@
 package org.openmrs.module.kenyaemrml.calculation;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,6 +28,7 @@ import org.openmrs.module.kenyaemr.calculation.library.hiv.art.OnArtCalculation;
 import org.openmrs.module.kenyaemr.metadata.HivMetadata;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
+import org.openmrs.module.kenyaemrml.util.MLDataExchange;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
 
 /**
@@ -43,33 +45,28 @@ public class IITHighRiskScoreCalculation extends AbstractPatientCalculation {
 	public CalculationResultMap evaluate(Collection<Integer> cohort, Map<String, Object> parameterValues, PatientCalculationContext context) {
 		
 		CalculationResultMap ret = new CalculationResultMap();
-		// Get HIV program
-		Program hivProgram = MetadataUtils.existing(Program.class, HivMetadata._Program.HIV);
-		// Get all patients who are alive and in HIV program
-		Set<Integer> alive = Filters.alive(cohort, context);
-		Set<Integer> inHivProgram = Filters.inProgram(hivProgram, alive, context);
+		
+		MLDataExchange mlDataExchange = new MLDataExchange();
+		List<Patient> allEligiblePatients = mlDataExchange.getAllEligiblePatients();
 
 		try {
-			for (Integer ptId : inHivProgram) {
+			for (Patient currentPatient : allEligiblePatients) {
 				try {
-					Patient currentPatient = Context.getPatientService().getPatient(ptId);
-					if(currentInArt(currentPatient)) {
-						PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
-								.getLatestPatientRiskScoreByPatient(currentPatient, true);
-						if (latestRiskScore != null) {
-							String riskGroup = latestRiskScore.getDescription();
-							if (riskGroup.trim().equalsIgnoreCase("High Risk")) {
-								ret.put(ptId, new BooleanResult(true, this, context));
-							}
+					PatientRiskScore latestRiskScore = Context.getService(MLinKenyaEMRService.class)
+							.getLatestPatientRiskScoreByPatient(currentPatient, true);
+					if (latestRiskScore != null) {
+						String riskGroup = latestRiskScore.getDescription();
+						if (riskGroup.trim().equalsIgnoreCase("High Risk")) {
+							ret.put(currentPatient.getId(), new BooleanResult(true, this, context));
 						}
 					}
 				} catch(Exception em) {
-					System.err.println("IIT ML High Risk reporting: " + em.getMessage());
+					System.err.println("IIT ML Error: High Risk reporting: " + em.getMessage());
 					em.printStackTrace();
 				}
 			}
 		} catch(Exception ex) {
-			System.err.println("IIT ML High Risk reporting: " + ex.getMessage());
+			System.err.println("IIT ML Error: High Risk reporting: " + ex.getMessage());
 			ex.printStackTrace();
 		}
 		
