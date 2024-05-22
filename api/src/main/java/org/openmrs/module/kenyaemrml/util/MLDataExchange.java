@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
 import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.formula.functions.T;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
@@ -31,11 +30,9 @@ import org.openmrs.GlobalProperty;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.PatientProgram;
-import org.openmrs.Program;
 import org.openmrs.User;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.PersonService;
-import org.openmrs.api.ProgramWorkflowService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
 import org.openmrs.calculation.result.CalculationResult;
@@ -47,10 +44,10 @@ import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.api.ModelService;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
+import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.querybuilder.SqlQueryBuilder;
 import org.openmrs.parameter.EncounterSearchCriteria;
 import org.openmrs.parameter.EncounterSearchCriteriaBuilder;
-import org.openmrs.module.reporting.evaluation.EvaluationContext;
 
 public class MLDataExchange {
 
@@ -647,10 +644,10 @@ public class MLDataExchange {
 								"\t    from kenyaemr_etl.etl_patient_hiv_followup fup\n" + //
 								"\t           join kenyaemr_etl.etl_patient_demographics p on p.patient_id=fup.patient_id\n" + //
 								"\t           join kenyaemr_etl.etl_hiv_enrollment e on fup.patient_id=e.patient_id\n" + //
-								"\t           left join kenyaemr_etl.etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(date_started) <= LAST_DAY(CURRENT_DATE - INTERVAL 1 MONTH)\n" + //
+								"\t           left join kenyaemr_etl.etl_drug_event de on e.patient_id = de.patient_id and de.program='HIV' and date(date_started) <= curdate()\n" + //
 								"\t           left outer JOIN\n" + //
 								"\t             (select patient_id, coalesce(date(effective_discontinuation_date),visit_date) visit_date,max(date(effective_discontinuation_date)) as effective_disc_date from kenyaemr_etl.etl_patient_program_discontinuation\n" + //
-								"\t              where date(visit_date) <= LAST_DAY(CURRENT_DATE - INTERVAL 1 MONTH) and program_name='HIV'\n" + //
+								"\t              where date(visit_date) <= curdate() and program_name='HIV'\n" + //
 								"\t              group by patient_id\n" + //
 								"\t             ) d on d.patient_id = fup.patient_id\n" + //
 								"\t\t\t   LEFT JOIN (\n" + //
@@ -659,13 +656,13 @@ public class MLDataExchange {
 								"\t\t\t\t\tGROUP BY patient_id\n" + //
 								"\t\t\t\t) AS visits ON fup.patient_id = visits.patient_id\n" + //
 								"                LEFT JOIN kenyaemr_ml_patient_risk_score mlp ON fup.patient_id = mlp.patient_id\n" + //
-								"\t    where fup.visit_date <= LAST_DAY(CURRENT_DATE - INTERVAL 1 MONTH)\n" + //
+								"\t    where fup.visit_date <= curdate()\n" + //
 								"        and (fup.patient_id NOT IN (SELECT patient_id FROM kenyaemr_ml_patient_risk_score)\n" + //
 								"        or mlp.evaluation_date < visits.latest_date)\n" + //
 								"\t    group by patient_id\n" + //
 								"\t    having (started_on_drugs is not null and started_on_drugs <> '') and (\n" + //
 								"\t        (\n" + //
-								"\t            (timestampdiff(DAY, date(latest_tca), LAST_DAY(CURRENT_DATE - INTERVAL 1 MONTH)) <= 30 and ((date(d.effective_disc_date) > LAST_DAY(CURRENT_DATE - INTERVAL 1 MONTH) or date(enroll_date) > date(d.effective_disc_date)) or d.effective_disc_date is null))\n" + //
+								"\t            (timestampdiff(DAY, date(latest_tca), curdate()) <= 30 and ((date(d.effective_disc_date) > curdate() or date(enroll_date) > date(d.effective_disc_date)) or d.effective_disc_date is null))\n" + //
 								"\t              and (date(latest_vis_date) >= date(date_discontinued) or date(latest_tca) >= date(date_discontinued) or disc_patient is null)\n" + //
 								"\t            )\n" + //
 								"\t        )\n" + //
