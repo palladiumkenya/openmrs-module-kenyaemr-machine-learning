@@ -550,210 +550,23 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			Double unscheduled_rate_last5 = getUnscheduledRateLast5(visits);
 			if(debugMode) System.err.println("IIT ML: new model (unscheduled_rate_last5): " + unscheduled_rate_last5);
 
-			// New model (MonthApr)
-			Integer MonthApr = getMonthApr(sortedRecords);
-			if(debugMode) System.err.println("IIT ML: new model (MonthApr): " + MonthApr);
-
-			// New model (MonthAug)
-			Integer MonthAug = getMonthAug(sortedRecords);
-			if(debugMode) System.err.println("IIT ML: new model (MonthAug): " + MonthAug);
-
-			// New model (MonthDec)
-			Integer MonthDec = getMonthDec(sortedRecords);
-			if(debugMode) System.err.println("IIT ML: new model (MonthDec): " + MonthDec);
-
-			// New model (MonthFeb)
-			Integer MonthFeb = getMonthFeb(sortedRecords);
-			if(debugMode) System.err.println("IIT ML: new model (MonthFeb): " + MonthFeb);
-
-			// New model (MonthJan)
-			Integer MonthJan = getMonthJan(sortedRecords);
-			if(debugMode) System.err.println("IIT ML: new model (MonthJan): " + MonthJan);
-
-			// New model (MonthJul)
-			Integer MonthJul = getMonthJul(sortedRecords);
-			if(debugMode) System.err.println("IIT ML: new model (MonthJul): " + MonthJul);
-
-			// New model (MonthJun)
-			Integer MonthJun = getMonthJun(sortedRecords);
-			if(debugMode) System.err.println("IIT ML: new model (MonthJun): " + MonthJun);
-
-			// New model (MonthMar)
-			Integer MonthMar = getMonthMar(sortedRecords);
-			if(debugMode) System.err.println("IIT ML: new model (MonthMar): " + MonthMar);
-
-			// New model (MonthMay)
-			Integer MonthMay = getMonthMay(sortedRecords);
-			if(debugMode) System.err.println("IIT ML: new model (MonthMay): " + MonthMay);
-
-			// New model (MonthNov)
-			Integer MonthNov = getMonthNov(sortedRecords);
-			if(debugMode) System.err.println("IIT ML: new model (MonthNov): " + MonthNov);
-
-			// New model (MonthOct)
-			Integer MonthOct = getMonthOct(sortedRecords);
-			if(debugMode) System.err.println("IIT ML: new model (MonthOct): " + MonthOct);
-
-			// New model (MonthSep)
-			Integer MonthSep = getMonthSep(sortedRecords);
-			if(debugMode) System.err.println("IIT ML: new model (MonthSep): " + MonthSep);
-
-			// New model (DayFri)
-			Integer DayFri = getDayFri(sortedRecords);
-			if(debugMode) System.err.println("IIT ML: new model (DayFri): " + DayFri);
-
-			// New model (DayMon)
-			Integer DayMon = getDayMon(sortedRecords);
-			if(debugMode) System.err.println("IIT ML: new model (DayMon): " + DayMon);
-
-			// New model (DaySat)
-			Integer DaySat = getDaySat(sortedRecords);
-			if(debugMode) System.err.println("IIT ML: new model (DaySat): " + DaySat);
-
-			// New model (DaySun)
-			Integer DaySun = getDaySun(sortedRecords);
-			if(debugMode) System.err.println("IIT ML: new model (DaySun): " + DaySun);
-
-			// New model (DayThu)
-			Integer DayThu = getDayThu(sortedRecords);
-			if(debugMode) System.err.println("IIT ML: new model (DayThu): " + DayThu);
-
-			// New model (DayTue)
-			Integer DayTue = getDayTue(sortedRecords);
-			if(debugMode) System.err.println("IIT ML: new model (DayTue): " + DayTue);
-
-			// New model (DayWed)
-			Integer DayWed = getDayWed(sortedRecords);
-			if(debugMode) System.err.println("IIT ML: new model (DayWed): " + DayWed);
-
 			// End new model
 
-			Integer patientGender = 0;
-			Integer female = getGenderFemale(demographics);
-			Integer male = getGenderMale(demographics);
-			if(male == 1) {
-				patientGender = 1;
-			}
-			if(female == 1) {
-				patientGender = 2;
-			}
+			Integer patientGender = getGender(demographics);
 
-			// (GenderFemale)
-			Integer GenderFemale = female;
-			if(debugMode) System.err.println("IIT ML: (GenderFemale): " + female);
-
-			// (GenderMale)
-			Integer GenderMale = male;
-			if(debugMode) System.err.println("IIT ML: (GenderMale): " + male);
+			// (Gender)
+			Integer GenderFemale = 0;
+			Integer GenderMale = 0;
+			if(patientGender == 1) {
+				GenderMale = 1;
+			} else if(patientGender == 2) {
+				GenderFemale = 1;
+			}
+			if(debugMode) System.err.println("IIT ML: (Gender): " + patientGender);
 
 			// (Age)
 			Long Age = getAgeYears(demographics);
 			if(debugMode) System.err.println("IIT ML: (Age): " + Age);
-
-			// (MaritalStatusDivorced)
-			Integer MaritalStatusDivorced = getMaritalStatusDivorced(demographics, Age);
-			if(debugMode) System.err.println("IIT ML: (MaritalStatusDivorced): " + MaritalStatusDivorced);
-
-			// (MaritalStatusMarried)
-			Integer MaritalStatusMarried = getMaritalStatusMarried(demographics, Age);
-			if(debugMode) System.err.println("IIT ML: (MaritalStatusMarried): " + MaritalStatusMarried);
-
-			// (MaritalStatusMinor)
-			Integer MaritalStatusMinor = getMaritalStatusMinor(Age);
-			if(debugMode) System.err.println("IIT ML: (MaritalStatusMinor): " + MaritalStatusMinor);
-
-			// (MaritalStatusOther)
-			Integer MaritalStatusOther = getMaritalStatusOther(demographics, Age);
-			if(debugMode) System.err.println("IIT ML: (MaritalStatusOther): " + MaritalStatusOther);
-
-			// (MaritalStatusPolygamous)
-			Integer MaritalStatusPolygamous = getMaritalStatusPolygamous(demographics, Age);
-			if(debugMode) System.err.println("IIT ML: (MaritalStatusPolygamous): " + MaritalStatusPolygamous);
-
-			// (MaritalStatusSingle)
-			Integer MaritalStatusSingle = getMaritalStatusSingle(demographics, Age);
-			if(debugMode) System.err.println("IIT ML: (MaritalStatusSingle): " + MaritalStatusSingle);
-
-			// (MaritalStatusWidow)
-			Integer MaritalStatusWidow = getMaritalStatusWidow(demographics, Age);
-			if(debugMode) System.err.println("IIT ML: (MaritalStatusWidow): " + MaritalStatusWidow);
-
-			// Standard Care, Fast Track,
-			// (DifferentiatedCarecommunityartdistributionhcwled)
-			Integer DifferentiatedCarecommunityartdistributionhcwled = getDifferentiatedCarecommunityartdistributionhcwled(visits);
-			if(debugMode) System.err.println("IIT ML: (DifferentiatedCarecommunityartdistributionhcwled): " + DifferentiatedCarecommunityartdistributionhcwled);
-
-			// (DifferentiatedCarecommunityartdistributionpeerled)
-			Integer DifferentiatedCarecommunityartdistributionpeerled = getDifferentiatedCarecommunityartdistributionpeerled(visits);
-			if(debugMode) System.err.println("IIT ML: (DifferentiatedCarecommunityartdistributionpeerled): " + DifferentiatedCarecommunityartdistributionpeerled);
-
-			// (DifferentiatedCareexpress)
-			Integer DifferentiatedCareexpress = getDifferentiatedCareexpress(visits);
-			if(debugMode) System.err.println("IIT ML: (DifferentiatedCareexpress): " + DifferentiatedCareexpress);
-
-			// (DifferentiatedCarefacilityartdistributiongroup)
-			Integer DifferentiatedCarefacilityartdistributiongroup = getDifferentiatedCarefacilityartdistributiongroup(visits);
-			if(debugMode) System.err.println("IIT ML: (DifferentiatedCarefacilityartdistributiongroup): " + DifferentiatedCarefacilityartdistributiongroup);
-
-			// (DifferentiatedCarefasttrack)
-			Integer DifferentiatedCarefasttrack = getDifferentiatedCarefasttrack(visits);
-			if(debugMode) System.err.println("IIT ML: (DifferentiatedCarefasttrack): " + DifferentiatedCarefasttrack);
-
-			// (DifferentiatedCarestandardcare)
-			Integer DifferentiatedCarestandardcare = getDifferentiatedCarestandardcare(visits);
-			if(debugMode) System.err.println("IIT ML: (DifferentiatedCarestandardcare): " + DifferentiatedCarestandardcare);
-
-			// (StabilityAssessmentStable)
-			Integer StabilityAssessmentStable = getStabilityAssessmentStable(visits);
-			if(debugMode) System.err.println("IIT ML: (StabilityAssessmentStable): " + StabilityAssessmentStable);
-
-			// (StabilityAssessmentUnstable)
-			Integer StabilityAssessmentUnstable = getStabilityAssessmentUnstable(visits);
-			if(debugMode) System.err.println("IIT ML: (StabilityAssessmentUnstable): " + StabilityAssessmentUnstable);
-
-			// (most_recent_art_adherencefair)
-			Integer most_recent_art_adherencefair = getMostRecentArtAdherenceFair(visits);
-			if(debugMode) System.err.println("IIT ML: (most_recent_art_adherencefair): " + most_recent_art_adherencefair);
-
-			// (most_recent_art_adherencegood)
-			Integer most_recent_art_adherencegood = getMostRecentArtAdherenceGood(visits);
-			if(debugMode) System.err.println("IIT ML: (most_recent_art_adherencegood): " + most_recent_art_adherencegood);
-
-			// (most_recent_art_adherencepoor)
-			Integer most_recent_art_adherencepoor = getMostRecentArtAdherencePoor(visits);
-			if(debugMode) System.err.println("IIT ML: (most_recent_art_adherencepoor): " + most_recent_art_adherencepoor);
-
-			// (Pregnantno)
-			SimpleObject Pregnantno = getPregnantNo(visits, patientGender, Age);
-			if(debugMode) System.err.println("IIT ML: (Pregnantno): " + Pregnantno.get("result"));
-
-			// (PregnantNR)
-			Integer PregnantNR = getPregnantNR(patientGender, Age);
-			if(debugMode) System.err.println("IIT ML: (PregnantNR): " + PregnantNR);
-
-			// (Pregnantyes)
-			SimpleObject Pregnantyes = getPregnantYes(visits, patientGender, Age);
-			if(debugMode) System.err.println("IIT ML: (Pregnantyes): " + Pregnantyes.get("result"));
-
-			// (Breastfeedingno)
-			SimpleObject Breastfeedingno = getBreastFeedingNo(visits, patientGender, Age);
-			if(debugMode) System.err.println("IIT ML: (Breastfeedingno): " + Breastfeedingno.get("result"));
-
-			// (BreastfeedingNR)
-			Integer BreastfeedingNR = getBreastFeedingNR(patientGender, Age);
-			if(debugMode) System.err.println("IIT ML: (BreastfeedingNR): " + BreastfeedingNR);
-
-			// (Breastfeedingyes)
-			SimpleObject Breastfeedingyes = getBreastFeedingYes(visits, patientGender, Age);
-			if(debugMode) System.err.println("IIT ML: (Breastfeedingyes): " + Breastfeedingyes.get("result"));
-
-			// (OptimizedHIVRegimenNo)
-			SimpleObject OptimizedHIVRegimenNo = getOptimizedHIVRegimenNo(pharmacy);
-			if(debugMode) System.err.println("IIT ML: (OptimizedHIVRegimenNo): " + OptimizedHIVRegimenNo.get("result"));
-
-			// (OptimizedHIVRegimenYes)
-			SimpleObject OptimizedHIVRegimenYes = getOptimizedHIVRegimenYes(pharmacy);
-			if(debugMode) System.err.println("IIT ML: (OptimizedHIVRegimenYes): " + OptimizedHIVRegimenYes.get("result"));
 
 			// (timeOnArt)
 			Long timeOnArt = getTimeOnArt(art);
@@ -789,30 +602,17 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			// End Local Pull And Display
 
 			// Start Pulled Variables
+
+			//One time vars
 			patientPredictionVariables.put("Age", Age);
 			patientPredictionVariables.put("average_tca_last5", average_tca_last5);
 			patientPredictionVariables.put("averagelateness", averagelateness);
 			patientPredictionVariables.put("averagelateness_last10", averagelateness_last10);
 			patientPredictionVariables.put("averagelateness_last3", averagelateness_last3);
 			patientPredictionVariables.put("averagelateness_last5", averagelateness_last5);
-			patientPredictionVariables.put("Breastfeedingno", Breastfeedingno.get("result"));
-			patientPredictionVariables.put("BreastfeedingNR", BreastfeedingNR);
-			patientPredictionVariables.put("Breastfeedingyes", Breastfeedingyes.get("result"));
-			patientPredictionVariables.put("DayFri", DayFri);
-			patientPredictionVariables.put("DayMon", DayMon);
-			patientPredictionVariables.put("DaySat", DaySat);
-			patientPredictionVariables.put("DaySun", DaySun);
-			patientPredictionVariables.put("DayThu", DayThu);
-			patientPredictionVariables.put("DayTue", DayTue);
-			patientPredictionVariables.put("DayWed", DayWed);
-			patientPredictionVariables.put("DifferentiatedCarecommunityartdistributionhcwled", DifferentiatedCarecommunityartdistributionhcwled);
-			patientPredictionVariables.put("DifferentiatedCarecommunityartdistributionpeerled", DifferentiatedCarecommunityartdistributionpeerled);
-			patientPredictionVariables.put("DifferentiatedCareexpress", DifferentiatedCareexpress);
-			patientPredictionVariables.put("DifferentiatedCarefacilityartdistributiongroup", DifferentiatedCarefacilityartdistributiongroup);
-			patientPredictionVariables.put("DifferentiatedCarefasttrack", DifferentiatedCarefasttrack);
-			patientPredictionVariables.put("DifferentiatedCarestandardcare", DifferentiatedCarestandardcare);
-			patientPredictionVariables.put("GenderFemale", GenderFemale);
-			patientPredictionVariables.put("GenderMale", GenderMale);
+			patientPredictionVariables.put("timeOnArt", timeOnArt);
+			patientPredictionVariables.put("unscheduled_rate", unscheduled_rate);
+			patientPredictionVariables.put("visit_1", visit_1);
 			patientPredictionVariables.put("late", missed1);
 			patientPredictionVariables.put("late_last10", late_last10);
 			patientPredictionVariables.put("late_last3", late_last3);
@@ -820,41 +620,86 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			patientPredictionVariables.put("late_rate", late_rate);
 			patientPredictionVariables.put("late28", late28);
 			patientPredictionVariables.put("late28_rate", late28_rate);
-			patientPredictionVariables.put("MaritalStatusDivorced", MaritalStatusDivorced);
-			patientPredictionVariables.put("MaritalStatusMarried", MaritalStatusMarried);
-			patientPredictionVariables.put("MaritalStatusMinor", MaritalStatusMinor);
-			patientPredictionVariables.put("MaritalStatusOther", MaritalStatusOther);
-			patientPredictionVariables.put("MaritalStatusPolygamous", MaritalStatusPolygamous);
-			patientPredictionVariables.put("MaritalStatusSingle", MaritalStatusSingle);
-			patientPredictionVariables.put("MaritalStatusWidow", MaritalStatusWidow);
-			patientPredictionVariables.put("MonthApr", MonthApr);
-			patientPredictionVariables.put("MonthAug", MonthAug);
-			patientPredictionVariables.put("MonthDec", MonthDec);
-			patientPredictionVariables.put("MonthFeb", MonthFeb);
-			patientPredictionVariables.put("MonthJan", MonthJan);
-			patientPredictionVariables.put("MonthJul", MonthJul);
-			patientPredictionVariables.put("MonthJun", MonthJun);
-			patientPredictionVariables.put("MonthMar", MonthMar);
-			patientPredictionVariables.put("MonthMay", MonthMay);
-			patientPredictionVariables.put("MonthNov", MonthNov);
-			patientPredictionVariables.put("MonthOct", MonthOct);
-			patientPredictionVariables.put("MonthSep", MonthSep);
-			patientPredictionVariables.put("most_recent_art_adherencefair", most_recent_art_adherencefair);
-			patientPredictionVariables.put("most_recent_art_adherencegood", most_recent_art_adherencegood);
-			patientPredictionVariables.put("most_recent_art_adherencepoor", most_recent_art_adherencepoor);
+			patientPredictionVariables.put("GenderFemale", GenderFemale);
+			patientPredictionVariables.put("GenderMale", GenderMale);
 			patientPredictionVariables.put("n_appts", n_appts);
 			patientPredictionVariables.put("NextAppointmentDate", NextAppointmentDate);
 			patientPredictionVariables.put("num_hiv_regimens", num_hiv_regimens.get("result"));
-			patientPredictionVariables.put("OptimizedHIVRegimenNo", OptimizedHIVRegimenNo.get("result"));
-			patientPredictionVariables.put("OptimizedHIVRegimenYes", OptimizedHIVRegimenYes.get("result"));
-			patientPredictionVariables.put("Pregnantno", Pregnantno.get("result"));
-			patientPredictionVariables.put("PregnantNR", PregnantNR);
-			patientPredictionVariables.put("Pregnantyes", Pregnantyes.get("result"));
-			patientPredictionVariables.put("StabilityAssessmentStable", StabilityAssessmentStable);
-			patientPredictionVariables.put("StabilityAssessmentUnstable", StabilityAssessmentUnstable);
-			patientPredictionVariables.put("timeOnArt", timeOnArt);
-			patientPredictionVariables.put("unscheduled_rate", unscheduled_rate);
-			patientPredictionVariables.put("visit_1", visit_1);
+
+			//Grouped vars
+
+			// Breast Feeding
+			patientPredictionVariables.put("Breastfeedingno", -10000.0);
+			patientPredictionVariables.put("BreastfeedingNR", 0);
+			patientPredictionVariables.put("Breastfeedingyes", -10000.0);
+			getBreastFeeding(patientPredictionVariables, visits, patientGender, Age);
+
+			// Day of week
+			patientPredictionVariables.put("DayFri", 0);
+			patientPredictionVariables.put("DayMon", 0);
+			patientPredictionVariables.put("DaySat", 0);
+			patientPredictionVariables.put("DaySun", 0);
+			patientPredictionVariables.put("DayThu", 0);
+			patientPredictionVariables.put("DayTue", 0);
+			patientPredictionVariables.put("DayWed", 0);
+			getPayloadDayOfWeek(patientPredictionVariables, sortedRecords);
+
+			// Differentiated care
+			patientPredictionVariables.put("DifferentiatedCarecommunityartdistributionhcwled", 0);
+			patientPredictionVariables.put("DifferentiatedCarecommunityartdistributionpeerled", 0);
+			patientPredictionVariables.put("DifferentiatedCareexpress", 0);
+			patientPredictionVariables.put("DifferentiatedCarefacilityartdistributiongroup", 0);
+			patientPredictionVariables.put("DifferentiatedCarefasttrack", 0);
+			patientPredictionVariables.put("DifferentiatedCarestandardcare", 0);
+			getDifferentiatedCare(patientPredictionVariables, visits);
+
+			// Marital Status
+			patientPredictionVariables.put("MaritalStatusDivorced", 0);
+			patientPredictionVariables.put("MaritalStatusMarried", 0);
+			patientPredictionVariables.put("MaritalStatusMinor", 0);
+			patientPredictionVariables.put("MaritalStatusOther", 0);
+			patientPredictionVariables.put("MaritalStatusPolygamous", 0);
+			patientPredictionVariables.put("MaritalStatusSingle", 0);
+			patientPredictionVariables.put("MaritalStatusWidow", 0);
+			getMaritalStatus(patientPredictionVariables, demographics, Age);
+
+			// Month of year
+			patientPredictionVariables.put("MonthApr", 0);
+			patientPredictionVariables.put("MonthAug", 0);
+			patientPredictionVariables.put("MonthDec", 0);
+			patientPredictionVariables.put("MonthFeb", 0);
+			patientPredictionVariables.put("MonthJan", 0);
+			patientPredictionVariables.put("MonthJul", 0);
+			patientPredictionVariables.put("MonthJun", 0);
+			patientPredictionVariables.put("MonthMar", 0);
+			patientPredictionVariables.put("MonthMay", 0);
+			patientPredictionVariables.put("MonthNov", 0);
+			patientPredictionVariables.put("MonthOct", 0);
+			patientPredictionVariables.put("MonthSep", 0);
+			getPayloadMonthOfYear(patientPredictionVariables, sortedRecords);
+
+			// Most recent ART adherence
+			patientPredictionVariables.put("most_recent_art_adherencefair", 0);
+			patientPredictionVariables.put("most_recent_art_adherencegood", 0);
+			patientPredictionVariables.put("most_recent_art_adherencepoor", 0);
+			getMostRecentArtAdherence(patientPredictionVariables, visits);
+
+			// Optimized HIV Regimen
+			patientPredictionVariables.put("OptimizedHIVRegimenNo", -10000.0F);
+			patientPredictionVariables.put("OptimizedHIVRegimenYes", -10000.0F);
+			getOptimizedHIVRegimen(patientPredictionVariables, pharmacy);
+
+			// Pregnant
+			patientPredictionVariables.put("Pregnantno", -10000.0F);
+			patientPredictionVariables.put("PregnantNR", 0);
+			patientPredictionVariables.put("Pregnantyes", -10000.0F);
+			getPregnant(patientPredictionVariables, visits, patientGender, Age);
+
+			// Stability Assessment
+			patientPredictionVariables.put("StabilityAssessmentStable", 0);
+			patientPredictionVariables.put("StabilityAssessmentUnstable", 0);
+			getStabilityAssessment(patientPredictionVariables, visits);
+			
 			// End Pulled Variables
 
 			// Load model configs and variables
@@ -1134,9 +979,12 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 		return(ret);
 	}
 
-	private SimpleObject getOptimizedHIVRegimenNo(List<List<Object>> pharmacy) {
-		SimpleObject ret = SimpleObject.create("result", -10000);
-
+	/**
+	 * Gets if the patient has an optimized HIV Regimen
+	 * @param patientPredictionVariables
+	 * @param pharmacy
+	 */
+	private void getOptimizedHIVRegimen(SimpleObject patientPredictionVariables, List<List<Object>> pharmacy) {
 		// NB: limit to last 400 days
 		if(pharmacy != null) {
 			if (pharmacy.size() > 0) {
@@ -1156,54 +1004,20 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 							String drugName = (String) pharmacyObject.get(3);
 							drugName = drugName.toLowerCase();
 							if (drugName.contains("dtg")) {
-								ret.put("result", 0);
+								patientPredictionVariables.put("OptimizedHIVRegimenYes", 1);
+								patientPredictionVariables.put("OptimizedHIVRegimenNo", 0);
 							} else {
-								ret.put("result", 1);
+								patientPredictionVariables.put("OptimizedHIVRegimenYes", 0);
+								patientPredictionVariables.put("OptimizedHIVRegimenNo", 1);
 							}
 						}
 					}
 				} else {
-					ret.put("result", -10000);
+					patientPredictionVariables.put("OptimizedHIVRegimenYes", -10000.0F);
+					patientPredictionVariables.put("OptimizedHIVRegimenNo", -10000.0F);
 				}
 			}
 		}
-		return(ret);
-	}
-
-	private SimpleObject getOptimizedHIVRegimenYes(List<List<Object>> pharmacy) {
-		SimpleObject ret = SimpleObject.create("result", -10000);
-
-		// NB: limit to last 400 days
-		if(pharmacy != null) {
-			if (pharmacy.size() > 0) {
-				// The last record
-				List<Object> pharmacyObject = pharmacy.get(pharmacy.size() - 1);
-				Date now = new Date();
-				Date dispenseDate = (Date) pharmacyObject.get(1);
-				// Get the difference in days
-				long differenceInMilliseconds = now.getTime() - dispenseDate.getTime();
-				int differenceInDays = (int) (differenceInMilliseconds / (24 * 60 * 60 * 1000));
-				if (differenceInDays < 400) {
-					// TreatmentType != NULL or Prophylaxis, Drug != NULL
-					if (pharmacyObject.get(4) != null && pharmacyObject.get(3) != null) {
-						String treatment = (String) pharmacyObject.get(4);
-						if(!treatment.trim().equalsIgnoreCase("Prophylaxis")) {
-							// Get drug name
-							String drugName = (String) pharmacyObject.get(3);
-							drugName = drugName.toLowerCase();
-							if (drugName.contains("dtg")) {
-								ret.put("result", 1);
-							} else {
-								ret.put("result", 0);
-							}
-						}
-					}
-				} else {
-					ret.put("result", -10000);
-				}
-			}
-		}
-		return(ret);
 	}
 
 	/**
@@ -1246,10 +1060,16 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			}
 		}
 		return(ret);
-	}
-
-	private SimpleObject getBreastFeedingNo(List<List<Object>> visits, Integer gender, Long Age) {
-		SimpleObject ret = SimpleObject.create("result", -10000);
+	}			
+			
+	/**
+	 * Check if patient is breastfeeding
+	 * @param patientPredictionVariables
+	 * @param visits
+	 * @param gender
+	 * @param Age
+	 */
+	private void getBreastFeeding(SimpleObject patientPredictionVariables, List<List<Object>> visits, Integer gender, Long Age) {
 
 		if(isFemaleOfChildBearingAge(gender, Age)) {
 			if (visits != null) {
@@ -1260,71 +1080,33 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 						String isBreastFeeding = (String) visitObject.get(11);
 						// Gender 1: Male, Gender 2: Female
 						if (isBreastFeeding.trim().equalsIgnoreCase("yes")) {
-							ret.put("result", 0);
-							return (ret);
+							patientPredictionVariables.put("Breastfeedingno", 0);
+							patientPredictionVariables.put("Breastfeedingyes", 1);
 						}
 						if (isBreastFeeding.trim().equalsIgnoreCase("no")) {
-							ret.put("result", 1);
-							return (ret);
+							patientPredictionVariables.put("Breastfeedingno", 1);
+							patientPredictionVariables.put("Breastfeedingyes", 0);
 						}
 					} else {
-						ret.put("result", -10000);
-						return (ret);
+						patientPredictionVariables.put("Breastfeedingno", -10000.0);
+						patientPredictionVariables.put("Breastfeedingyes", -10000.0);
 					}
 				}
 			}
+			patientPredictionVariables.put("BreastfeedingNR", 0);
 		} else {
-			ret.put("result", 0);
-			return (ret);
+			patientPredictionVariables.put("BreastfeedingNR", 1);
 		}
-		return(ret);
 	}
 
-	private Integer getBreastFeedingNR(Integer gender, Long Age) {
-		Integer ret = 0;
-		// Gender 1: Male, Gender 2: Female
-		if(isFemaleOfChildBearingAge(gender, Age)) {
-			ret = 0;
-		} else {
-			ret = 1;
-		}
-		return(ret);
-	}
-
-	private SimpleObject getBreastFeedingYes(List<List<Object>> visits, Integer gender, Long Age) {
-		SimpleObject ret = SimpleObject.create("result", -10000);
-
-		if(isFemaleOfChildBearingAge(gender, Age)) {
-			if (visits != null) {
-				// Get the last visit
-				if (visits.size() > 0) {
-					List<Object> visitObject = visits.get(visits.size() - 1);
-					if (visitObject.get(11) != null) {
-						String isBreastFeeding = (String) visitObject.get(11);
-						// Gender 1: Male, Gender 2: Female
-						if (isBreastFeeding.trim().equalsIgnoreCase("no")) {
-							ret.put("result", 0);
-							return (ret);
-						}
-						if (isBreastFeeding.trim().equalsIgnoreCase("yes")) {
-							ret.put("result", 1);
-							return (ret);
-						}
-					} else {
-						ret.put("result", -10000);
-						return (ret);
-					}
-				}
-			}
-		} else {
-			ret.put("result", 0);
-			return (ret);
-		}
-		return(ret);
-	}
-
-	private SimpleObject getPregnantNo(List<List<Object>> visits, Integer gender, Long Age) {
-		SimpleObject ret = SimpleObject.create("result", -10000);
+	/**
+	 * Check whether the patient is pregnant
+	 * @param patientPredictionVariables
+	 * @param visits
+	 * @param gender
+	 * @param Age
+	 */
+	private void getPregnant(SimpleObject patientPredictionVariables, List<List<Object>> visits, Integer gender, Long Age) {
 
 		if(isFemaleOfChildBearingAge(gender, Age)) {
 			if (visits != null) {
@@ -1335,71 +1117,31 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 						String isPregnant = (String) visitObject.get(6);
 						// Gender 1: Male, Gender 2: Female
 						if (isPregnant.trim().equalsIgnoreCase("yes")) {
-							ret.put("result", 0);
-							return (ret);
+							patientPredictionVariables.put("Pregnantno", 0);
+							patientPredictionVariables.put("Pregnantyes", 1);
 						}
 						if (isPregnant.trim().equalsIgnoreCase("no")) {
-							ret.put("result", 1);
-							return (ret);
+							patientPredictionVariables.put("Pregnantno", 1);
+							patientPredictionVariables.put("Pregnantyes", 0);
 						}
 					} else {
-						ret.put("result", -10000);
-						return (ret);
+						patientPredictionVariables.put("Pregnantno", -10000.0F);
+						patientPredictionVariables.put("Pregnantyes", -10000.0F);
 					}
 				}
 			}
+			patientPredictionVariables.put("PregnantNR", 0);
 		} else {
-			ret.put("result", 0);
-			return (ret);
+			patientPredictionVariables.put("PregnantNR", 1);
 		}
-
-		return(ret);
 	}
 
-	private Integer getPregnantNR(Integer gender, Long Age) {
-		Integer ret = 0;
-		// Gender 1: Male, Gender 2: Female
-		if(isFemaleOfChildBearingAge(gender, Age)) {
-			ret = 0;
-		} else  {
-			ret = 1;
-		}
-		return(ret);
-	}
-
-	private SimpleObject getPregnantYes(List<List<Object>> visits, Integer gender, Long Age) {
-		SimpleObject ret = SimpleObject.create("result", -10000);
-
-		if(isFemaleOfChildBearingAge(gender, Age)) {
-			if (visits != null) {
-				// Get the last visit
-				if (visits.size() > 0) {
-					List<Object> visitObject = visits.get(visits.size() - 1);
-					if (visitObject.get(6) != null) {
-						String isPregnant = (String) visitObject.get(6);
-						// Gender 1: Male, Gender 2: Female
-						if (isPregnant.trim().equalsIgnoreCase("no")) {
-							ret.put("result", 0);
-							return (ret);
-						}
-						if (isPregnant.trim().equalsIgnoreCase("yes")) {
-							ret.put("result", 1);
-							return (ret);
-						}
-					} else {
-						ret.put("result", -10000);
-						return (ret);
-					}
-				}
-			}
-		} else {
-			ret.put("result", 0);
-			return (ret);
-		}
-		return(ret);
-	}
-
-	private Integer getMostRecentArtAdherenceFair(List<List<Object>> visits) {
+	/**
+	 * Gets the most recent ART adherence for the patient
+	 * @param patientPredictionVariables
+	 * @param visits
+	 */
+	private void getMostRecentArtAdherence(SimpleObject patientPredictionVariables, List<List<Object>> visits) {
 		Integer ret = 0;
 		if(visits != null) {
 			// Get the last visit
@@ -1430,8 +1172,11 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 								for (int i = 0; i < adherenceTokens.length; i++) {
 									if(i == artPos) {
 										if (adherenceTokens[i].trim().equalsIgnoreCase("fair")) {
-											ret = 1;
-											return(ret);
+											patientPredictionVariables.put("most_recent_art_adherencefair", 1);
+										} else if (adherenceTokens[i].trim().equalsIgnoreCase("good")) {
+											patientPredictionVariables.put("most_recent_art_adherencegood", 1);
+										} else if (adherenceTokens[i].trim().equalsIgnoreCase("poor")) {
+											patientPredictionVariables.put("most_recent_art_adherencepoor", 1);
 										}
 									}
 								}
@@ -1441,101 +1186,13 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 				}
 			}
 		}
-		return(ret);
 	}
-
-	private Integer getMostRecentArtAdherenceGood(List<List<Object>> visits) {
-		Integer ret = 0;
-		if(visits != null) {
-			// Get the last visit
-			if (visits.size() > 0) {
-				List<Object> visitObject = visits.get(visits.size() - 1);
-				// Get adherence category (ART) position
-				if (visitObject.get(12) != null) {
-					String adherencePositions = (String) visitObject.get(12);
-					String[] tokens = adherencePositions.split("\\|");
-
-					int artPos = -1;
-					for (int i = 0; i < tokens.length; i++) {
-						if (tokens[i].trim().equalsIgnoreCase("ART")) {
-							if(debugMode) System.err.println("IIT ML: Position of 'ART': " + i);
-							artPos = i;
-							break;
-						}
-					}
-
-					if(artPos > -1) {
-						// We found ART adherence is covered we get the status
-						if (visitObject.get(9) != null) {
-							String adherenceString = (String) visitObject.get(9);
-							if(debugMode) System.err.println("IIT ML: Adherence full string: " + adherenceString);
-							String[] adherenceTokens = adherenceString.split("\\|");
-							if(debugMode) System.err.println("IIT ML: Adherence tokens: " + Arrays.toString(adherenceTokens));
-							if(adherenceTokens.length > 0) {
-								for (int i = 0; i < adherenceTokens.length; i++) {
-									if(i == artPos) {
-										if (adherenceTokens[i].trim().equalsIgnoreCase("good")) {
-											ret = 1;
-											return(ret);
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getMostRecentArtAdherencePoor(List<List<Object>> visits) {
-		Integer ret = 0;
-		if(visits != null) {
-			// Get the last visit
-			if (visits.size() > 0) {
-				List<Object> visitObject = visits.get(visits.size() - 1);
-				// Get adherence category (ART) position
-				if (visitObject.get(12) != null) {
-					String adherencePositions = (String) visitObject.get(12);
-					String[] tokens = adherencePositions.split("\\|");
-
-					int artPos = -1;
-					for (int i = 0; i < tokens.length; i++) {
-						if (tokens[i].trim().equalsIgnoreCase("ART")) {
-							if(debugMode) System.err.println("IIT ML: Position of 'ART': " + i);
-							artPos = i;
-							break;
-						}
-					}
-
-					if(artPos > -1) {
-						// We found ART adherence is covered we get the status
-						if (visitObject.get(9) != null) {
-							String adherenceString = (String) visitObject.get(9);
-							if(debugMode) System.err.println("IIT ML: Adherence full string: " + adherenceString);
-							String[] adherenceTokens = adherenceString.split("\\|");
-							if(debugMode) System.err.println("IIT ML: Adherence tokens: " + Arrays.toString(adherenceTokens));
-							if(adherenceTokens.length > 0) {
-								for (int i = 0; i < adherenceTokens.length; i++) {
-									if(i == artPos) {
-										if (adherenceTokens[i].trim().equalsIgnoreCase("poor")) {
-											ret = 1;
-											return(ret);
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getStabilityAssessmentStable(List<List<Object>> visits) {
-		Integer ret = 0;
+			
+	/**
+	 * Get the stability assessment of the patient
+	 * @param visits
+	 */
+	private void getStabilityAssessment(SimpleObject patientPredictionVariables, List<List<Object>> visits) {
 		if(visits != null) {
 			// Get the last visit
 			if (visits.size() > 0) {
@@ -1543,118 +1200,21 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 				if (visitObject.get(8) != null) {
 					String differentiatedCare = (String) visitObject.get(8);
 					if(differentiatedCare.trim().equalsIgnoreCase("stable")) {
-						ret = 1;
+						patientPredictionVariables.put("StabilityAssessmentStable", 1);
+					} else if(differentiatedCare.trim().equalsIgnoreCase("not stable")) {
+						patientPredictionVariables.put("StabilityAssessmentUnstable", 1);
 					}
 				}
 			}
 		}
-		return(ret);
-	}
+	}		
 
-	private Integer getStabilityAssessmentUnstable(List<List<Object>> visits) {
-		Integer ret = 0;
-		if(visits != null) {
-			// Get the last visit
-			if (visits.size() > 0) {
-				List<Object> visitObject = visits.get(visits.size() - 1);
-				if (visitObject.get(8) != null) {
-					String differentiatedCare = (String) visitObject.get(8);
-					if(differentiatedCare.trim().equalsIgnoreCase("not stable")) {
-						ret = 1;
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getDifferentiatedCarecommunityartdistributionhcwled(List<List<Object>> visits) {
-		Integer ret = 0;
-		if(visits != null) {
-			// Get the last visit
-			if (visits.size() > 0) {
-				List<Object> visitObject = visits.get(visits.size() - 1);
-				if (visitObject.get(7) != null) {
-					String differentiatedCare = (String) visitObject.get(7);
-					if(differentiatedCare.trim().equalsIgnoreCase("Community ART Distribution - HCW Led")) {
-						ret = 1;
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getDifferentiatedCarecommunityartdistributionpeerled(List<List<Object>> visits) {
-		Integer ret = 0;
-		if(visits != null) {
-			// Get the last visit
-			if (visits.size() > 0) {
-				List<Object> visitObject = visits.get(visits.size() - 1);
-				if (visitObject.get(7) != null) {
-					String differentiatedCare = (String) visitObject.get(7);
-					if(differentiatedCare.trim().equalsIgnoreCase("Community ART Distribution - Peer Led")) {
-						ret = 1;
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getDifferentiatedCareexpress(List<List<Object>> visits) {
-		Integer ret = 0;
-		if(visits != null) {
-			// Get the last visit
-			if (visits.size() > 0) {
-				List<Object> visitObject = visits.get(visits.size() - 1);
-				if (visitObject.get(7) != null) {
-					String differentiatedCare = (String) visitObject.get(7);
-					if(differentiatedCare.trim().equalsIgnoreCase("Express")) {
-						ret = 1;
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getDifferentiatedCarefacilityartdistributiongroup(List<List<Object>> visits) {
-		Integer ret = 0;
-		if(visits != null) {
-			// Get the last visit
-			if (visits.size() > 0) {
-				List<Object> visitObject = visits.get(visits.size() - 1);
-				if (visitObject.get(7) != null) {
-					String differentiatedCare = (String) visitObject.get(7);
-					if(differentiatedCare.trim().equalsIgnoreCase("Facility ART Distribution Group")) {
-						ret = 1;
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getDifferentiatedCarefasttrack(List<List<Object>> visits) {
-		Integer ret = 0;
-		if(visits != null) {
-			// Get the last visit
-			if (visits.size() > 0) {
-				List<Object> visitObject = visits.get(visits.size() - 1);
-				if (visitObject.get(7) != null) {
-					String differentiatedCare = (String) visitObject.get(7);
-					if(differentiatedCare.trim().equalsIgnoreCase("Fast Track")) {
-						ret = 1;
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getDifferentiatedCarestandardcare(List<List<Object>> visits) {
-		Integer ret = 0;
+	/**
+	 * Gets differentiated care of the patient
+	 * @param visits
+	 * @return
+	 */
+	private void getDifferentiatedCare(SimpleObject patientPredictionVariables, List<List<Object>> visits) {
 		if(visits != null) {
 			// Get the last visit
 			if (visits.size() > 0) {
@@ -1662,23 +1222,43 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 				if (visitObject.get(7) != null) {
 					String differentiatedCare = (String) visitObject.get(7);
 					if(differentiatedCare.trim().equalsIgnoreCase("Standard Care")) {
-						ret = 1;
+						patientPredictionVariables.put("DifferentiatedCarestandardcare", 1);
+					} else if(differentiatedCare.trim().equalsIgnoreCase("Fast Track")) {
+						patientPredictionVariables.put("DifferentiatedCarefasttrack", 1);
+					} else if(differentiatedCare.trim().equalsIgnoreCase("Facility ART Distribution Group")) {
+						patientPredictionVariables.put("DifferentiatedCarefacilityartdistributiongroup", 1);
+					} else if(differentiatedCare.trim().equalsIgnoreCase("Express")) {
+						patientPredictionVariables.put("DifferentiatedCareexpress", 1);
+					} else if(differentiatedCare.trim().equalsIgnoreCase("Community ART Distribution - Peer Led")) {
+						patientPredictionVariables.put("DifferentiatedCarecommunityartdistributionpeerled", 1);
+					} else if(differentiatedCare.trim().equalsIgnoreCase("Community ART Distribution - HCW Led")) {
+						patientPredictionVariables.put("DifferentiatedCarecommunityartdistributionhcwled", 1);
 					}
 				}
 			}
 		}
-		return(ret);
 	}
 
-	private Integer getMaritalStatusOther(List<List<Object>> demographics, Long Age) {
-		Integer ret = 0;
+	/**
+	 * Get marital status of patient
+	 * @param demographics
+	 * @param Age
+	 * @return
+	 */
+	private void getMaritalStatus(SimpleObject patientPredictionVariables, List<List<Object>> demographics, Long Age) {
 		if(demographics != null) {
 			// Get the last appointment
 			if (demographics.size() > 0) {
 				List<Object> maritalObject = demographics.get(demographics.size() - 1);
 				if(maritalObject.get(4) != null) {
 					String marital = (String) maritalObject.get(4);
-					if (!marital.trim().equalsIgnoreCase("single") &&
+					if (Age <= 15) {
+						patientPredictionVariables.put("MaritalStatusMinor", 1);
+					} else if ((marital.trim().equalsIgnoreCase("divorced") && Age > 15) ||
+							(marital.trim().equalsIgnoreCase("separated") && Age > 15)
+					) {
+						patientPredictionVariables.put("MaritalStatusDivorced", 1);
+					} else if (!marital.trim().equalsIgnoreCase("single") &&
 							!marital.trim().equalsIgnoreCase("divorced") &&
 							!marital.trim().equalsIgnoreCase("widow") &&
 							!marital.trim().equalsIgnoreCase("separated") &&
@@ -1688,110 +1268,22 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 							!marital.trim().equalsIgnoreCase("polygamous") &&
 							Age > 15
 					) {
-						ret = 1;
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getMaritalStatusSingle(List<List<Object>> demographics, Long Age) {
-		Integer ret = 0;
-		if(demographics != null) {
-			// Get the last appointment
-			if (demographics.size() > 0) {
-				List<Object> maritalObject = demographics.get(demographics.size() - 1);
-				if(maritalObject.get(4) != null) {
-					String gender = (String) maritalObject.get(4);
-					if (gender.trim().equalsIgnoreCase("single") && Age > 15) {
-						ret = 1;
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getMaritalStatusWidow(List<List<Object>> demographics, Long Age) {
-		Integer ret = 0;
-		if(demographics != null) {
-			// Get the last appointment
-			if (demographics.size() > 0) {
-				List<Object> maritalObject = demographics.get(demographics.size() - 1);
-				if(maritalObject.get(4) != null) {
-					String marital = (String) maritalObject.get(4);
-					if (marital.trim().equalsIgnoreCase("widow") && Age > 15) {
-						ret = 1;
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getMaritalStatusPolygamous(List<List<Object>> demographics, Long Age) {
-		Integer ret = 0;
-		if(demographics != null) {
-			// Get the last appointment
-			if (demographics.size() > 0) {
-				List<Object> maritalObject = demographics.get(demographics.size() - 1);
-				if(maritalObject.get(4) != null) {
-					String marital = (String) maritalObject.get(4);
-					if (marital.trim().equalsIgnoreCase("polygamous") && Age > 15) {
-						ret = 1;
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getMaritalStatusDivorced(List<List<Object>> demographics, Long Age) {
-		Integer ret = 0;
-		if(demographics != null) {
-			// Get the last appointment
-			if (demographics.size() > 0) {
-				List<Object> maritalObject = demographics.get(demographics.size() - 1);
-				if(maritalObject.get(4) != null) {
-					String marital = (String) maritalObject.get(4);
-					if ((marital.trim().equalsIgnoreCase("divorced") && Age > 15) ||
-							(marital.trim().equalsIgnoreCase("separated") && Age > 15)
-					) {
-						ret = 1;
-					}
-				}
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getMaritalStatusMarried(List<List<Object>> demographics, Long Age) {
-		Integer ret = 0;
-		if(demographics != null) {
-			// Get the last appointment
-			if (demographics.size() > 0) {
-				List<Object> maritalObject = demographics.get(demographics.size() - 1);
-				if(maritalObject.get(4) != null){
-					String marital = (String) maritalObject.get(4);
-					if ((marital.trim().equalsIgnoreCase("married") && Age > 15) ||
+						patientPredictionVariables.put("MaritalStatusOther", 1);
+					} else if (marital.trim().equalsIgnoreCase("single") && Age > 15) {
+						patientPredictionVariables.put("MaritalStatusSingle", 1);
+					} else if (marital.trim().equalsIgnoreCase("widow") && Age > 15) {
+						patientPredictionVariables.put("MaritalStatusWidow", 1);
+					} else if (marital.trim().equalsIgnoreCase("polygamous") && Age > 15) {
+						patientPredictionVariables.put("MaritalStatusPolygamous", 1);
+					} else if ((marital.trim().equalsIgnoreCase("married") && Age > 15) ||
 							(marital.trim().equalsIgnoreCase("monogamous") && Age > 15) ||
 							(marital.trim().equalsIgnoreCase("cohabiting") && Age > 15)
 					) {
-						ret = 1;
+						patientPredictionVariables.put("MaritalStatusMarried", 1);
 					}
 				}
 			}
 		}
-		return(ret);
-	}
-
-	private Integer getMaritalStatusMinor(Long Age) {
-		Integer ret = 0;
-		if (Age <= 15) {
-			ret = 1;
-		}
-		return(ret);
 	}
 
 	private Long getAgeYears(List<List<Object>> demographics) {
@@ -1819,7 +1311,7 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 				.toLocalDate();
 	}
 
-	private Integer getGenderFemale(List<List<Object>> demographics) {
+	private Integer getGender(List<List<Object>> demographics) {
 		Integer ret = 0;
 		if(demographics != null) {
 			// Get the last appointment
@@ -1828,6 +1320,8 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 				if(genderObject.get(1) != null) {
 					String gender = (String) genderObject.get(1);
 					if (gender.trim().equalsIgnoreCase("female")) {
+						ret = 2;
+					} else if (gender.trim().equalsIgnoreCase("male")) {
 						ret = 1;
 					}
 				}
@@ -1836,287 +1330,93 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 		return(ret);
 	}
 
-	private Integer getGenderMale(List<List<Object>> demographics) {
-		Integer ret = 0;
-		if(demographics != null) {
+	private void getPayloadMonthOfYear(SimpleObject patientPredictionVariables, List<Appointment> appointments) {
+		if(appointments != null) {
 			// Get the last appointment
-			if (demographics.size() > 0) {
-				List<Object> genderObject = demographics.get(demographics.size() - 1);
-				if(genderObject.get(1) != null) {
-					String gender = (String) genderObject.get(1);
-					if (gender.trim().equalsIgnoreCase("male")) {
-						ret = 1;
-					}
+			if(appointments.size() > 0) {
+				Appointment latestAppointment = appointments.get(appointments.size() - 1);
+				Date NAD = latestAppointment.getAppointmentDate();
+				int monthOfYear = getMonthOfYear(NAD);
+				switch (monthOfYear) {
+					case Calendar.JANUARY:
+						patientPredictionVariables.put("MonthJan", 1);
+						break;
+					case Calendar.FEBRUARY:
+						patientPredictionVariables.put("MonthFeb", 1);
+						break;
+					case Calendar.MARCH:
+						patientPredictionVariables.put("MonthMar", 1);
+						break;
+					case Calendar.APRIL:
+						patientPredictionVariables.put("MonthApr", 1);
+						break;
+					case Calendar.MAY:
+						patientPredictionVariables.put("MonthMay", 1);
+						break;
+					case Calendar.JUNE:
+						patientPredictionVariables.put("MonthJun", 1);
+						break;
+					case Calendar.JULY:
+						patientPredictionVariables.put("MonthJul", 1);
+						break;
+					case Calendar.AUGUST:
+						patientPredictionVariables.put("MonthAug", 1);
+						break;
+					case Calendar.SEPTEMBER:
+						patientPredictionVariables.put("MonthSep", 1);
+						break;
+					case Calendar.OCTOBER:
+						patientPredictionVariables.put("MonthOct", 1);
+						break;
+					case Calendar.NOVEMBER:
+						patientPredictionVariables.put("MonthNov", 1);
+						break;
+					case Calendar.DECEMBER:
+						patientPredictionVariables.put("MonthDec", 1);
+						break;
+					default:
+						System.err.println("IIT ML: ERROR: Month of year not found");
+						break;
 				}
 			}
 		}
-		return(ret);
 	}
 
-	private Integer getMonthJan(List<Appointment> appointments) {
-		Integer ret = 0;
-		if(appointments != null) {
-			// Get the last appointment
-			if(appointments.size() > 0) {
-				Appointment latestAppointment = appointments.get(appointments.size() - 1);
-				Date NAD = latestAppointment.getAppointmentDate();
-				int monthOfYear = getMonthOfYear(NAD);
-				ret = (monthOfYear == Calendar.JANUARY) ? 1 : 0;
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getMonthFeb(List<Appointment> appointments) {
-		Integer ret = 0;
-		if(appointments != null) {
-			// Get the last appointment
-			if(appointments.size() > 0) {
-				Appointment latestAppointment = appointments.get(appointments.size() - 1);
-				Date NAD = latestAppointment.getAppointmentDate();
-				int monthOfYear = getMonthOfYear(NAD);
-				ret = (monthOfYear == Calendar.FEBRUARY) ? 1 : 0;
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getMonthMar(List<Appointment> appointments) {
-		Integer ret = 0;
-		if(appointments != null) {
-			// Get the last appointment
-			if(appointments.size() > 0) {
-				Appointment latestAppointment = appointments.get(appointments.size() - 1);
-				Date NAD = latestAppointment.getAppointmentDate();
-				int monthOfYear = getMonthOfYear(NAD);
-				ret = (monthOfYear == Calendar.MARCH) ? 1 : 0;
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getMonthApr(List<Appointment> appointments) {
-		Integer ret = 0;
-		if(appointments != null) {
-			// Get the last appointment
-			if(appointments.size() > 0) {
-				Appointment latestAppointment = appointments.get(appointments.size() - 1);
-				Date NAD = latestAppointment.getAppointmentDate();
-				int monthOfYear = getMonthOfYear(NAD);
-				ret = monthOfYear == Calendar.APRIL ? 1: 0;
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getMonthMay(List<Appointment> appointments) {
-		Integer ret = 0;
-		if(appointments != null) {
-			// Get the last appointment
-			if(appointments.size() > 0) {
-				Appointment latestAppointment = appointments.get(appointments.size() - 1);
-				Date NAD = latestAppointment.getAppointmentDate();
-				int monthOfYear = getMonthOfYear(NAD);
-				ret = (monthOfYear == Calendar.MAY) ? 1 : 0;
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getMonthJun(List<Appointment> appointments) {
-		Integer ret = 0;
-		if(appointments != null) {
-			// Get the last appointment
-			if(appointments.size() > 0) {
-				Appointment latestAppointment = appointments.get(appointments.size() - 1);
-				Date NAD = latestAppointment.getAppointmentDate();
-				int monthOfYear = getMonthOfYear(NAD);
-				ret = (monthOfYear == Calendar.JUNE) ? 1 : 0;
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getMonthJul(List<Appointment> appointments) {
-		Integer ret = 0;
-		if(appointments != null) {
-			// Get the last appointment
-			if(appointments.size() > 0) {
-				Appointment latestAppointment = appointments.get(appointments.size() - 1);
-				Date NAD = latestAppointment.getAppointmentDate();
-				int monthOfYear = getMonthOfYear(NAD);
-				ret = (monthOfYear == Calendar.JULY) ? 1 : 0;
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getMonthAug(List<Appointment> appointments) {
-		Integer ret = 0;
-		if(appointments != null) {
-			// Get the last appointment
-			if(appointments.size() > 0) {
-				Appointment latestAppointment = appointments.get(appointments.size() - 1);
-				Date NAD = latestAppointment.getAppointmentDate();
-				int monthOfYear = getMonthOfYear(NAD);
-				ret = (monthOfYear == Calendar.AUGUST) ? 1 : 0;
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getMonthSep(List<Appointment> appointments) {
-		Integer ret = 0;
-		if(appointments != null) {
-			// Get the last appointment
-			if(appointments.size() > 0) {
-				Appointment latestAppointment = appointments.get(appointments.size() - 1);
-				Date NAD = latestAppointment.getAppointmentDate();
-				int monthOfYear = getMonthOfYear(NAD);
-				ret = (monthOfYear == Calendar.SEPTEMBER) ? 1 : 0;
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getMonthOct(List<Appointment> appointments) {
-		Integer ret = 0;
-		if(appointments != null) {
-			// Get the last appointment
-			if(appointments.size() > 0) {
-				Appointment latestAppointment = appointments.get(appointments.size() - 1);
-				Date NAD = latestAppointment.getAppointmentDate();
-				int monthOfYear = getMonthOfYear(NAD);
-				ret = monthOfYear == Calendar.OCTOBER ? 1: 0;
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getMonthNov(List<Appointment> appointments) {
-		Integer ret = 0;
-		if(appointments != null) {
-			// Get the last appointment
-			if(appointments.size() > 0) {
-				Appointment latestAppointment = appointments.get(appointments.size() - 1);
-				Date NAD = latestAppointment.getAppointmentDate();
-				int monthOfYear = getMonthOfYear(NAD);
-				ret = (monthOfYear == Calendar.NOVEMBER) ? 1 : 0;
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getMonthDec(List<Appointment> appointments) {
-		Integer ret = 0;
-		if(appointments != null) {
-			// Get the last appointment
-			if(appointments.size() > 0) {
-				Appointment latestAppointment = appointments.get(appointments.size() - 1);
-				Date NAD = latestAppointment.getAppointmentDate();
-				int monthOfYear = getMonthOfYear(NAD);
-				ret = (monthOfYear == Calendar.DECEMBER) ? 1 : 0;
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getDayMon(List<Appointment> appointments) {
-		Integer ret = 0;
+	public static void getPayloadDayOfWeek(SimpleObject patientPredictionVariables, List<Appointment> appointments) {
 		if(appointments != null) {
 			// Get the last appointment
 			if(appointments.size() > 0) {
 				Appointment latestAppointment = appointments.get(appointments.size() - 1);
 				Date NAD = latestAppointment.getAppointmentDate();
 				int dayOfWeek = getDayOfWeek(NAD);
-				ret = (dayOfWeek == Calendar.MONDAY) ? 1 : 0;
+				switch (dayOfWeek) {
+					case Calendar.MONDAY:
+						patientPredictionVariables.put("DayMon", 1);
+						break;
+					case Calendar.TUESDAY:
+						patientPredictionVariables.put("DayTue", 1);
+						break;
+					case Calendar.WEDNESDAY:
+						patientPredictionVariables.put("DayWed", 1);
+						break;
+					case Calendar.THURSDAY:
+						patientPredictionVariables.put("DayThu", 1);
+						break;
+					case Calendar.FRIDAY:
+						patientPredictionVariables.put("DayFri", 1);
+						break;
+					case Calendar.SATURDAY:
+						patientPredictionVariables.put("DaySat", 1);
+						break;
+					case Calendar.SUNDAY:
+						patientPredictionVariables.put("DaySun", 1);
+						break;
+					default:
+						System.err.println("IIT ML: ERROR: Day of week not found");
+						break;
+				}	
 			}
 		}
-		return(ret);
-	}
-
-	private Integer getDayTue(List<Appointment> appointments) {
-		Integer ret = 0;
-		if(appointments != null) {
-			// Get the last appointment
-			if(appointments.size() > 0) {
-				Appointment latestAppointment = appointments.get(appointments.size() - 1);
-				Date NAD = latestAppointment.getAppointmentDate();
-				int dayOfWeek = getDayOfWeek(NAD);
-				ret = (dayOfWeek == Calendar.TUESDAY) ? 1 : 0;
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getDayWed(List<Appointment> appointments) {
-		Integer ret = 0;
-		if(appointments != null) {
-			// Get the last appointment
-			if(appointments.size() > 0) {
-				Appointment latestAppointment = appointments.get(appointments.size() - 1);
-				Date NAD = latestAppointment.getAppointmentDate();
-				int dayOfWeek = getDayOfWeek(NAD);
-				ret = (dayOfWeek == Calendar.WEDNESDAY) ? 1 : 0;
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getDayThu(List<Appointment> appointments) {
-		Integer ret = 0;
-		if(appointments != null) {
-			// Get the last appointment
-			if(appointments.size() > 0) {
-				Appointment latestAppointment = appointments.get(appointments.size() - 1);
-				Date NAD = latestAppointment.getAppointmentDate();
-				int dayOfWeek = getDayOfWeek(NAD);
-				ret = (dayOfWeek == Calendar.THURSDAY) ? 1 : 0;
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getDayFri(List<Appointment> appointments) {
-		Integer ret = 0;
-		if(appointments != null) {
-			// Get the last appointment
-			if(appointments.size() > 0) {
-				Appointment latestAppointment = appointments.get(appointments.size() - 1);
-				Date NAD = latestAppointment.getAppointmentDate();
-				int dayOfWeek = getDayOfWeek(NAD);
-				ret = (dayOfWeek == Calendar.FRIDAY) ? 1 : 0;
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getDaySat(List<Appointment> appointments) {
-		Integer ret = 0;
-		if(appointments != null) {
-			// Get the last appointment
-			if(appointments.size() > 0) {
-				Appointment latestAppointment = appointments.get(appointments.size() - 1);
-				Date NAD = latestAppointment.getAppointmentDate();
-				int dayOfWeek = getDayOfWeek(NAD);
-				ret = (dayOfWeek == Calendar.SATURDAY) ? 1 : 0;
-			}
-		}
-		return(ret);
-	}
-
-	private Integer getDaySun(List<Appointment> appointments) {
-		Integer ret = 0;
-		if(appointments != null) {
-			// Get the last appointment
-			if(appointments.size() > 0) {
-				Appointment latestAppointment = appointments.get(appointments.size() - 1);
-				Date NAD = latestAppointment.getAppointmentDate();
-				int dayOfWeek = getDayOfWeek(NAD);
-				ret = (dayOfWeek == Calendar.SUNDAY) ? 1 : 0;
-			}
-		}
-		return(ret);
 	}
 
 	public static int getMonthOfYear(Date date) {
