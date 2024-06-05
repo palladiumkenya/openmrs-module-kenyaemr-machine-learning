@@ -156,9 +156,9 @@
     <bean id="kenyaemrml.config.report" class="org.openmrs.module.kenyacore.report.ReportConfiguration">
         <property name="commonReports">
             <set>
-                <ref bean="kenyaemrml.hiv.report.highIIT" />
-                <!-- <ref bean="kenyaemrml.hiv.report.mediumIIT" />
-                <ref bean="kenyaemrml.hiv.report.lowIIT" /> -->
+                <!-- <ref bean="kenyaemrml.hiv.report.highIIT" /> -->
+                <!-- <ref bean="kenyaemrml.hiv.report.mediumIIT" /> -->
+                <!-- <ref bean="kenyaemrml.hiv.report.lowIIT" /> -->
             </set>
         </property>
     </bean>
