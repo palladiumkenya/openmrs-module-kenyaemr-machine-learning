@@ -20,17 +20,12 @@ import org.springframework.web.servlet.ModelAndView;
 public class CorsInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        System.out.println("REST: Now handling CORS");
         String controllerPackage = handler.getClass().getPackage().getName();
-        System.out.println("REST: Handler: " + controllerPackage);
-        System.out.println("REST: Handler string: " + handler.toString());
         if (handler instanceof HandlerMethod) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
-            System.out.println("REST: Handler method: " + handlerMethod.toString());
             
             EnableCors enableCorsAnnotation = handlerMethod.getMethodAnnotation(EnableCors.class);
             if (enableCorsAnnotation != null) {
-                System.out.println("REST: enabling CORS");
                 String[] origins = enableCorsAnnotation.origins();
                 if (origins.length > 0) {
                     response.setHeader("Access-Control-Allow-Origin", String.join(",", origins));
@@ -56,7 +51,6 @@ public class CorsInterceptor implements HandlerInterceptor {
 
         // Handle OPTIONS request
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-            System.out.println("REST: Now handling CORS preflight OPTIONS");
             response.setStatus(HttpServletResponse.SC_OK);
             return false; // Stop further processing
         }
