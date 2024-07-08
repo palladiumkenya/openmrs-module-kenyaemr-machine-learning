@@ -426,42 +426,47 @@ public class MachineLearningRestController extends BaseRestController {
 
 		PatientRiskScore patientRiskScore = new PatientRiskScore();
 		Patient patient = Context.getPatientService().getPatientByUuid(patientUuid);
-		List<Visit> visits = Context.getVisitService().getActiveVisitsByPatient(patient);
 
-		// Check if we are currently checked in
-		if(visits.size() > 0) {
-			//check if we have a saved score
-			Date lastScore = Context.getService(MLinKenyaEMRService.class).getPatientLatestRiskEvaluationDate(patient);
-			if(lastScore != null) {
-				//check if a green card has been filled since the last score
-				Form hivGreenCardForm = MetadataUtils.existing(Form.class, HivMetadata._Form.HIV_GREEN_CARD);
-				List<Form> hivCareForms = Arrays.asList(hivGreenCardForm);
-				Location defaultLocation = Context.getService(KenyaEmrService.class).getDefaultLocation();
-				EncounterSearchCriteria encounterSearchCriteria = new EncounterSearchCriteriaBuilder()
-							.setIncludeVoided(false)
-							.setFromDate(lastScore)
-							// .setToDate(new Date())
-							.setPatient(patient)
-							.setEnteredViaForms(hivCareForms)
-							.setLocation(defaultLocation)
-							.createEncounterSearchCriteria();
-				List<Encounter> hivCareEncounters = Context.getEncounterService().getEncounters(encounterSearchCriteria);
-				if(hivCareEncounters.size() > 0) {
-					// We have had a greencard form filled after the last encounter, we can now generate a new score NB: Greencard save should have triggered score generation
-					patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatientRealTime(patient);
+		if(patient != null) {
+			List<Visit> visits = Context.getVisitService().getActiveVisitsByPatient(patient);
+
+			// Check if we are currently checked in
+			if(visits.size() > 0) {
+				//check if we have a saved score
+				Date lastScore = Context.getService(MLinKenyaEMRService.class).getPatientLatestRiskEvaluationDate(patient);
+				if(lastScore != null) {
+					//check if a green card has been filled since the last score
+					Form hivGreenCardForm = MetadataUtils.existing(Form.class, HivMetadata._Form.HIV_GREEN_CARD);
+					List<Form> hivCareForms = Arrays.asList(hivGreenCardForm);
+					Location defaultLocation = Context.getService(KenyaEmrService.class).getDefaultLocation();
+					EncounterSearchCriteria encounterSearchCriteria = new EncounterSearchCriteriaBuilder()
+								.setIncludeVoided(false)
+								.setFromDate(lastScore)
+								// .setToDate(new Date())
+								.setPatient(patient)
+								.setEnteredViaForms(hivCareForms)
+								.setLocation(defaultLocation)
+								.createEncounterSearchCriteria();
+					List<Encounter> hivCareEncounters = Context.getEncounterService().getEncounters(encounterSearchCriteria);
+					if(hivCareEncounters.size() > 0) {
+						// We have had a greencard form filled after the last encounter, we can now generate a new score NB: Greencard save should have triggered score generation
+						patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatientRealTime(patient);
+					} else {
+						patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient);
+					}
+				} else {
+					patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient, false);
+				}
+			} else {
+				Date checkScore = Context.getService(MLinKenyaEMRService.class).getPatientLatestRiskEvaluationDate(patient);
+				if(checkScore == null) {
+					patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient, false);
 				} else {
 					patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient);
 				}
-			} else {
-				patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient, false);
 			}
 		} else {
-			Date checkScore = Context.getService(MLinKenyaEMRService.class).getPatientLatestRiskEvaluationDate(patient);
-			if(checkScore == null) {
-				patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient, false);
-			} else {
-				patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient);
-			}
+			System.err.println("IIT ML: Error: Could not find a patient with UUID: " + patientUuid);
 		}
 
 		Date evaluationDate = null;
