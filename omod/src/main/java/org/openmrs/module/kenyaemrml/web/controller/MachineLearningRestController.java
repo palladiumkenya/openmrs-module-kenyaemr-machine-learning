@@ -1,6 +1,7 @@
 package org.openmrs.module.kenyaemrml.web.controller;
 
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -28,10 +29,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
-import org.jfree.data.time.Month;
 import org.json.simple.JSONObject;
+import org.openmrs.Encounter;
+import org.openmrs.Form;
+import org.openmrs.Location;
+import org.openmrs.Patient;
+import org.openmrs.Visit;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.kenyaemr.api.KenyaEmrService;
+import org.openmrs.module.kenyaemr.metadata.HivMetadata;
 import org.openmrs.module.kenyaemrml.api.MLUtils;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.api.ModelService;
@@ -40,8 +47,11 @@ import org.openmrs.module.kenyaemrml.domain.ScoringResult;
 import org.openmrs.module.kenyaemrml.iit.Appointment;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
 import org.openmrs.module.kenyaemrml.iit.Treatment;
+import org.openmrs.module.metadatadeploy.MetadataUtils;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
+import org.openmrs.parameter.EncounterSearchCriteria;
+import org.openmrs.parameter.EncounterSearchCriteriaBuilder;
 import org.openmrs.ui.framework.SimpleObject;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -49,9 +59,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.openmrs.module.kenyaemrml.iit.Appointment;
-// import org.springframework.web.bind.annotation.CrossOrigin;
 
 /**
  * The main controller for ML in KenyaEMR
@@ -401,6 +410,95 @@ public class MachineLearningRestController extends BaseRestController {
 		}
 	}
 
+	/**
+	 * Gete the patients IIT score given the patient UUID
+	 * @param patientId
+	 * @param kenyaUi
+	 * @param ui
+	 * @return
+	 */
+	// @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.OPTIONS})
+	@EnableCors(origins = "*", methods = "*", headers = "Origin, Content-Type, Accept, Authorization, *")
+	@RequestMapping(method = RequestMethod.GET, value = "/patientiitscore")
+	@ResponseBody
+	public SimpleObject getCurrentIITRiskScore(@RequestParam("patientUuid") String patientUuid) {
+		SimpleObject ret = new SimpleObject();
+
+		PatientRiskScore patientRiskScore = new PatientRiskScore();
+		Patient patient = Context.getPatientService().getPatientByUuid(patientUuid);
+
+		if(patient != null) {
+			List<Visit> visits = Context.getVisitService().getActiveVisitsByPatient(patient);
+
+			// Check if we are currently checked in
+			if(visits.size() > 0) {
+				//check if we have a saved score
+				Date lastScore = Context.getService(MLinKenyaEMRService.class).getPatientLatestRiskEvaluationDate(patient);
+				if(lastScore != null) {
+					//check if a green card has been filled since the last score
+					Form hivGreenCardForm = MetadataUtils.existing(Form.class, HivMetadata._Form.HIV_GREEN_CARD);
+					List<Form> hivCareForms = Arrays.asList(hivGreenCardForm);
+					Location defaultLocation = Context.getService(KenyaEmrService.class).getDefaultLocation();
+					EncounterSearchCriteria encounterSearchCriteria = new EncounterSearchCriteriaBuilder()
+								.setIncludeVoided(false)
+								.setFromDate(lastScore)
+								// .setToDate(new Date())
+								.setPatient(patient)
+								.setEnteredViaForms(hivCareForms)
+								.setLocation(defaultLocation)
+								.createEncounterSearchCriteria();
+					List<Encounter> hivCareEncounters = Context.getEncounterService().getEncounters(encounterSearchCriteria);
+					if(hivCareEncounters.size() > 0) {
+						// We have had a greencard form filled after the last encounter, we can now generate a new score NB: Greencard save should have triggered score generation
+						patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatientRealTime(patient);
+					} else {
+						patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient);
+					}
+				} else {
+					patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient, false);
+				}
+			} else {
+				Date checkScore = Context.getService(MLinKenyaEMRService.class).getPatientLatestRiskEvaluationDate(patient);
+				if(checkScore == null) {
+					patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient, false);
+				} else {
+					patientRiskScore = Context.getService(MLinKenyaEMRService.class).getLatestPatientRiskScoreByPatient(patient);
+				}
+			}
+		} else {
+			System.err.println("IIT ML: Error: Could not find a patient with UUID: " + patientUuid);
+		}
+
+		Date evaluationDate = null;
+		Double riskScore = null;
+		String description = null;
+		String riskFactors = null;
+		
+		if(patientRiskScore != null) {
+			evaluationDate = patientRiskScore.getEvaluationDate();
+			riskScore = patientRiskScore.getRiskScore();
+			description = patientRiskScore.getDescription();
+			riskFactors = patientRiskScore.getRiskFactors();
+		}
+
+		ret.put("riskScore", (riskScore != null && riskScore > 0.00) ? (int) Math.rint((riskScore * 100)) + " %" : "-");
+		ret.put("evaluationDate", evaluationDate != null ? formatDate(evaluationDate) : "-");
+		ret.put("description", description != null ? description : "-");
+		ret.put("riskFactors", riskFactors != null ? riskFactors : "-");
+
+		return(ret);
+	}
+
+	public String formatDate(Date date) {
+		DateFormat dateFormatter = new SimpleDateFormat("dd-MMM-yyyy");
+		return date == null ? "" : dateFormatter.format(date);
+	}
+
+	/**
+	 * An endpoint for testing IIT
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/testiit")
 	@ResponseBody
 	public Object variableTest(HttpServletRequest request) {

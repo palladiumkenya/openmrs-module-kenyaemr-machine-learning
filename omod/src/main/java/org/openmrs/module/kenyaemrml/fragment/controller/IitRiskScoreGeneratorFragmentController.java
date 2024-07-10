@@ -165,7 +165,7 @@ public class IitRiskScoreGeneratorFragmentController {
 	}
 
 	/**
-	 * Gets the facility name given the facility code
+	 * Gets the patient IIT score given the patient ID
 	 * @return
 	 */
 	@AppAction("kenyaemrml.predictions")
