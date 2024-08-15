@@ -59,7 +59,7 @@ jobs:
           mvn license:format
           sudo mvn clean install -DskipTests
           sudo rm -rf /var/lib/OpenMRS/modules/kenyaemr-*.omod
-          sudo cp -r /apps/githubworkflows/kenyaemr-modules/openmrs-module-kenyaemr-machine-learning/omod/target/kenyaemr-*.omod /var/lib/OpenMRS/modules/
+          sudo cp -r /apps/githubworkflows/kenyaemr-modules/openmrs-module-kenyaemr-machine-learning/omod/target/kenyaemrml*.omod /var/lib/OpenMRS/modules/
           sudo chown -R tomcat:tomcat /var/lib/OpenMRS/modules/
           sudo chmod +r /var/lib/OpenMRS/modules/*.omod
           sudo chmod 755 /var/lib/OpenMRS/modules/*.omod
