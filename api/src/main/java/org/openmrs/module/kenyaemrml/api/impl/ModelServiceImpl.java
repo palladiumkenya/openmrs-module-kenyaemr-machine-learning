@@ -87,6 +87,7 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			Map<String, Object> results = score(evaluator, inputFields, debug);
 			// Add the thresholds
 			results.put("thresholds", MLUtils.getHTSThresholds());
+			results.put("moduleVersion", MLUtils.getModuleVersion("kenyaemrml"));
 			ScoringResult scoringResult = new ScoringResult(results);
 			return scoringResult;
 		}
