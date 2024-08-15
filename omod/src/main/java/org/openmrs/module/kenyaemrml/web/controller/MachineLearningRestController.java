@@ -79,7 +79,7 @@ public class MachineLearningRestController extends BaseRestController {
 			 "modelId": "hts_xgb_28052024_may_2024",
 			 "encounterDate": "2024-03-06",
 			 "facilityId": "13258",
-			 "debug": "true"
+			 "debug": "false"
 		 },
 		 "variableValues": {
 			 "Age":0,
@@ -214,6 +214,7 @@ public class MachineLearningRestController extends BaseRestController {
 	@RequestMapping(method = RequestMethod.POST, value = "/casefindingscore")
 	@ResponseBody
 	public Object processHTSModel(HttpServletRequest request) {
+		System.out.println("Using ML module version: " + MLUtils.getModuleVersion("kenyaemrml"));
 		ModelService modelService = Context.getService(ModelService.class);
 		String requestBody = null;
 		try {
@@ -265,7 +266,7 @@ public class MachineLearningRestController extends BaseRestController {
 			 "modelId": "XGB_IIT_02052024",
 			 "encounterDate": "2024-02-05",
 			 "facilityId": "15204",
-			 "debug": "true"
+			 "debug": "false"
 		 },
 		 "variableValues": {
 			 "anc": 0,

@@ -3,9 +3,6 @@ package org.openmrs.module.kenyaemrml.api;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -18,7 +15,6 @@ import org.codehaus.jackson.node.ObjectNode;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Location;
 import org.openmrs.api.context.Context;
@@ -26,7 +22,8 @@ import org.openmrs.module.kenyaemr.api.KenyaEmrService;
 import org.openmrs.module.kenyaemrml.domain.ModelInputFields;
 import org.openmrs.module.kenyaemrml.domain.ScoringResult;
 import org.openmrs.ui.framework.SimpleObject;
-
+import org.openmrs.module.Module;
+import org.openmrs.module.ModuleFactory;
 
 public class MLUtils {
 	
@@ -41,58 +38,17 @@ public class MLUtils {
 	public static String MODEL_PARAMETER_VALUE_OBJECT_KEY = "variableValues";
 	
 	public static String MODEL_CONFIG_OBJECT_KEY = "modelConfigs";
-
-	public static String[] HTS_FACILITY_PROFILE_VARIABLES = {
-			"births",
-			"pregnancies",
-			"literacy",
-			"poverty",
-			"anc",
-			"pnc",
-			"sba",
-			"hiv_prev",
-			"hiv_count",
-			"condom",
-			"intercourse",
-			"in_union",
-			"circumcision",
-			"partner_away",
-			"partner_men",
-			"partner_women",
-			"sti",
-			"pop"
-	};
-
-	public static String[] IIT_FACILITY_PROFILE_VARIABLES = {
-			"SumTXCurr",
-			"births",
-			"pregnancies",
-			"literacy",
-			"poverty",
-			"anc",
-			"pnc",
-			"sba",
-			"hiv_prev",
-			"hiv_count",
-			"condom",
-			"intercourse",
-			"in_union",
-			"circumcision",
-			"partner_away",
-			"partner_men",
-			"partner_women",
-			"sti",
-			"pop",
-			"keph_level_nameLevel.2",
-			"keph_level_nameLevel.3",
-			"keph_level_nameLevel.4",
-			"keph_level_nameLevel.5",
-			"keph_level_nameLevel.6",
-			"owner_typeFaith",
-			"owner_typeNGO",
-			"owner_typePrivate",
-			"owner_typePublic" };
-
+	
+	public static String[] HTS_FACILITY_PROFILE_VARIABLES = { "births", "pregnancies", "literacy", "poverty", "anc", "pnc",
+	        "sba", "hiv_prev", "hiv_count", "condom", "intercourse", "in_union", "circumcision", "partner_away",
+	        "partner_men", "partner_women", "sti", "pop" };
+	
+	public static String[] IIT_FACILITY_PROFILE_VARIABLES = { "SumTXCurr", "births", "pregnancies", "literacy", "poverty",
+	        "anc", "pnc", "sba", "hiv_prev", "hiv_count", "condom", "intercourse", "in_union", "circumcision",
+	        "partner_away", "partner_men", "partner_women", "sti", "pop", "keph_level_nameLevel.2",
+	        "keph_level_nameLevel.3", "keph_level_nameLevel.4", "keph_level_nameLevel.5", "keph_level_nameLevel.6",
+	        "owner_typeFaith", "owner_typeNGO", "owner_typePrivate", "owner_typePublic" };
+	
 	public static String fetchRequestBody(BufferedReader reader) {
 		String requestBodyJsonStr = "";
 		try {
@@ -155,9 +111,6 @@ public class MLUtils {
 			modelParams.put(keyId, keyValue);
 		}
 		
-		prepareEncounterModelParams(encounterDateString, modelParams);
-		// add facility cut off
-		
 		JSONObject profile = getHTSFacilityProfile("FacilityCode", facilityMflCode, getHTSFacilityCutOffs());
 		
 		for (int i = 0; i < HTS_FACILITY_PROFILE_VARIABLES.length; i++) {
@@ -168,7 +121,7 @@ public class MLUtils {
 		inputFields.setFields(modelParams);
 		return inputFields;
 	}
-
+	
 	/**
 	 * Extracts IIT model variables from request body Variable values are of float type
 	 * 
@@ -216,9 +169,6 @@ public class MLUtils {
 			modelParams.put(keyId, keyValue);
 		}
 		
-		prepareEncounterModelParams(encounterDateString, modelParams);
-		// add facility cut off
-		
 		JSONObject profile = getHTSFacilityProfile("FacilityCode", facilityMflCode, getIITFacilityCutOffs());
 		
 		for (int i = 0; i < IIT_FACILITY_PROFILE_VARIABLES.length; i++) {
@@ -228,73 +178,6 @@ public class MLUtils {
 		ModelInputFields inputFields = new ModelInputFields();
 		inputFields.setFields(modelParams);
 		return inputFields;
-	}
-	
-	private static Map<String, Object> prepareEncounterModelParams(String encounterDateString,
-	        Map<String, Object> modelParams) {
-		SimpleDateFormat sdf = new SimpleDateFormat(YYYY_MM_DD);
-		if (StringUtils.isNotBlank(encounterDateString)) {
-			Date encDate = null;
-			try {
-				encDate = sdf.parse(encounterDateString);
-				Calendar c = Calendar.getInstance();
-				c.setTime(encDate);
-				int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
-				int month = c.get(Calendar.MONTH);
-				Map<String, Object> addedDayOfWeekVariables = setDayOfWeekVariables(dayOfWeek, modelParams);
-				Map<String, Object> addedMonthVariables = setMonthVariables(month, addedDayOfWeekVariables);
-				return addedMonthVariables;
-				
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		return modelParams;
-		
-	}
-	
-	/**
-	 * Sets the day of the week variables required in the ML model
-	 * 
-	 * @param dayOfWeek
-	 * @param modelParams
-	 */
-	private static Map<String, Object> setDayOfWeekVariables(int dayOfWeek, Map<String, Object> modelParams) {
-		
-		String[] daysOfWeek = { "dayofweek1", "dayofweek2", "dayofweek3", "dayofweek4", "dayofweek5", "dayofweek6",
-		        "dayofweek7" }; // we use the natural array ordering
-		// 1- Monday, 7- Sunday
-		for (int i = 0; i < daysOfWeek.length; i++) {
-			if (i == dayOfWeek - 1) { // substract 1 to align to array index i.e. 0 = 1-1
-				modelParams.put(daysOfWeek[i], 1); // set to 1
-			} else {
-				modelParams.put(daysOfWeek[i], 0); // set to 0
-			}
-		}
-		return modelParams;
-	}
-	
-	/**
-	 * Set month variables
-	 * 
-	 * @param month
-	 * @param modelParams
-	 */
-	private static Map<String, Object> setMonthVariables(int month, Map<String, Object> modelParams) {
-		
-		String[] months = { "month_of_test1", "month_of_test2", "month_of_test3", "month_of_test4", "month_of_test5",
-		        "month_of_test6", "month_of_test7", "month_of_test8", "month_of_test9", "month_of_test10",
-		        "month_of_test11", "month_of_test12" }; // we use the natural array ordering
-		
-		for (int i = 0; i < months.length; i++) {
-			if (i == month) {
-				modelParams.put(months[i], 1); // set to 1
-			} else {
-				modelParams.put(months[i], 0); // set to 0
-			}
-		}
-		return modelParams;
 	}
 	
 	/**
@@ -330,7 +213,8 @@ public class MLUtils {
 	 * @return
 	 */
 	public static String readBundledHtsCasefindingFacilityProfileFile() {
-		InputStream stream = MLUtils.class.getClassLoader().getResourceAsStream("hts/hts_ml_facility_cut_off_national_jul_2024.json");
+		InputStream stream = MLUtils.class.getClassLoader().getResourceAsStream(
+		    "hts/hts_ml_facility_cut_off_national_jul_2024.json");
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			ArrayNode result = mapper.readValue(stream, ArrayNode.class);
@@ -341,14 +225,15 @@ public class MLUtils {
 		}
 		return null;
 	}
-
+	
 	/**
 	 * Reads bundled IIT case finding facility profile
 	 * 
 	 * @return
 	 */
 	public static String readBundledIITCasefindingFacilityProfileFile() {
-		InputStream stream = MLUtils.class.getClassLoader().getResourceAsStream("iit/iit_ml_facility_cut_off_national_dec_2023.json");
+		InputStream stream = MLUtils.class.getClassLoader().getResourceAsStream(
+		    "iit/iit_ml_facility_cut_off_national_dec_2023.json");
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			ArrayNode result = mapper.readValue(stream, ArrayNode.class);
@@ -359,10 +244,10 @@ public class MLUtils {
 		}
 		return null;
 	}
-
-
+	
 	/**
 	 * Get the current HTS thresholds for this facility from the matrix file
+	 * 
 	 * @return SimpleObject - The thresholds
 	 */
 	public static SimpleObject getHTSThresholds() {
@@ -433,14 +318,15 @@ public class MLUtils {
 				}
 			}
 		} catch (Exception e) {
-			System.err.println("HTS ML Error: failed to get matrix stream: " + e.getMessage());
-			e.printStackTrace();
+			System.err.println("HTS ML Error: Failed to get thresholds from matrix. We get from globals: " + e.getMessage());
+			// e.printStackTrace();
 		}
 		return (ret);
 	}
-
+	
 	/**
 	 * Get the current IIT thresholds for this facility from the matrix file
+	 * 
 	 * @return SimpleObject - The thresholds
 	 */
 	public static SimpleObject getIITThresholds() {
@@ -511,12 +397,12 @@ public class MLUtils {
 				}
 			}
 		} catch (Exception e) {
-			System.err.println("IIT ML Error: failed to get matrix stream: " + e.getMessage());
-			e.printStackTrace();
+			System.err.println("IIT ML: Failed to get thresholds from matrix. We get from globals: " + e.getMessage());
+			// e.printStackTrace();
 		}
 		return (ret);
 	}
-
+	
 	/**
 	 * Helper method for getting a facility profile by facility name
 	 * 
@@ -570,7 +456,7 @@ public class MLUtils {
 			Object obj = jsonParser.parse(readBundledHtsCasefindingFacilityProfileFile());
 			JSONArray facilitiesMap = (JSONArray) obj;
 			
-			return facilitiesMap;			
+			return facilitiesMap;
 		}
 		catch (Exception e) {
 			System.err.println("HTS ML ERROR: Failed to parse the facility matrix file: " + e.getMessage());
@@ -579,7 +465,7 @@ public class MLUtils {
 		
 		return null;
 	}
-
+	
 	/**
 	 * Reading content from bundled mapping json file for iit score cut-off
 	 * 
@@ -607,12 +493,12 @@ public class MLUtils {
 		KenyaEmrService emrService = Context.getService(KenyaEmrService.class);
 		return emrService.getDefaultLocation();
 	}
-
+	
 	public static String getDefaultMflCode() {
 		KenyaEmrService emrService = Context.getService(KenyaEmrService.class);
 		return emrService.getDefaultLocationMflCode();
 	}
-
+	
 	/**
 	 * Get the IIT ML score using direct method (Does not call the backend)
 	 * 
@@ -626,8 +512,9 @@ public class MLUtils {
 			String requestBody = payload;
 			ObjectNode modelConfigs = MLUtils.getModelConfig(requestBody);
 			String facilityMflCode = modelConfigs.get(MLUtils.FACILITY_ID_REQUEST_VARIABLE).asText();
-			boolean isDebugMode = modelConfigs.has("debug") && modelConfigs.get("debug").asText().equals("true") ? true : false;
-
+			boolean isDebugMode = modelConfigs.has("debug") && modelConfigs.get("debug").asText().equals("true") ? true
+			        : false;
+			
 			if (facilityMflCode.equals("")) { // default to the default facility configured in the EMR
 				facilityMflCode = MLUtils.getDefaultMflCode();
 			}
@@ -639,21 +526,25 @@ public class MLUtils {
 				System.err.println("Error: The service requires model, date, and facility information");
 				return "";
 			}
-
-			JSONObject profile = MLUtils.getHTSFacilityProfile("FacilityCode", facilityMflCode, MLUtils.getIITFacilityCutOffs());
+			
+			JSONObject profile = MLUtils.getHTSFacilityProfile("FacilityCode", facilityMflCode,
+			    MLUtils.getIITFacilityCutOffs());
 			
 			if (profile == null) {
-				System.err.println("Error: The facility provided currently doesn't have an IIT cut-off profile. Provide an appropriate facility");
+				System.err
+				        .println("Error: The facility provided currently doesn't have an IIT cut-off profile. Provide an appropriate facility");
 				return "";
 			}
-
-			ModelInputFields inputFields = MLUtils.extractIITVariablesFromRequestBody(requestBody, facilityMflCode, encounterDate);
-
+			
+			ModelInputFields inputFields = MLUtils.extractIITVariablesFromRequestBody(requestBody, facilityMflCode,
+			    encounterDate);
+			
 			// System.err.println("IIT Score: Using input fields: " + inputFields);
 			
-			ScoringResult scoringResult = modelService.iitscore(modelId, facilityMflCode, encounterDate, inputFields, isDebugMode);
-
-			if(scoringResult != null) {
+			ScoringResult scoringResult = modelService.iitscore(modelId, facilityMflCode, encounterDate, inputFields,
+			    isDebugMode);
+			
+			if (scoringResult != null) {
 				ObjectMapper mapper = new ObjectMapper();
 				mlScore = mapper.writeValueAsString(scoringResult);
 				// System.out.println("ITT ML - Got IIT Score JSON as: " + mlScore);
@@ -663,8 +554,20 @@ public class MLUtils {
 			System.err.println("Error: could not get the IIT ML score: " + ex.getMessage());
 			ex.printStackTrace();
 		}
-
-		return(mlScore);
+		
+		return (mlScore);
+	}
+	
+	public static String getModuleVersion(String moduleId) {
+		// Retrieve the module by its ID
+		Module module = ModuleFactory.getModuleById(moduleId);
+		
+		if (module != null) {
+			// Return the version of the module
+			return module.getVersion();
+		}
+		
+		return "Module not found!";
 	}
 	
 }
