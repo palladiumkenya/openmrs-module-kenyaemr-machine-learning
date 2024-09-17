@@ -214,7 +214,7 @@ public class MLUtils {
 	 */
 	public static String readBundledHtsCasefindingFacilityProfileFile() {
 		InputStream stream = MLUtils.class.getClassLoader().getResourceAsStream(
-		    "hts/hts_ml_facility_cut_off_national_jul_2024.json");
+		    "hts/hts_ml_facility_cut_off_national_sept_2024.json");
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			ArrayNode result = mapper.readValue(stream, ArrayNode.class);
@@ -298,7 +298,7 @@ public class MLUtils {
 
 		// Check if the matrix has the thresholds
 		String facilityMflCode = getDefaultMflCode();
-		InputStream stream = MLUtils.class.getClassLoader().getResourceAsStream("hts/hts_ml_facility_cut_off_national_jul_2024.json");
+		InputStream stream = MLUtils.class.getClassLoader().getResourceAsStream("hts/hts_ml_facility_cut_off_national_sept_2024.json");
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			JsonNode rootNode = mapper.readTree(stream);
