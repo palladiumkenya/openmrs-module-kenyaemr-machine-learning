@@ -14,11 +14,21 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.time.DateUtils;
+import org.openmrs.Concept;
+import org.openmrs.Encounter;
+import org.openmrs.EncounterType;
 import org.openmrs.GlobalProperty;
+import org.openmrs.Location;
+import org.openmrs.Obs;
 import org.openmrs.Patient;
+import org.openmrs.api.ConceptService;
+import org.openmrs.api.EncounterService;
+import org.openmrs.api.ObsService;
 import org.openmrs.api.UserService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
+import org.openmrs.module.kenyaemr.api.KenyaEmrService;
+import org.openmrs.module.kenyaemrml.ModuleConstants;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.api.ModelService;
 import org.openmrs.module.kenyaemrml.api.db.hibernate.HibernateMLinKenyaEMRDao;
@@ -47,7 +57,105 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 	
 	@Override
 	public PatientRiskScore saveOrUpdateRiskScore(PatientRiskScore riskScore) {
+		saveIITRiskScoreAsAnObs(riskScore);
 		return mLinKenyaEMRDao.saveOrUpdateRiskScore(riskScore);
+	}
+
+	/**
+	 * Save the given IIT risk score as an OBS
+	 * 
+	 */
+	private Boolean saveIITRiskScoreAsAnObs(PatientRiskScore riskScore) {
+		Boolean ret = false;
+
+		try {
+			// Save as an OBS
+			// Create an encounter
+			EncounterService encounterService = Context.getEncounterService();
+			ConceptService conceptService = Context.getConceptService();
+			ObsService obsService = Context.getObsService();
+
+			EncounterType encounterType = encounterService.getEncounterTypeByUuid(ModuleConstants.IIT_SCORE_ENCOUNTER_TYPE);
+
+			if(encounterType != null) {
+				// Create new encounter
+				Encounter encounter = new Encounter();
+				encounter.setEncounterType(encounterType);
+				encounter.setPatient(riskScore.getPatient());
+				Location defaultLocation = Context.getService(KenyaEmrService.class).getDefaultLocation();
+				encounter.setLocation(defaultLocation);
+				encounter.setEncounterDatetime(new Date());
+				encounter.setCreator(Context.getAuthenticatedUser());
+				encounter.setDateCreated(new Date());
+				// Save encounter
+				encounterService.saveEncounter(encounter);
+
+				// create OBS for IIT value
+				Concept valueConcept = conceptService.getConceptByUuid(ModuleConstants.IIT_SCORE_RESULT_CONCEPT);
+				Obs obs = new Obs();
+				obs.setPerson(riskScore.getPatient());
+				obs.setConcept(valueConcept);
+				obs.setValueNumeric(riskScore.getRiskScore());
+				obs.setObsDatetime(new Date());
+				obs.setEncounter(encounter);
+				
+				obsService.saveObs(obs, "Added IIT numeric observation");
+				
+				encounter.addObs(obs);
+				encounterService.saveEncounter(encounter);
+
+				System.out.println("OrderEntry Module: Success creating IIT value obs");
+
+				// create OBS for IIT description (VERY HIGH, HIGH, MEDIUM, LOW)
+				String description = riskScore.getDescription();
+				description = description.trim().toLowerCase();
+				if(description.equalsIgnoreCase("Low Risk") || description.equalsIgnoreCase("Medium Risk") || description.equalsIgnoreCase("High Risk") || description.equalsIgnoreCase("Very High Risk")) {
+					Concept descriptionAnswerConcept = null;
+					if(description.equalsIgnoreCase("Low Risk")) {
+						descriptionAnswerConcept = conceptService.getConceptByUuid(ModuleConstants.IIT_SCORE_DESCRIPTION_LOW_ANSWER_CONCEPT);
+					} else if(description.equalsIgnoreCase("Medium Risk")) {
+						descriptionAnswerConcept = conceptService.getConceptByUuid(ModuleConstants.IIT_SCORE_DESCRIPTION_MEDIUM_ANSWER_CONCEPT);
+					} else if(description.equalsIgnoreCase("High Risk")) {
+						descriptionAnswerConcept = conceptService.getConceptByUuid(ModuleConstants.IIT_SCORE_DESCRIPTION_HIGH_ANSWER_CONCEPT);
+					} else if(description.equalsIgnoreCase("Very High Risk")) {
+						descriptionAnswerConcept = conceptService.getConceptByUuid(ModuleConstants.IIT_SCORE_DESCRIPTION_VERYHIGH_ANSWER_CONCEPT);
+					}
+					if(descriptionAnswerConcept != null) {
+						Concept descriptionQuestionConcept = conceptService.getConceptByUuid(ModuleConstants.IIT_SCORE_DESCRIPTION_QUESTION_CONCEPT);
+						if(descriptionQuestionConcept != null) {
+							Obs descriptionObs = new Obs();
+							descriptionObs.setPerson(riskScore.getPatient());
+							descriptionObs.setConcept(descriptionQuestionConcept);
+							descriptionObs.setValueCoded(descriptionAnswerConcept);
+							descriptionObs.setObsDatetime(new Date());
+							descriptionObs.setEncounter(encounter);
+							
+							obsService.saveObs(descriptionObs, "Added IIT description observation");
+							
+							encounter.addObs(descriptionObs);
+							encounterService.saveEncounter(encounter);
+
+							System.out.println("OrderEntry Module: Success creating IIT description obs");
+
+							return true;
+						} else {
+							System.err.println("OrderEntry Module: Could not get concept for this description question : Not creating a description obs");
+						}
+					} else {
+						System.err.println("OrderEntry Module: Could not get concept for this description : Not creating a description obs: " + description);
+					}
+				} else {
+					System.err.println("OrderEntry Module: Could not find a matching concept for this IIT score description: " + description + " : Not creating a description obs");
+				}
+			} else {
+				System.err.println("OrderEntry Module: Error creating IIT score as an OBS: could not find IIT score encounter type");
+			}
+		} catch(Exception ex) {
+			System.err.println("OrderEntry Module: Error saving the IIT score as an OBS: " + ex.getMessage());
+			ex.printStackTrace();
+		}
+
+		return ret;
 	}
 	
 	@Override
