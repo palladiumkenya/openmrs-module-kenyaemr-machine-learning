@@ -519,6 +519,8 @@ public class MLUtils {
 				facilityMflCode = MLUtils.getDefaultMflCode();
 			}
 			
+			System.out.println("OrderEntry Module: Got the facility MFL as: " + facilityMflCode);
+			
 			String modelId = modelConfigs.get(MLUtils.MODEL_ID_REQUEST_VARIABLE).asText();
 			String encounterDate = modelConfigs.get(MLUtils.ENCOUNTER_DATE_REQUEST_VARIABLE).asText();
 			
@@ -531,8 +533,8 @@ public class MLUtils {
 			    MLUtils.getIITFacilityCutOffs());
 			
 			if (profile == null) {
-				System.err
-				        .println("Error: The facility provided currently doesn't have an IIT cut-off profile. Provide an appropriate facility");
+				System.err.println("Error: The facility provided: " + facilityMflCode
+				        + " currently doesn't have an IIT cut-off profile. Provide an appropriate facility");
 				return "";
 			}
 			

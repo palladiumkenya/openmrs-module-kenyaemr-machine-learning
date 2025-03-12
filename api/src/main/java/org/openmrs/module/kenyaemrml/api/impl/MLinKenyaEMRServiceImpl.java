@@ -104,6 +104,8 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 				encounter.addObs(obs);
 				encounterService.saveEncounter(encounter);
 
+				System.out.println("OrderEntry Module: Success creating IIT value obs");
+
 				// create OBS for IIT description (VERY HIGH, HIGH, MEDIUM, LOW)
 				String description = riskScore.getDescription();
 				description = description.trim().toLowerCase();
@@ -128,10 +130,12 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 							descriptionObs.setObsDatetime(new Date());
 							descriptionObs.setEncounter(encounter);
 							
-							obsService.saveObs(obs, "Added IIT description observation");
+							obsService.saveObs(descriptionObs, "Added IIT description observation");
 							
 							encounter.addObs(descriptionObs);
 							encounterService.saveEncounter(encounter);
+
+							System.out.println("OrderEntry Module: Success creating IIT description obs");
 
 							return true;
 						} else {
