@@ -208,6 +208,34 @@
 			The paging threshold for NDWH response. Default is 400
 		</description>
 	</globalProperty>
+	<globalProperty>
+		<property>kenyaemr.iit.machine.learning.useAPI</property>
+		<defaultValue>false</defaultValue>
+		<description>
+			Whether to use API instead of local PMML file for IIT prediction
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>kenyaemr.iit.machine.learning.APIURL</property>
+		<defaultValue>http://127.0.0.1:8000</defaultValue>
+		<description>
+			The API url for IIT
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>kenyaemr.iit.machine.learning.APIusername</property>
+		<defaultValue>admin</defaultValue>
+		<description>
+			The API username for IIT
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>kenyaemr.iit.machine.learning.APIpassword</property>
+		<defaultValue>Admin123</defaultValue>
+		<description>
+			The API password for IIT
+		</description>
+	</globalProperty>
 	<!--
 	<dwr>
 		<allow>

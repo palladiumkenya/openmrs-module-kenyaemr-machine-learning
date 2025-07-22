@@ -1,5 +1,6 @@
 package org.openmrs.module.kenyaemrml.api.impl;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -8,6 +9,7 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
@@ -33,6 +35,7 @@ import org.jpmml.evaluator.Evaluator;
 import org.jpmml.evaluator.FieldValue;
 import org.jpmml.evaluator.InputField;
 import org.jpmml.evaluator.OutputField;
+// import org.omg.CORBA.Request;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
@@ -40,6 +43,7 @@ import org.openmrs.PatientIdentifierType;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
+import org.openmrs.module.kenyaemrml.ModuleConstants;
 import org.openmrs.module.kenyaemrml.api.HTSMLService;
 import org.openmrs.module.kenyaemrml.api.IITMLService;
 import org.openmrs.module.kenyaemrml.api.MLUtils;
@@ -51,6 +55,13 @@ import org.openmrs.module.kenyaemrml.iit.Appointment;
 import org.openmrs.module.kenyaemrml.iit.PatientRiskScore;
 import org.openmrs.module.kenyaemrml.iit.Treatment;
 import org.openmrs.ui.framework.SimpleObject;
+// import org.springframework.web.bind.annotation.RequestBody;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * Service class used to prepare and score models
@@ -196,6 +207,147 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 	 * Gets the latest patient IIT score
 	 */
 	public PatientRiskScore generatePatientRiskScore(Patient patient) {
+		PatientRiskScore patientRiskScore = new PatientRiskScore();
+
+		GlobalProperty gpUseAPI = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_IIT_USE_API);
+
+		if(gpUseAPI != null) {
+			String stUseAPI = gpUseAPI.getPropertyValue();
+			if(stUseAPI != null && stUseAPI.trim().equalsIgnoreCase("true")) {
+				return(generatePatientRiskScoreRemote(patient));
+			} else if(stUseAPI != null && stUseAPI.trim().equalsIgnoreCase("false")) {
+				return(generatePatientRiskScoreLocal(patient));
+			} else {
+				return(generatePatientRiskScoreLocal(patient));
+			}
+		}
+		
+		patientRiskScore = generatePatientRiskScoreLocal(patient);
+
+		return(patientRiskScore);
+	}
+
+	/**
+	 * Gets the latest patient IIT score from remote API
+	 */
+	public PatientRiskScore generatePatientRiskScoreRemote(Patient patient) {
+		PatientRiskScore patientRiskScore = new PatientRiskScore();
+
+		GlobalProperty gpIITAPIUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_IIT_API_URL);
+		GlobalProperty gpIITAPIUsername = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_IIT_API_USERNAME);
+		GlobalProperty gpIITAPIPassword = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_IIT_API_PASSWORD);
+
+		if(gpIITAPIUrl == null || gpIITAPIUsername == null || gpIITAPIPassword == null) {
+			System.err.println("Machine learning module: Error : IIT remote API : Some global parameters are not set. Cannot continue");
+			return(patientRiskScore);
+		}
+
+		System.err.println("Machine learning module: Using IIT remote API");
+
+		try {
+			String stIITAPIUrl = gpIITAPIUrl.getPropertyValue();
+			String stIITAPIUsername = gpIITAPIUsername.getPropertyValue();
+			String stIITAPIPassword = gpIITAPIPassword.getPropertyValue();
+
+			if(stIITAPIUrl == null || stIITAPIUsername == null || stIITAPIPassword == null) {
+				System.err.println("Machine learning module: Error : IIT remote API : Some global parameters are not set. Cannot continue");
+				return(patientRiskScore);
+			}
+
+			String auth = stIITAPIUsername + ":" + stIITAPIPassword;
+			String authentication = Base64.getEncoder().encodeToString(auth.getBytes());
+
+			// Create the payload
+			// Get the hash of the patient UUID
+			String patientUuid = patient.getUuid();
+			String hashedPatientUuid = MLUtils.getSHA256Hash(patientUuid);
+			// or hash of ID
+			// String hashedPatientId = MLUtils.getSHA256Hash(String.valueOf(patient.getId()));
+
+			String facilityMflCode = MLUtils.getDefaultMflCode();
+
+			Date evaluationDate = null;
+			Double riskScore = null;
+			String description = null;
+			String riskFactors = null;
+			String startDate = "2015-01-01";
+			String endDate = formatDate(new Date(), "yyyy-MMM-dd");
+
+			SimpleObject rawPayload = SimpleObject.create("ppk", hashedPatientUuid, "sc", facilityMflCode, "start_date", startDate, "end_date", endDate);
+			String payload = rawPayload.toJson();
+
+			OkHttpClient client = new OkHttpClient().newBuilder().build();
+			MediaType mediaType = MediaType.parse("application/json");
+			RequestBody body = RequestBody.create(mediaType, payload);
+			Request request = new Request.Builder()
+				.url(stIITAPIUrl)
+				.method("POST", body)
+				.addHeader("Content-Type", "application/json")
+				.addHeader("Authorization", authentication)
+				.build();
+			Response response = client.newCall(request).execute();
+
+			// We extract the data
+			if (response.isSuccessful()) {
+				okhttp3.ResponseBody responseBody = response.body();
+				if (responseBody != null) {
+					String responseString = responseBody.string();
+					org.json.JSONObject json = new org.json.JSONObject(responseString);
+
+					if (json.has("result")) {
+						org.json.JSONObject result = json.getJSONObject("result");
+						double predOut = result.getDouble("pred_out");
+						String predCat = result.getString("pred_cat");
+
+						System.out.println("Machine learning module: Got remote result: pred_out: " + predOut);
+						System.out.println("Machine learning module: Got remote result: pred_cat: " + predCat);
+
+						patientRiskScore.setRiskScore(predOut);
+						patientRiskScore.setDescription(predCat);
+						patientRiskScore.setPatient(patient);
+						String randUUID = UUID.randomUUID().toString(); 
+						patientRiskScore.setSourceSystemUuid(randUUID);
+						patientRiskScore.setRiskFactors("");
+						patientRiskScore.setRiskScore(riskScore);
+						patientRiskScore.setEvaluationDate(new Date());
+
+					} else if (json.has("detail")) {
+						String error = json.getString("detail");
+						System.err.println("Machine learning module: IIT Error: " + error);
+					} else {
+						System.err.println("Machine learning module: Unexpected JSON structure: " + responseString);
+					}
+				} else {
+					System.err.println("Machine learning module: Response body is null.");
+				}
+			} else {
+				System.err.println("Machine learning module: Request failed with code: " + response.code());
+			}
+
+		} catch(Exception ex) {
+			System.err.println("Machine learning module: Error getting remote iit score: " + ex.getMessage());
+			ex.printStackTrace();
+		}
+
+		return(patientRiskScore);
+	}
+
+	/**
+	 * Format date using a given format
+	 * @param date
+	 * @return
+	 */
+	public String formatDate(Date date, String format) {
+		DateFormat dateFormatter = new SimpleDateFormat(format);
+		return date == null ? "" : dateFormatter.format(date);
+	}
+
+	/**
+	 * Gets the latest patient IIT score from local PMML
+	 */
+	public PatientRiskScore generatePatientRiskScoreLocal(Patient patient) {
+		System.err.println("Machine learning module: Using IIT local PMML");
+
 		long startTime = System.currentTimeMillis();
 		long stopTime = 0L;
 		long startMemory = getMemoryConsumption();
