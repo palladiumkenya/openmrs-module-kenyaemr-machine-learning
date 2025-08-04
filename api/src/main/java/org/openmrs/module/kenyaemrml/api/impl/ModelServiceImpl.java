@@ -259,10 +259,12 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 
 			// Create the payload
 			// Get the hash of the patient UUID
-			String patientUuid = patient.getUuid();
-			String hashedPatientUuid = MLUtils.getSHA256Hash(patientUuid);
+			// String patientUuid = patient.getUuid();
+			// String hashedPatientUuid = MLUtils.getSHA256Hash(patientUuid);
 			// or hash of ID
 			// String hashedPatientId = MLUtils.getSHA256Hash(String.valueOf(patient.getId()));
+			// or just the patient id
+			String hashedPatientId = String.valueOf(patient.getId());
 
 			String facilityMflCode = MLUtils.getDefaultMflCode();
 
@@ -273,7 +275,7 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			String startDate = "2015-01-01";
 			String endDate = formatDate(new Date(), "yyyy-MMM-dd");
 
-			SimpleObject rawPayload = SimpleObject.create("ppk", hashedPatientUuid, "sc", facilityMflCode, "start_date", startDate, "end_date", endDate);
+			SimpleObject rawPayload = SimpleObject.create("ppk", hashedPatientId, "sc", facilityMflCode, "start_date", startDate, "end_date", endDate);
 			String payload = rawPayload.toJson();
 
 			OkHttpClient client = new OkHttpClient().newBuilder().build();

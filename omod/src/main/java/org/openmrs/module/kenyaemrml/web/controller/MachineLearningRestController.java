@@ -464,13 +464,18 @@ public class MachineLearningRestController extends BaseRestController {
 
 			// Create the payload
 			// Get the hash of the patient UUID
-			String hashedPatientUuid = MLUtils.getSHA256Hash(patientUuid);
+			// String hashedPatientUuid = MLUtils.getSHA256Hash(patientUuid);
 			// or hash of ID
-			// String hashedPatientId = "";
-			// Patient patient = Context.getPatientService().getPatientByUuid(patientUuid);
+			String hashedPatientId = "";
+			Patient patient = Context.getPatientService().getPatientByUuid(patientUuid);
 			// if(patient != null) {
 			// 	hashedPatientId = MLUtils.getSHA256Hash(String.valueOf(patient.getId()));
 			// }
+			// or just the patient id
+			if(patient != null) {
+				hashedPatientId = String.valueOf(patient.getId());
+			}
+
 			String facilityMflCode = MLUtils.getDefaultMflCode();
 
 			Date evaluationDate = null;
@@ -478,7 +483,7 @@ public class MachineLearningRestController extends BaseRestController {
 			String description = null;
 			String riskFactors = null;
 
-			SimpleObject rawPayload = SimpleObject.create("ppk", hashedPatientUuid, "sc", facilityMflCode, "start_date", "2021-01-01", "end_date", "2025-01-01");
+			SimpleObject rawPayload = SimpleObject.create("ppk", hashedPatientId, "sc", facilityMflCode, "start_date", "2021-01-01", "end_date", "2025-01-01");
 			String payload = rawPayload.toJson();
 
 			OkHttpClient client = new OkHttpClient().newBuilder().build();
