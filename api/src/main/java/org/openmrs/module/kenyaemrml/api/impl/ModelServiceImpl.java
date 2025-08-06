@@ -231,6 +231,12 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 	 * Gets the latest patient IIT score from remote API
 	 */
 	public PatientRiskScore generatePatientRiskScoreRemote(Patient patient) {
+
+		long startTime = System.currentTimeMillis();
+		long stopTime = 0L;
+		long startMemory = getMemoryConsumption();
+		long stopMemory = 0L;
+
 		PatientRiskScore patientRiskScore = new PatientRiskScore();
 
 		GlobalProperty gpIITAPIUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_IIT_API_URL);
@@ -268,15 +274,17 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 
 			String facilityMflCode = MLUtils.getDefaultMflCode();
 
-			Date evaluationDate = null;
-			Double riskScore = null;
-			String description = null;
-			String riskFactors = null;
+			// Date evaluationDate = null;
+			// Double riskScore = null;
+			// String description = null;
+			// String riskFactors = null;
 			String startDate = "2015-01-01";
-			String endDate = formatDate(new Date(), "yyyy-MMM-dd");
+			String endDate = formatDate(new Date(), "yyyy-MM-dd");
 
 			SimpleObject rawPayload = SimpleObject.create("ppk", hashedPatientId, "sc", facilityMflCode, "start_date", startDate, "end_date", endDate);
 			String payload = rawPayload.toJson();
+			System.err.println("Machine learning module: IIT Sending payload: " + payload);
+			System.err.println("Machine learning module: IIT using remote URL: " + stIITAPIUrl);
 
 			OkHttpClient client = new OkHttpClient().newBuilder().build();
 			MediaType mediaType = MediaType.parse("application/json");
@@ -294,24 +302,30 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 				okhttp3.ResponseBody responseBody = response.body();
 				if (responseBody != null) {
 					String responseString = responseBody.string();
+					System.err.println("Machine learning module: IIT Got response: " + responseString);
 					org.json.JSONObject json = new org.json.JSONObject(responseString);
 
 					if (json.has("result")) {
 						org.json.JSONObject result = json.getJSONObject("result");
 						double predOut = result.getDouble("pred_out");
 						String predCat = result.getString("pred_cat");
+						String evaluation_date = result.getString("evaluation_date");
+						org.json.JSONObject risk_factors = result.getJSONObject("risk_factors");
 
 						System.out.println("Machine learning module: Got remote result: pred_out: " + predOut);
 						System.out.println("Machine learning module: Got remote result: pred_cat: " + predCat);
+						System.out.println("Machine learning module: evaluation_date: " + evaluation_date);
+						System.out.println("Machine learning module: risk_factors: " + risk_factors);
 
 						patientRiskScore.setRiskScore(predOut);
 						patientRiskScore.setDescription(predCat);
 						patientRiskScore.setPatient(patient);
 						String randUUID = UUID.randomUUID().toString(); 
 						patientRiskScore.setSourceSystemUuid(randUUID);
-						patientRiskScore.setRiskFactors("");
-						patientRiskScore.setRiskScore(riskScore);
+						patientRiskScore.setRiskFactors(risk_factors.toString());
 						patientRiskScore.setEvaluationDate(new Date());
+
+						return(patientRiskScore);
 
 					} else if (json.has("detail")) {
 						String error = json.getString("detail");
@@ -330,6 +344,24 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 			System.err.println("Machine learning module: Error getting remote iit score: " + ex.getMessage());
 			ex.printStackTrace();
 		}
+
+		//In case of an error
+		patientRiskScore.setRiskFactors("");
+		patientRiskScore.setRiskScore(0.00);
+		patientRiskScore.setPatient(patient);
+		patientRiskScore.setDescription("Unknown Risk");
+		patientRiskScore.setEvaluationDate(new Date());
+		String randUUID = UUID.randomUUID().toString(); 
+		patientRiskScore.setSourceSystemUuid(randUUID);
+
+		stopTime = System.currentTimeMillis();
+		long elapsedTime = stopTime - startTime;
+		System.out.println("Time taken: " + elapsedTime);
+		System.out.println("Time taken sec: " + elapsedTime / 1000);
+
+		stopMemory = getMemoryConsumption();
+		long usedMemory = stopMemory - startMemory;
+		System.out.println("Memory used: " + usedMemory);
 
 		return(patientRiskScore);
 	}

@@ -101,23 +101,27 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 				
 				obsService.saveObs(obs, "Added IIT numeric observation");
 				
-				encounter.addObs(obs);
-				encounterService.saveEncounter(encounter);
+				// encounter.addObs(obs);
+				// encounterService.saveEncounter(encounter);
 
-				System.out.println("OrderEntry Module: Success creating IIT value obs");
+				System.out.println("Machine learning module: Success creating IIT value obs");
 
 				// create OBS for IIT description (VERY HIGH, HIGH, MEDIUM, LOW)
 				String description = riskScore.getDescription();
 				description = description.trim().toLowerCase();
-				if(description.equalsIgnoreCase("Low Risk") || description.equalsIgnoreCase("Medium Risk") || description.equalsIgnoreCase("High Risk") || description.equalsIgnoreCase("Very High Risk")) {
+				if(description.equalsIgnoreCase("Low Risk") || description.equalsIgnoreCase("Medium Risk") || 
+					description.equalsIgnoreCase("High Risk") || description.equalsIgnoreCase("Very High Risk") ||
+					description.equalsIgnoreCase("Low") || description.equalsIgnoreCase("Medium") || 
+					description.equalsIgnoreCase("High") || description.equalsIgnoreCase("Very High")
+					) {
 					Concept descriptionAnswerConcept = null;
-					if(description.equalsIgnoreCase("Low Risk")) {
+					if(description.equalsIgnoreCase("Low Risk") || description.equalsIgnoreCase("Low")) {
 						descriptionAnswerConcept = conceptService.getConceptByUuid(ModuleConstants.IIT_SCORE_DESCRIPTION_LOW_ANSWER_CONCEPT);
-					} else if(description.equalsIgnoreCase("Medium Risk")) {
+					} else if(description.equalsIgnoreCase("Medium Risk") || description.equalsIgnoreCase("Medium")) {
 						descriptionAnswerConcept = conceptService.getConceptByUuid(ModuleConstants.IIT_SCORE_DESCRIPTION_MEDIUM_ANSWER_CONCEPT);
-					} else if(description.equalsIgnoreCase("High Risk")) {
+					} else if(description.equalsIgnoreCase("High Risk") || description.equalsIgnoreCase("High")) {
 						descriptionAnswerConcept = conceptService.getConceptByUuid(ModuleConstants.IIT_SCORE_DESCRIPTION_HIGH_ANSWER_CONCEPT);
-					} else if(description.equalsIgnoreCase("Very High Risk")) {
+					} else if(description.equalsIgnoreCase("Very High Risk") || description.equalsIgnoreCase("Very High")) {
 						descriptionAnswerConcept = conceptService.getConceptByUuid(ModuleConstants.IIT_SCORE_DESCRIPTION_VERYHIGH_ANSWER_CONCEPT);
 					}
 					if(descriptionAnswerConcept != null) {
@@ -132,26 +136,26 @@ public class MLinKenyaEMRServiceImpl extends BaseOpenmrsService implements MLinK
 							
 							obsService.saveObs(descriptionObs, "Added IIT description observation");
 							
-							encounter.addObs(descriptionObs);
-							encounterService.saveEncounter(encounter);
+							// encounter.addObs(descriptionObs);
+							// encounterService.saveEncounter(encounter);
 
-							System.out.println("OrderEntry Module: Success creating IIT description obs");
+							System.out.println("Machine learning module: Success creating IIT description obs");
 
 							return true;
 						} else {
-							System.err.println("OrderEntry Module: Could not get concept for this description question : Not creating a description obs");
+							System.err.println("Machine learning module: Could not get concept for this description question : Not creating a description obs");
 						}
 					} else {
-						System.err.println("OrderEntry Module: Could not get concept for this description : Not creating a description obs: " + description);
+						System.err.println("Machine learning module: Could not get concept for this description : Not creating a description obs: " + description);
 					}
 				} else {
-					System.err.println("OrderEntry Module: Could not find a matching concept for this IIT score description: " + description + " : Not creating a description obs");
+					System.err.println("Machine learning module: Could not find a matching concept for this IIT score description: " + description + " : Not creating a description obs");
 				}
 			} else {
-				System.err.println("OrderEntry Module: Error creating IIT score as an OBS: could not find IIT score encounter type");
+				System.err.println("Machine learning module: Error creating IIT score as an OBS: could not find IIT score encounter type");
 			}
 		} catch(Exception ex) {
-			System.err.println("OrderEntry Module: Error saving the IIT score as an OBS: " + ex.getMessage());
+			System.err.println("Machine learning module: Error saving the IIT score as an OBS: " + ex.getMessage());
 			ex.printStackTrace();
 		}
 

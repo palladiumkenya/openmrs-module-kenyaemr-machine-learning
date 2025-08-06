@@ -485,6 +485,8 @@ public class MachineLearningRestController extends BaseRestController {
 
 			SimpleObject rawPayload = SimpleObject.create("ppk", hashedPatientId, "sc", facilityMflCode, "start_date", "2021-01-01", "end_date", "2025-01-01");
 			String payload = rawPayload.toJson();
+			System.err.println("Machine learning module: IIT Sending payload: " + payload);
+			System.err.println("Machine learning module: IIT using remote URL: " + stIITAPIUrl);
 
 			OkHttpClient client = new OkHttpClient().newBuilder().build();
 			MediaType mediaType = MediaType.parse("application/json");
@@ -502,15 +504,26 @@ public class MachineLearningRestController extends BaseRestController {
 				okhttp3.ResponseBody responseBody = response.body();
 				if (responseBody != null) {
 					String responseString = responseBody.string();
+					System.err.println("Machine learning module: IIT Got response: " + responseString);
 					org.json.JSONObject json = new org.json.JSONObject(responseString);
 
 					if (json.has("result")) {
 						org.json.JSONObject result = json.getJSONObject("result");
 						double predOut = result.getDouble("pred_out");
 						String predCat = result.getString("pred_cat");
+						String evaluation_date = result.getString("evaluation_date");
+						org.json.JSONObject risk_factors = result.getJSONObject("risk_factors");
 
 						System.out.println("Machine learning module: pred_out: " + predOut);
 						System.out.println("Machine learning module: pred_cat: " + predCat);
+						System.out.println("Machine learning module: evaluation_date: " + evaluation_date);
+						System.out.println("Machine learning module: risk_factors: " + risk_factors);
+
+						riskScore = predOut;
+						description = predCat;
+						riskFactors = risk_factors.toString();
+						evaluationDate = new Date();
+
 					} else if (json.has("detail")) {
 						String error = json.getString("detail");
 						System.err.println("Machine learning module: IIT Error: " + error);

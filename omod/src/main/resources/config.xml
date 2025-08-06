@@ -217,7 +217,7 @@
 	</globalProperty>
 	<globalProperty>
 		<property>kenyaemr.iit.machine.learning.APIURL</property>
-		<defaultValue>http://127.0.0.1:8000</defaultValue>
+		<defaultValue>http://127.0.0.1:8000/inference</defaultValue>
 		<description>
 			The API url for IIT
 		</description>
