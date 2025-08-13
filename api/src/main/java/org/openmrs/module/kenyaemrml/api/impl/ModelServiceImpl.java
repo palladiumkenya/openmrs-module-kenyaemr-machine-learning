@@ -310,7 +310,7 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 						double predOut = result.getDouble("pred_out");
 						String predCat = result.getString("pred_cat");
 						String evaluation_date = result.getString("evaluation_date");
-						org.json.JSONObject risk_factors = result.getJSONObject("risk_factors");
+						org.json.JSONObject risk_factors = result.getJSONObject("risk_factors") != null ? result.getJSONObject("risk_factors") : new org.json.JSONObject();
 
 						System.out.println("Machine learning module: Got remote result: pred_out: " + predOut);
 						System.out.println("Machine learning module: Got remote result: pred_cat: " + predCat);
