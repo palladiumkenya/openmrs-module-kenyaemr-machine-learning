@@ -3,6 +3,9 @@ package org.openmrs.module.kenyaemrml.api;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -559,6 +562,25 @@ public class MLUtils {
 		
 		return (mlScore);
 	}
+	
+	/**
+	 * Gets the sha256 hash of a string
+	 */
+	public static String getSHA256Hash(String input) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] encodedHash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+
+        // Convert bytes to hex
+        StringBuilder hexString = new StringBuilder();
+        for (byte b : encodedHash) {
+            String hex = Integer.toHexString(0xff & b);
+            if (hex.length() == 1)
+                hexString.append('0');
+            hexString.append(hex);
+        }
+
+        return hexString.toString();
+    }
 	
 	public static String getModuleVersion(String moduleId) {
 		// Retrieve the module by its ID

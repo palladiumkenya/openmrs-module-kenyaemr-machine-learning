@@ -1,6 +1,9 @@
 package org.openmrs.module.kenyaemrml.web.controller;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -10,6 +13,7 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,8 +34,10 @@ import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
 import org.json.simple.JSONObject;
+// import org.omg.CORBA.Request;
 import org.openmrs.Encounter;
 import org.openmrs.Form;
+import org.openmrs.GlobalProperty;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Visit;
@@ -39,6 +45,7 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.kenyaemr.api.KenyaEmrService;
 import org.openmrs.module.kenyaemr.metadata.HivMetadata;
+import org.openmrs.module.kenyaemrml.ModuleConstants;
 import org.openmrs.module.kenyaemrml.api.MLUtils;
 import org.openmrs.module.kenyaemrml.api.MLinKenyaEMRService;
 import org.openmrs.module.kenyaemrml.api.ModelService;
@@ -57,10 +64,17 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+// import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * The main controller for ML in KenyaEMR
@@ -412,7 +426,133 @@ public class MachineLearningRestController extends BaseRestController {
 	}
 
 	/**
-	 * Gete the patients IIT score given the patient UUID
+	 * Gets the patients IIT score given the patient UUID using the new remote method
+	 * @param patientId
+	 * @param kenyaUi
+	 * @param ui
+	 * @return
+	 */
+	// @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.OPTIONS})
+	@EnableCors(origins = "*", methods = "*", headers = "Origin, Content-Type, Accept, Authorization, *")
+	@RequestMapping(method = RequestMethod.GET, value = "/patientupgradediitscore")
+	@ResponseBody
+	public SimpleObject getCurrentUpgradedIITRiskScore(@RequestParam("patientUuid") String patientUuid) {
+		SimpleObject ret = new SimpleObject();
+		try {
+			GlobalProperty gpIITAPIUrl = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_IIT_API_URL);
+			GlobalProperty gpIITAPIUsername = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_IIT_API_USERNAME);
+			GlobalProperty gpIITAPIPassword = Context.getAdministrationService().getGlobalPropertyObject(ModuleConstants.GP_IIT_API_PASSWORD);
+
+			if(gpIITAPIUrl == null || gpIITAPIUsername == null || gpIITAPIPassword == null) {
+				System.err.println("Machine learning module: Error : IIT remote API : Some global parameters are not set. Cannot continue");
+				return(ret);
+			}
+
+			System.err.println("Machine learning module: Using IIT remote API");
+
+			String stIITAPIUrl = gpIITAPIUrl.getPropertyValue();
+			String stIITAPIUsername = gpIITAPIUsername.getPropertyValue();
+			String stIITAPIPassword = gpIITAPIPassword.getPropertyValue();
+
+			if(stIITAPIUrl == null || stIITAPIUsername == null || stIITAPIPassword == null) {
+				System.err.println("Machine learning module: Error : IIT remote API : Some global parameters are not set. Cannot continue");
+				return(ret);
+			}
+
+			String auth = stIITAPIUsername + ":" + stIITAPIPassword;
+			String authentication = Base64.getEncoder().encodeToString(auth.getBytes());
+
+			// Create the payload
+			// Get the hash of the patient UUID
+			// String hashedPatientUuid = MLUtils.getSHA256Hash(patientUuid);
+			// or hash of ID
+			String hashedPatientId = "";
+			Patient patient = Context.getPatientService().getPatientByUuid(patientUuid);
+			// if(patient != null) {
+			// 	hashedPatientId = MLUtils.getSHA256Hash(String.valueOf(patient.getId()));
+			// }
+			// or just the patient id
+			if(patient != null) {
+				hashedPatientId = String.valueOf(patient.getId());
+			}
+
+			String facilityMflCode = MLUtils.getDefaultMflCode();
+
+			Date evaluationDate = null;
+			Double riskScore = null;
+			String description = null;
+			String riskFactors = null;
+
+			SimpleObject rawPayload = SimpleObject.create("ppk", hashedPatientId, "sc", facilityMflCode, "start_date", "2021-01-01", "end_date", "2025-01-01");
+			String payload = rawPayload.toJson();
+			System.err.println("Machine learning module: IIT Sending payload: " + payload);
+			System.err.println("Machine learning module: IIT using remote URL: " + stIITAPIUrl);
+
+			OkHttpClient client = new OkHttpClient().newBuilder().build();
+			MediaType mediaType = MediaType.parse("application/json");
+			RequestBody body = RequestBody.create(mediaType, payload);
+			Request request = new Request.Builder()
+				.url(stIITAPIUrl)
+				.method("POST", body)
+				.addHeader("Content-Type", "application/json")
+				.addHeader("Authorization", authentication)
+				.build();
+			Response response = client.newCall(request).execute();
+
+			// We extract the data
+			if (response.isSuccessful()) {
+				okhttp3.ResponseBody responseBody = response.body();
+				if (responseBody != null) {
+					String responseString = responseBody.string();
+					System.err.println("Machine learning module: IIT Got response: " + responseString);
+					org.json.JSONObject json = new org.json.JSONObject(responseString);
+
+					if (json.has("result")) {
+						org.json.JSONObject result = json.getJSONObject("result");
+						double predOut = result.getDouble("pred_out");
+						String predCat = result.getString("pred_cat");
+						String evaluation_date = result.getString("evaluation_date");
+						org.json.JSONObject risk_factors = result.getJSONObject("risk_factors");
+
+						System.out.println("Machine learning module: pred_out: " + predOut);
+						System.out.println("Machine learning module: pred_cat: " + predCat);
+						System.out.println("Machine learning module: evaluation_date: " + evaluation_date);
+						System.out.println("Machine learning module: risk_factors: " + risk_factors);
+
+						riskScore = predOut;
+						description = predCat;
+						riskFactors = risk_factors.toString();
+						evaluationDate = new Date();
+
+					} else if (json.has("detail")) {
+						String error = json.getString("detail");
+						System.err.println("Machine learning module: IIT Error: " + error);
+					} else {
+						System.err.println("Machine learning module: Unexpected JSON structure: " + responseString);
+					}
+				} else {
+					System.err.println("Machine learning module: Response body is null.");
+				}
+			} else {
+				System.err.println("Machine learning module: Request failed with code: " + response.code());
+			}
+
+			ret.put("riskScore", (riskScore != null && riskScore > 0.00) ? (int) Math.rint((riskScore * 100)) + " %" : "-");
+			ret.put("evaluationDate", evaluationDate != null ? formatDate(evaluationDate) : "-");
+			ret.put("description", description != null ? description : "-");
+			ret.put("riskFactors", riskFactors != null ? riskFactors : "-");
+		} catch(Exception ex) {
+			System.err.println("Machine learning module: Error getting iit score: " + ex.getMessage());
+			ex.printStackTrace();
+		}
+
+		return(ret);
+	}
+
+	
+
+	/**
+	 * Gets the patients IIT score given the patient UUID using local PMML
 	 * @param patientId
 	 * @param kenyaUi
 	 * @param ui

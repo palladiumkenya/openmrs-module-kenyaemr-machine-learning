@@ -46,4 +46,24 @@ public class ModuleConstants {
 	 * IIT Score Description Answer Concept (qualitative answer - VERY HIGH)
 	 */
 	public static final String IIT_SCORE_DESCRIPTION_VERYHIGH_ANSWER_CONCEPT = "167164AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	/**
+	 * Global parameter to check whether to use API for iit prediction
+	 */
+	public static final String GP_IIT_USE_API = "kenyaemr.iit.machine.learning.useAPI";
+	
+	/**
+	 * Global parameter to get the IIT API URL
+	 */
+	public static final String GP_IIT_API_URL = "kenyaemr.iit.machine.learning.APIURL";
+	
+	/**
+	 * Global parameter to get the IIT API Username
+	 */
+	public static final String GP_IIT_API_USERNAME = "kenyaemr.iit.machine.learning.APIusername";
+	
+	/**
+	 * Global parameter to get the IIT API Password
+	 */
+	public static final String GP_IIT_API_PASSWORD = "kenyaemr.iit.machine.learning.APIpassword";
 }
