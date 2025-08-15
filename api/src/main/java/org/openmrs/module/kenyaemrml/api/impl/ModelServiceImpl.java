@@ -310,7 +310,8 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 						double predOut = result.getDouble("pred_out");
 						String predCat = result.getString("pred_cat");
 						String evaluation_date = result.getString("evaluation_date");
-						org.json.JSONObject risk_factors = result.getJSONObject("risk_factors") != null ? result.getJSONObject("risk_factors") : new org.json.JSONObject();
+						Object risk_factors = result.get("risk_factors");
+						// org.json.JSONObject risk_factors = result.getJSONObject("risk_factors");
 
 						System.out.println("Machine learning module: Got remote result: pred_out: " + predOut);
 						System.out.println("Machine learning module: Got remote result: pred_cat: " + predCat);
@@ -322,7 +323,7 @@ public class ModelServiceImpl extends BaseOpenmrsService implements ModelService
 						patientRiskScore.setPatient(patient);
 						String randUUID = UUID.randomUUID().toString(); 
 						patientRiskScore.setSourceSystemUuid(randUUID);
-						patientRiskScore.setRiskFactors(risk_factors.toString());
+						patientRiskScore.setRiskFactors(risk_factors != null ? risk_factors.toString() : "");
 						patientRiskScore.setEvaluationDate(new Date());
 
 						return(patientRiskScore);
