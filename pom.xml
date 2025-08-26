@@ -10,7 +10,7 @@
 
 	<groupId>org.openmrs.module</groupId>
 	<artifactId>kenyaemrml</artifactId>
-	<version>1.4.1-SNAPSHOT</version>
+	<version>1.4.1</version>
 	<packaging>pom</packaging>
 	<name>ML in KenyaEMR</name>
 	<description>Implementation of Machine learning in KenyaEMR</description>
